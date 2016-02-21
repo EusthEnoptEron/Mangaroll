@@ -16,6 +16,10 @@ import android.util.Log;
 import android.content.Intent;
 import com.oculus.vrappframework.VrActivity;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 public class MainActivity extends VrActivity {
 	public static final String TAG = "Mangaroll";
 
@@ -37,5 +41,40 @@ public class MainActivity extends VrActivity {
 		String uriString = VrActivity.getUriStringFromIntent( intent );
 
 		setAppPtr( nativeSetAppInterface( this, fromPackageNameString, commandString, uriString ) );
-    }   
+    }
+
+	public static byte[] LoadHttpUrl( String str ) {
+		int totalLen = 0;
+		byte[] returnBuffer = new byte[totalLen];
+
+		Log.d(TAG, "LoadHttpUrl " + str );
+		try {
+			URL aURL = new URL( str );
+			HttpURLConnection conn = (HttpURLConnection)aURL.openConnection();
+			conn.connect();
+			InputStream is = conn.getInputStream();
+
+			byte[]	readbuffer = new byte[0x100000];
+
+			while( true ) {
+				int count = is.read(readbuffer);
+				if ( count < 0 ) {
+					break;
+				}
+				byte[] tempBuffer = new byte[totalLen + count];
+				System.arraycopy(returnBuffer,  0,  tempBuffer,  0,  totalLen );
+				System.arraycopy(readbuffer,  0, tempBuffer,  totalLen,  count );
+				totalLen += count;
+				returnBuffer = tempBuffer;
+			}
+
+			is.close();
+		} catch (Exception e) {
+			Log.v(TAG, "LoadHttpUrl", e);
+		}
+
+		Log.d(TAG, "totalLen " + totalLen);
+
+		return returnBuffer;
+	}
 }

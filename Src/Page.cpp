@@ -58,15 +58,22 @@ namespace OvrMangaroll {
 				// Load if unloaded
 				Load();
 			} else {
-				if(_DisplayState != DisplayState::INVISIBLE) {
-					if(_LoadState == LoadState::LOADED && _TextureLoaded) {
-						UnloadTexture();
+				_DisplayState = DisplayState::INVISIBLE;
+
+				if(_LoadState == LoadState::LOADED) {
+					UnloadTexture();
+
+					float degreeStart = _Offset / PIXELS_PER_DEGREE;
+					if(abs(angle - degreeStart) > 720) {
+						free(Buffer);
+						_Geometry.Free();
+						_LoadState = LoadState::UNLOADED;
 					}
-					_DisplayState = DisplayState::INVISIBLE;
 				}
 				//LOG("DONT DRAW %s", _Path.ToCStr());
 			}
 		} else {
+
 			_DisplayState = DisplayState::INVISIBLE;
 		}
 	}
@@ -92,12 +99,18 @@ namespace OvrMangaroll {
 		}
 	}
 
+	void *DownloadImage(Thread *thread, void *v) {
+		//Page *page = (Page *)v;
+		
+		return NULL;
+	}
+
 	void *FillBuffer(Thread *thread, void *v) {
 		Page *page = (Page *)v;
 
 		MemBufferFile bufferFile = MemBufferFile( page->GetPath().ToCStr() );
 		MemBuffer fileBuffer = bufferFile.ToMemBuffer();
-
+		
 		int comp;
 		page->Buffer = stbi_load_from_memory((unsigned char*)(fileBuffer.Buffer), fileBuffer.Length, &(page->_RealWidth), &(page->_RealHeight), &comp, 4);
 		
@@ -133,7 +146,7 @@ namespace OvrMangaroll {
 			// Only if needed...
 			this->_LoadState = LoadState::LOADING;
 
-			_LoadThread = Thread( Thread::CreateParams( &FillBuffer, this ) );
+			_LoadThread = Thread( Thread::CreateParams( GetWorker(), this ) );
 			_LoadThread.Start();
 		}
 
@@ -159,20 +172,17 @@ namespace OvrMangaroll {
 	}
 
 
-	void Page::FillTexture() {
+	Thread::ThreadFn Page::GetWorker() {
 		_Texture = LoadTextureFromApplicationPackage(_Path.ToCStr(), TextureFlags_t( TEXTUREFLAG_NO_DEFAULT ), _RealWidth, _RealHeight);
 		_TextureLoaded = true;
+		return NULL;
 	}
 
-	void LocalPage::FillTexture() {
-		MemBufferFile bufferFile = MemBufferFile( _Path.ToCStr() );
-		//Buffer = bufferFile.ToMemBuffer();
-
-
-		LoadTexture();
-
-		bufferFile.FreeData();
+	Thread::ThreadFn LocalPage::GetWorker() {
+		return &FillBuffer;
 	}
+
+
 
 	void Page::SetOffset(int offset) {
 		_Offset = offset;
@@ -272,4 +282,8 @@ namespace OvrMangaroll {
 		LOG("CREATED MESH %s (w=%d)", _Path.ToCStr(), _RealWidth);
 	}
 
+
+	Thread::ThreadFn RemotePage::GetWorker() {
+		return &DownloadImage;
+	}
 }

@@ -13,6 +13,7 @@ Copyright   :   Copyright 2014 Oculus VR, LLC. All Rights reserved.
 #include "GuiSys.h"
 #include "OVR_Locale.h"
 #include "Kernel/OVR_Hash.h"
+#include "Kernel/OVR_Types.h"
 
 #if 0
 	#define GL( func )		func; EglCheckErrors();
@@ -132,7 +133,15 @@ void Mangaroll::OneTimeInit( const char * fromPackage, const char * launchIntent
 	OVR_UNUSED( launchIntentURI );
 	WARN("YAY");
 	const ovrJava * java = app->GetJava();
-	
+	//jclass clazz  = java->Env->GetObjectClass(java->ActivityObject);
+
+	//jmethodID methodId = java->Env->GetStaticMethodID( clazz, "LoadHttpUrl", "(Ljava/lang/String;)[B");
+	//jstring jstr = app->GetJava()->Env->NewStringUTF( "http://192.168.1.39:8080/GFM00001.jpg" );
+	//jbyteArray arr = (jbyteArray) java->Env->CallStaticObjectMethod(clazz, methodId, jstr);
+	//int count = java->Env->GetArrayLength(arr);
+	//void* bytes = java->Env->GetPrimitiveArrayCritical(arr, 0);
+	//WARN("DOWNLOAD: %d", count);
+
 	SoundEffectContext = new ovrSoundEffectContext( *java->Env, java->ActivityObject );
 	SoundEffectContext->Initialize();
 	SoundEffectPlayer = new OvrGuiSys::ovrDummySoundEffectPlayer();

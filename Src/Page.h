@@ -54,7 +54,7 @@ namespace OvrMangaroll {
 		int _BufferHeight;
 	protected:
 		void UnloadTexture();
-		void virtual FillTexture();
+		Thread::ThreadFn virtual GetWorker();
 		String _Path;
 		int _Offset;
 		LoadState _LoadState;
@@ -83,7 +83,15 @@ namespace OvrMangaroll {
 	public:
 		LocalPage(String path) : Page(path) {}
 	protected:
-		void virtual FillTexture();
+		Thread::ThreadFn virtual GetWorker();
+	};
+
+	class RemotePage : public Page {
+	public:
+		RemotePage(String path) : Page(path) {}
+
+	protected:
+		Thread::ThreadFn virtual GetWorker();
 	};
 }
 
