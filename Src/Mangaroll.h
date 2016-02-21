@@ -21,6 +21,7 @@ Copyright   :   Copyright 2014 Oculus VR, LLC. All Rights reserved.
 #include <memory>
 #include "GuiSys.h"
 #include "Page.h"
+#include "PageCarousel.h"
 
 namespace OvrMangaroll
 {
@@ -52,7 +53,7 @@ private:
 	OVR::GlGeometry			Quad;
 	GLint				VertexTransformAttribute;
 	GLuint				InstanceTransformBuffer;
-	Array<Page*> Pages; 
+	PageCarousel *Carousel;
 };
 
 } // namespace OvrTemplateApp

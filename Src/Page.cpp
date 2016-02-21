@@ -13,7 +13,6 @@ namespace OvrMangaroll {
 
 	Page::~Page(void)
 	{
-		
 		if(_LoadState == LoadState::LOADED) {
 			UnloadTexture();
 
@@ -28,7 +27,7 @@ namespace OvrMangaroll {
 		return _Next;
 	}
 	
-	void Page::Update(float angle) {
+	void Page::UpdateStates(float angle) {
 		_DisplayState = DisplayState::INVISIBLE;
 		bool startedSelected = _Selected;
 		_Selected = false;
@@ -75,6 +74,29 @@ namespace OvrMangaroll {
 		} else {
 
 			_DisplayState = DisplayState::INVISIBLE;
+		}
+	}
+
+	void Page::Update(float angle) {
+		UpdateStates(angle);
+
+		if(_Selected) {
+			double selectionTime = vrapi_GetTimeInSeconds() - _SelectionStart;
+
+			if(selectionTime > 2) {
+				float radianOffset = Mathf::Pi / 2;// - widthInRadians / 2; // Makes sure this thing is centered
+				radianOffset += DegreeToRad(_Offset / PIXELS_PER_DEGREE);
+				radianOffset += DegreeToRad(_Width / PIXELS_PER_DEGREE) / 2.0f;
+
+				float x = cos(radianOffset) * RADIUS;
+				float z = -sin(radianOffset) * RADIUS;
+				Vector3f dir = Vector3f(-x, 0.0f,-z);
+
+				float progress = fmin(1, fmax(0, ((selectionTime - 2.0f) / 2.0f)));
+
+				Position = dir * progress * 0.2f;
+				Touch();
+			}
 		}
 	}
 
@@ -189,30 +211,15 @@ namespace OvrMangaroll {
 		_Positionable = true;
 	}
 
-	void Page::Draw(const GlProgram &prog) {
+	void Page::Draw(const Matrix4f &m) {
 		if(this->_DisplayState == DisplayState::VISIBLE && this->_LoadState == LoadState::LOADED) {
+			this->UpdateModel();
+
 			//LOG("DRAW %s", _Path.ToCStr());
 
 			// Draw
 			//glUniform1i(glGetUniformLocation( prog.program, "IsSelected" ), this->_Selected);
-			if(_Selected) {
-				double selectionTime = vrapi_GetTimeInSeconds() - _SelectionStart;
-
-				if(selectionTime > 2) {
-					float radianOffset = Mathf::Pi / 2;// - widthInRadians / 2; // Makes sure this thing is centered
-					radianOffset += DegreeToRad(_Offset / PIXELS_PER_DEGREE);
-					radianOffset += DegreeToRad(_Width / PIXELS_PER_DEGREE) / 2.0f;
-
-					float x = cos(radianOffset) * RADIUS;
-					float z = -sin(radianOffset) * RADIUS;
-					Vector3f dir = Vector3f(-x, 0.0f,-z);
-
-					float progress = fmin(1, fmax(0, ((selectionTime - 2.0f) / 2.0f)));
-					glUniformMatrix4fv( prog.uModel, 1, GL_TRUE, Matrix4f::Translation(dir * progress * 0.2f).M[0]);
-				}
-			} else {
-				glUniformMatrix4fv( prog.uModel, 1, GL_TRUE, Matrix4f::Identity().M[0]);
-			}
+			glUniformMatrix4fv( _Prog.uModel, 1, GL_TRUE, (m * Mat).M[0]);
 
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(_Texture.target, _Texture.texture);

@@ -6,7 +6,8 @@ include ../../../../../cflags.mk
 
 LOCAL_MODULE			:= mangaroll
 LOCAL_SRC_FILES			:= ../../../Src/Mangaroll.cpp \
-                           ../../../Src/Page.cpp
+                           ../../../Src/Page.cpp \
+                           ../../../Src/PageCarousel.cpp
 LOCAL_STATIC_LIBRARIES	:= vrsound vrmodel vrlocale vrgui vrappframework systemutils libovrkernel
 LOCAL_SHARED_LIBRARIES	:= vrapi
 

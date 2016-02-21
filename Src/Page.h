@@ -2,6 +2,7 @@
 #define OVRPAGE_H
 
 #include "App.h"
+#include "GlObject.h"
 
 using namespace OVR;
 namespace OvrMangaroll {
@@ -11,9 +12,10 @@ namespace OvrMangaroll {
 	enum LoadState { UNLOADED, LOADING, LOADED };
 	enum DisplayState { VISIBLE, INVISIBLE, LIMBO };
 
-	class Page {
+	class Page : public GlObject {
 	public:
 		Page(String _path) : 
+			GlObject(),
 			_Path(_path),
 			_Offset(0), 
 			_LoadState(UNLOADED), 
@@ -40,9 +42,10 @@ namespace OvrMangaroll {
 		static const float RADIUS;
 		void Update(float angle);
 		void SetNext(Page *next);
+		void SetProgram(GlProgram &prog) { _Prog = prog; }
 		Page *GetNext(void);
 		void Load(void);
-		void Draw(const GlProgram &prog);
+		void Draw(const Matrix4f &m);
 		void SetOffset(int offset);
 		String GetPath() { return _Path; }
 		//MemBuffer Buffer;
@@ -72,7 +75,8 @@ namespace OvrMangaroll {
 		Matrix4f _Model;
 		//void FillBuffer();
 	private:
-		
+		void UpdateStates(float);
+		GlProgram _Prog;
 	protected:
 
 		void CreateMesh(void);

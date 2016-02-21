@@ -201,24 +201,14 @@ void Mangaroll::OneTimeInit( const char * fromPackage, const char * launchIntent
 	}
 
 	Array<String> images = DirectoryFileList(mangaPath.ToCStr());
-	Pages.Resize(images.GetSizeI());
+	Carousel = new PageCarousel();
 
-	int y = 0;
 	for(int i = 0; i < images.GetSizeI(); i++) {
 		WARN("%s -> %s", images[i].ToCStr(), images[i].GetExtension().ToCStr());
 		if(images[i].GetExtension() == ".jpg") {
 			WARN("YEAH");
-			Pages[y++] = new LocalPage(images[i]);
-		}
-	}
-	Pages.Resize(y);
-	if(y > 0) {
-		Pages[0]->SetOffset(0);
 
-		if(y > 1) {
-			for(int i = 0; i < Pages.GetSizeI() - 1; i++) {
-				Pages[i]->SetNext(Pages[i+1]);
-			}
+			Carousel->AddPage(new LocalPage(images[i]));
 		}
 	}
 
@@ -263,9 +253,7 @@ void Mangaroll::OneTimeShutdown()
 
 	DeleteProgram( Program );
 
-	for(int i = 0; i < Pages.GetSizeI(); i++) {
-		delete Pages[i];
-	}
+	delete Carousel;
 
 }
 
@@ -309,9 +297,8 @@ Matrix4f Mangaroll::Frame( const VrFrame & vrFrame )
 	// Update GUI systems after the app frame, but before rendering anything.
 	GuiSys->Frame( vrFrame, CenterEyeViewMatrix );
 
-	for(int i = 0; i < Pages.GetSizeI(); i++) {
-		Pages[i]->Update(angle);
-	}
+
+	Carousel->Update(angle);
 
 	return CenterEyeViewMatrix;
 }
@@ -330,9 +317,7 @@ Matrix4f Mangaroll::DrawEyeView( const int eye, const float fovDegreesX, const f
 	GL( glUniformMatrix4fv( Program.uView, 1, GL_TRUE, eyeViewMatrix.M[0] ) );
 	GL( glUniformMatrix4fv( Program.uProjection, 1, GL_TRUE, eyeProjectionMatrix.M[0] ) );
 
-	for(int i = 0; i < Pages.GetSizeI(); i++) {
-		Pages[i]->Draw(Program);
-	}
+	Carousel->Draw(Matrix4f::Identity());
 /*
 	GL( glActiveTexture(GL_TEXTURE0) );
 	GL( glBindTexture(Page1.target, Page1.texture) );
