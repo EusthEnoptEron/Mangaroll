@@ -4,6 +4,7 @@
 #include "Kernel/OVR_MemBuffer.h"
 #include "stb_image.h"
 #include "ImageData.h"
+#include "Helpers.h"
 
 namespace OvrMangaroll {
 
@@ -80,21 +81,25 @@ namespace OvrMangaroll {
 	void Page::Update(float angle) {
 		UpdateStates(angle);
 
-		if(_Selected) {
-			double selectionTime = vrapi_GetTimeInSeconds() - _SelectionStart;
+		if(_DisplayState == DisplayState::VISIBLE) {
+			if(_Selected) {
+				//double selectionTime = vrapi_GetTimeInSeconds() - _SelectionStart;
 
-			if(selectionTime > 2) {
-				float radianOffset = Mathf::Pi / 2;// - widthInRadians / 2; // Makes sure this thing is centered
-				radianOffset += DegreeToRad(_Offset / PIXELS_PER_DEGREE);
-				radianOffset += DegreeToRad(_Width / PIXELS_PER_DEGREE) / 2.0f;
+				//if(selectionTime > 2) {
+				
+					float radianOffset = Mathf::Pi / 2;// - widthInRadians / 2; // Makes sure this thing is centered
+					radianOffset += DegreeToRad(_Offset / PIXELS_PER_DEGREE);
+					radianOffset += DegreeToRad(_Width / PIXELS_PER_DEGREE) / 2.0f;
 
-				float x = cos(radianOffset) * RADIUS;
-				float z = -sin(radianOffset) * RADIUS;
-				Vector3f dir = Vector3f(-x, 0.0f,-z);
+					float x = cos(radianOffset) * RADIUS;
+					float z = -sin(radianOffset) * RADIUS;
+					Vector3f dir = Vector3f(-x, 0.0f,-z);
 
-				float progress = fmin(1, fmax(0, ((selectionTime - 2.0f) / 2.0f)));
-
-				Position = dir * progress * 0.2f;
+					Position = Position.Lerp(dir * 0.2f, Time::Delta * 10);
+					Touch();
+				//}
+			} else {
+				Position = Position.Lerp(Vector3f::ZERO, Time::Delta * 10);
 				Touch();
 			}
 		}
@@ -121,11 +126,6 @@ namespace OvrMangaroll {
 		}
 	}
 
-	void *DownloadImage(Thread *thread, void *v) {
-		//Page *page = (Page *)v;
-		
-		return NULL;
-	}
 
 	void *LocalPage::LoadFile(Thread *thread, void *v) {
 		LocalPage *page = (LocalPage *)v;

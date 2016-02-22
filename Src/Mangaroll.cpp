@@ -14,6 +14,7 @@ Copyright   :   Copyright 2014 Oculus VR, LLC. All Rights reserved.
 #include "OVR_Locale.h"
 #include "Kernel/OVR_Hash.h"
 #include "Kernel/OVR_Types.h"
+#include "Helpers.h"
 
 #if 0
 	#define GL( func )		func; EglCheckErrors();
@@ -133,17 +134,6 @@ void Mangaroll::OneTimeInit( const char * fromPackage, const char * launchIntent
 	OVR_UNUSED( launchIntentURI );
 	const ovrJava * java = app->GetJava();
 
-	//jclass clazz  = java->Env->GetObjectClass(java->ActivityObject);
-
-	//jclass clazz  = java->Env->GetObjectClass(java->ActivityObject);
-
-	//jmethodID methodId = java->Env->GetStaticMethodID( clazz, "LoadHttpUrl", "(Ljava/lang/String;)[B");
-	//jstring jstr = app->GetJava()->Env->NewStringUTF( "http://192.168.1.39:8080/GFM00001.jpg" );
-	//jbyteArray arr = (jbyteArray) java->Env->CallStaticObjectMethod(clazz, methodId, jstr);
-	//int count = java->Env->GetArrayLength(arr);
-	//void* bytes = java->Env->GetPrimitiveArrayCritical(arr, 0);
-	//WARN("DOWNLOAD: %d", count);
-
 	SoundEffectContext = new ovrSoundEffectContext( *java->Env, java->ActivityObject );
 	SoundEffectContext->Initialize();
 	SoundEffectPlayer = new OvrGuiSys::ovrDummySoundEffectPlayer();
@@ -208,18 +198,18 @@ void Mangaroll::OneTimeInit( const char * fromPackage, const char * launchIntent
 	for(int i = 0; i < images.GetSizeI(); i++) {
 		//WARN("%s -> %s", images[i].ToCStr(), images[i].GetExtension().ToCStr());
 		if(images[i].GetExtension() == ".jpg") {
-			//Carousel->AddPage(new LocalPage(images[i]));
+			Carousel->AddPage(new LocalPage(images[i]));
 		}
 	}
 
 	// Create remote pages
-	Carousel->AddPage(new RemotePage("http://192.168.1.39:8080/000a.jpg", java));
-	Carousel->AddPage(new RemotePage("http://192.168.1.39:8080/000b.jpg", java));
-	Carousel->AddPage(new RemotePage("http://192.168.1.39:8080/000c.jpg", java));
-	Carousel->AddPage(new RemotePage("http://192.168.1.39:8080/001.jpg", java));
-	Carousel->AddPage(new RemotePage("http://192.168.1.39:8080/002.jpg", java));
-	Carousel->AddPage(new RemotePage("http://192.168.1.39:8080/003.jpg", java));
-	Carousel->AddPage(new RemotePage("http://192.168.1.39:8080/004_005.jpg", java));
+	//Carousel->AddPage(new RemotePage("http://192.168.1.39:8080/000a.jpg", java));
+	//Carousel->AddPage(new RemotePage("http://192.168.1.39:8080/000b.jpg", java));
+	//Carousel->AddPage(new RemotePage("http://192.168.1.39:8080/000c.jpg", java));
+	//Carousel->AddPage(new RemotePage("http://192.168.1.39:8080/001.jpg", java));
+	//Carousel->AddPage(new RemotePage("http://192.168.1.39:8080/002.jpg", java));
+	//Carousel->AddPage(new RemotePage("http://192.168.1.39:8080/003.jpg", java));
+	//Carousel->AddPage(new RemotePage("http://192.168.1.39:8080/004_005.jpg", java));
 
 /*
 	Pages.Resize(11);
@@ -248,7 +238,8 @@ void Mangaroll::OneTimeInit( const char * fromPackage, const char * launchIntent
 	
 	Pages[0]->SetOffset(0);*/
 
-
+	Time::Delta = 0;
+	Time::Elapsed = vrapi_GetTimeInSeconds();
 }
 
 
@@ -287,7 +278,10 @@ float deltaAngle(float angle1, float angle2) {
 }
 Matrix4f Mangaroll::Frame( const VrFrame & vrFrame )
 {
-	
+	Time::Delta = vrapi_GetTimeInSeconds() - Time::Elapsed;
+	Time::Elapsed = vrapi_GetTimeInSeconds();
+
+
 	CenterEyeViewMatrix = vrapi_GetCenterEyeViewMatrix( &app->GetHeadModelParms(), &vrFrame.Tracking, NULL );
 	const Matrix4f m = CenterEyeViewMatrix;
 

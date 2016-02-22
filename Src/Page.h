@@ -1,5 +1,4 @@
-#ifndef OVRPAGE_H
-#define OVRPAGE_H
+#pragma once
 
 #include "App.h"
 #include "GlObject.h"
@@ -96,5 +95,3 @@ namespace OvrMangaroll {
 	};
 
 }
-
-#endif

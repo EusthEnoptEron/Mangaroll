@@ -1,5 +1,7 @@
-#include "Kernel/OVR_Math.h"
 #pragma once
+
+#include "Kernel/OVR_Math.h"
+
 
 using namespace OVR;
 
@@ -35,6 +37,4 @@ namespace OvrMangaroll {
 		bool _dirty;
 
 	};
-
-
 }
