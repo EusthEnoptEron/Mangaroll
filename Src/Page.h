@@ -73,9 +73,12 @@ namespace OvrMangaroll {
 		bool _Selected;
 		double _SelectionStart;
 		Matrix4f _Model;
+
+		void ConsumeBuffer(unsigned char* buffer, int length);
 		//void FillBuffer();
 	private:
 		void UpdateStates(float);
+		
 		GlProgram _Prog;
 	protected:
 
@@ -88,15 +91,10 @@ namespace OvrMangaroll {
 		LocalPage(String path) : Page(path) {}
 	protected:
 		Thread::ThreadFn virtual GetWorker();
+	private:
+		static void *LoadFile(Thread *thread, void *v);
 	};
 
-	class RemotePage : public Page {
-	public:
-		RemotePage(String path) : Page(path) {}
-
-	protected:
-		Thread::ThreadFn virtual GetWorker();
-	};
 }
 
 #endif

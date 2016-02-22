@@ -127,39 +127,43 @@ namespace OvrMangaroll {
 		return NULL;
 	}
 
-	void *FillBuffer(Thread *thread, void *v) {
-		Page *page = (Page *)v;
+	void *LocalPage::LoadFile(Thread *thread, void *v) {
+		LocalPage *page = (LocalPage *)v;
 
 		MemBufferFile bufferFile = MemBufferFile( page->GetPath().ToCStr() );
 		MemBuffer fileBuffer = bufferFile.ToMemBuffer();
 		
-		int comp;
-		page->Buffer = stbi_load_from_memory((unsigned char*)(fileBuffer.Buffer), fileBuffer.Length, &(page->_RealWidth), &(page->_RealHeight), &comp, 4);
-		
-		if(page->Buffer != NULL) {
-			WARN("BUFFER COULD BE LOADED: %d/%d", page->_RealWidth, page->_RealHeight);
-			if(page->_RealWidth > 1500) {
-				unsigned char *oldBuffer = page->Buffer;
-				//page->Buffer = ScaleImageRGBA(page->Buffer, page->_RealWidth, page->_RealHeight, 1024, 1024, ImageFilter::IMAGE_FILTER_CUBIC, true);
-				page->Buffer = QuarterImageSize(page->Buffer, page->_RealWidth, page->_RealHeight, false);
+		page->ConsumeBuffer((unsigned char*)(fileBuffer.Buffer), fileBuffer.Length);
 
-				page->_BufferWidth = OVR::Alg::Max( 1, page->_RealWidth >> 1 );
-				page->_BufferHeight = OVR::Alg::Max( 1, page->_RealHeight >> 1 );
-			/*	page->_BufferWidth = 1024;
-				page->_BufferHeight = 1024;*/
-
-				free(oldBuffer);
-			} else {
-				page->_BufferWidth = page->_RealWidth;
-				page->_BufferHeight = page->_RealHeight;
-			}
-		} else {
-		}
-		
 		fileBuffer.FreeData();
 		bufferFile.FreeData();
 
 		return NULL;
+	}
+
+	void Page::ConsumeBuffer(unsigned char* buffer, int length) {
+		int comp;
+		Buffer = stbi_load_from_memory(buffer, length, &(_RealWidth), &(_RealHeight), &comp, 4);
+		
+		if(Buffer != NULL) {
+			WARN("BUFFER COULD BE LOADED: %d/%d", _RealWidth, _RealHeight);
+			if(_RealWidth > 1500) {
+				unsigned char *oldBuffer = Buffer;
+				//Buffer = ScaleImageRGBA(Buffer, _RealWidth, _RealHeight, 1024, 1024, ImageFilter::IMAGE_FILTER_CUBIC, true);
+				Buffer = QuarterImageSize(Buffer, _RealWidth, _RealHeight, false);
+
+				_BufferWidth = OVR::Alg::Max( 1, _RealWidth >> 1 );
+				_BufferHeight = OVR::Alg::Max( 1, _RealHeight >> 1 );
+			/*	_BufferWidth = 1024;
+				_BufferHeight = 1024;*/
+
+				free(oldBuffer);
+			} else {
+				_BufferWidth = _RealWidth;
+				_BufferHeight = _RealHeight;
+			}
+		} else {
+		}
 	}
 
 	void Page::Load() {
@@ -201,7 +205,7 @@ namespace OvrMangaroll {
 	}
 
 	Thread::ThreadFn LocalPage::GetWorker() {
-		return &FillBuffer;
+		return &LocalPage::LoadFile;
 	}
 
 
@@ -287,10 +291,5 @@ namespace OvrMangaroll {
 		_Geometry.Create(attribs, indices);
 
 		LOG("CREATED MESH %s (w=%d)", _Path.ToCStr(), _RealWidth);
-	}
-
-
-	Thread::ThreadFn RemotePage::GetWorker() {
-		return &DownloadImage;
 	}
 }

@@ -24,12 +24,27 @@
     <ClInclude Include="Src\Page.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Src\GlObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\PageCarousel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\RemotePage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Mangaroll.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Src\Page.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\PageCarousel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\RemotePage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -131,8 +131,10 @@ void Mangaroll::OneTimeInit( const char * fromPackage, const char * launchIntent
 	OVR_UNUSED( fromPackage );
 	OVR_UNUSED( launchIntentJSON );
 	OVR_UNUSED( launchIntentURI );
-	WARN("YAY");
 	const ovrJava * java = app->GetJava();
+
+	//jclass clazz  = java->Env->GetObjectClass(java->ActivityObject);
+
 	//jclass clazz  = java->Env->GetObjectClass(java->ActivityObject);
 
 	//jmethodID methodId = java->Env->GetStaticMethodID( clazz, "LoadHttpUrl", "(Ljava/lang/String;)[B");
@@ -204,13 +206,20 @@ void Mangaroll::OneTimeInit( const char * fromPackage, const char * launchIntent
 	Carousel = new PageCarousel();
 
 	for(int i = 0; i < images.GetSizeI(); i++) {
-		WARN("%s -> %s", images[i].ToCStr(), images[i].GetExtension().ToCStr());
+		//WARN("%s -> %s", images[i].ToCStr(), images[i].GetExtension().ToCStr());
 		if(images[i].GetExtension() == ".jpg") {
-			WARN("YEAH");
-
-			Carousel->AddPage(new LocalPage(images[i]));
+			//Carousel->AddPage(new LocalPage(images[i]));
 		}
 	}
+
+	// Create remote pages
+	Carousel->AddPage(new RemotePage("http://192.168.1.39:8080/000a.jpg", java));
+	Carousel->AddPage(new RemotePage("http://192.168.1.39:8080/000b.jpg", java));
+	Carousel->AddPage(new RemotePage("http://192.168.1.39:8080/000c.jpg", java));
+	Carousel->AddPage(new RemotePage("http://192.168.1.39:8080/001.jpg", java));
+	Carousel->AddPage(new RemotePage("http://192.168.1.39:8080/002.jpg", java));
+	Carousel->AddPage(new RemotePage("http://192.168.1.39:8080/003.jpg", java));
+	Carousel->AddPage(new RemotePage("http://192.168.1.39:8080/004_005.jpg", java));
 
 /*
 	Pages.Resize(11);

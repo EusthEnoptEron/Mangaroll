@@ -62,10 +62,15 @@
   <ItemGroup>
     <ClCompile Include="src\Mangaroll.cpp" />
     <ClCompile Include="Src\Page.cpp" />
+    <ClCompile Include="Src\PageCarousel.cpp" />
+    <ClCompile Include="Src\RemotePage.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\GlObject.h" />
     <ClInclude Include="src\Mangaroll.h" />
     <ClInclude Include="Src\Page.h" />
+    <ClInclude Include="Src\PageCarousel.h" />
+    <ClInclude Include="Src\RemotePage.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="projects\android\build\outputs\lint-results-release-fatal.html" />

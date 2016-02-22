@@ -22,6 +22,7 @@ Copyright   :   Copyright 2014 Oculus VR, LLC. All Rights reserved.
 #include "GuiSys.h"
 #include "Page.h"
 #include "PageCarousel.h"
+#include "RemotePage.h"
 
 namespace OvrMangaroll
 {
