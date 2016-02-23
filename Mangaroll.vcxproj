@@ -60,6 +60,7 @@
   <ItemDefinitionGroup>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Helpers.cpp" />
     <ClCompile Include="src\Mangaroll.cpp" />
     <ClCompile Include="Src\Page.cpp" />
     <ClCompile Include="Src\PageCarousel.cpp" />
@@ -67,6 +68,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\GlObject.h" />
+    <ClInclude Include="Src\Helpers.h" />
     <ClInclude Include="src\Mangaroll.h" />
     <ClInclude Include="Src\Page.h" />
     <ClInclude Include="Src\PageCarousel.h" />

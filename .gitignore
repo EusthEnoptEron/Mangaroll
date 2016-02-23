@@ -4,3 +4,6 @@
 /Mangaroll.v12.suo
 /Mangaroll.vcxproj.user
 build
+*.so
+*.o
+*.d

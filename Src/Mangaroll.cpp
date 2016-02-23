@@ -278,10 +278,6 @@ float deltaAngle(float angle1, float angle2) {
 }
 Matrix4f Mangaroll::Frame( const VrFrame & vrFrame )
 {
-	Time::Delta = vrapi_GetTimeInSeconds() - Time::Elapsed;
-	Time::Elapsed = vrapi_GetTimeInSeconds();
-
-
 	CenterEyeViewMatrix = vrapi_GetCenterEyeViewMatrix( &app->GetHeadModelParms(), &vrFrame.Tracking, NULL );
 	const Matrix4f m = CenterEyeViewMatrix;
 
@@ -295,6 +291,13 @@ Matrix4f Mangaroll::Frame( const VrFrame & vrFrame )
 	angle += angleDiff;
 
 	prevLookAt = lookAt;
+
+	// UPDATE GLOBAL HELPERS
+	Time::Delta = vrFrame.DeltaSeconds;
+	Time::Elapsed = vrapi_GetTimeInSeconds();
+	Frame::Current = &vrFrame;
+	HMD::Direction = lookAt;
+	// ---------------------
 
 	//WARN("Angle: %f", angle);
 	// Update GUI systems after the app frame, but before rendering anything.
