@@ -1,2 +1,3 @@
 # Mangaroll
-Experimental GearVR app to view manga.
+
+Uses a cylindrical layout that lets the user progress his reading by turning around in a circle. Thanks to it having no cables, there is no risk of getting yourself tangled up! Unless you're wearing a pair of headphones...
