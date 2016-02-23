@@ -27,37 +27,50 @@ namespace OvrMangaroll {
 	Page *Page::GetNext() {
 		return _Next;
 	}
+
+	bool Page::IsLoaded() {
+		return _LoadState == LoadState::LOADED;
+	}
+
+	bool Page::IsVisible() {
+		return _DisplayState == DisplayState::VISIBLE;
+	}
 	
+	bool Page::IsTarget(float angle) {
+		if(IsVisible()) {
+			float angleEnd = _AngularOffset + _AngularWidth;
+			return angle > _AngularOffset && angle < angleEnd;
+		}
+		return false;
+	}
+
+
+	void Page::SetSelected(bool state) {
+		_Selected = state;
+		_SelectionStart = Time::Elapsed;
+	}
+
 	void Page::UpdateStates(float angle) {
 		_DisplayState = DisplayState::INVISIBLE;
-		bool startedSelected = _Selected;
-		_Selected = false;
 
 		float pixelStart = angle * PIXELS_PER_DEGREE - 60 * PIXELS_PER_DEGREE;
 		float pixelEnd   = angle * PIXELS_PER_DEGREE + 60 * PIXELS_PER_DEGREE;
 
 		if(_Positionable) {
 			int right = (_Offset + _Width);
+
+			// If user's view is inside the valid range...
 			if((_Offset > pixelStart && _Offset < pixelEnd) || (_LoadState == LoadState::LOADED && right > pixelStart && right < pixelEnd)) {
 				_DisplayState = DisplayState::VISIBLE;
 
 				if(_LoadState == LoadState::LOADED) {
 					LoadTexture();
-
-					float degreeStart = _Offset / PIXELS_PER_DEGREE;
-					float degreeEnd = degreeStart + _Width / PIXELS_PER_DEGREE;
-
-					if(angle > degreeStart && angle < degreeEnd) {
-						_Selected = true;
-						if(!startedSelected) {
-							_SelectionStart = vrapi_GetTimeInSeconds();
-						}
-					}
 				}
 
 				// Load if unloaded
 				Load();
 			} else {
+				// Otherwise - disappear!
 				_DisplayState = DisplayState::INVISIBLE;
 
 				if(_LoadState == LoadState::LOADED) {
@@ -73,7 +86,6 @@ namespace OvrMangaroll {
 				//LOG("DONT DRAW %s", _Path.ToCStr());
 			}
 		} else {
-
 			_DisplayState = DisplayState::INVISIBLE;
 		}
 	}
@@ -83,21 +95,16 @@ namespace OvrMangaroll {
 
 		if(_DisplayState == DisplayState::VISIBLE) {
 			if(_Selected) {
-				//double selectionTime = vrapi_GetTimeInSeconds() - _SelectionStart;
+				float radianOffset = Mathf::Pi / 2;// - widthInRadians / 2; // Makes sure this thing is centered
+				radianOffset += DegreeToRad(_Offset / PIXELS_PER_DEGREE);
+				radianOffset += DegreeToRad(_Width / PIXELS_PER_DEGREE) / 2.0f;
 
-				//if(selectionTime > 2) {
-				
-					float radianOffset = Mathf::Pi / 2;// - widthInRadians / 2; // Makes sure this thing is centered
-					radianOffset += DegreeToRad(_Offset / PIXELS_PER_DEGREE);
-					radianOffset += DegreeToRad(_Width / PIXELS_PER_DEGREE) / 2.0f;
+				float x = cos(radianOffset) * RADIUS;
+				float z = -sin(radianOffset) * RADIUS;
+				Vector3f dir = Vector3f(-x, 0.0f,-z);
 
-					float x = cos(radianOffset) * RADIUS;
-					float z = -sin(radianOffset) * RADIUS;
-					Vector3f dir = Vector3f(-x, 0.0f,-z);
-
-					Position = Position.Lerp(dir * 0.2f, Time::Delta * 10);
-					Touch();
-				//}
+				Position = Position.Lerp(dir * 0.4f, Time::Delta * 10);
+				Touch();
 			} else {
 				Position = Position.Lerp(Vector3f::ZERO, Time::Delta * 10);
 				Touch();
@@ -184,7 +191,8 @@ namespace OvrMangaroll {
 
 				// Calculate real width
 				_Width = REFERENCE_HEIGHT / _RealHeight * _RealWidth;
-			
+				_AngularWidth  = _Width / PIXELS_PER_DEGREE;
+
 				if(_Next != NULL) {
 					_Next->SetOffset(_Offset + _Width);
 				}
@@ -212,6 +220,7 @@ namespace OvrMangaroll {
 
 	void Page::SetOffset(int offset) {
 		_Offset = offset;
+		_AngularOffset = _Offset / PIXELS_PER_DEGREE;
 		_Positionable = true;
 	}
 

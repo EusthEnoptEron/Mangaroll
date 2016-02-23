@@ -23,8 +23,10 @@ namespace OvrMangaroll {
 			_Texture(),
 			_Geometry(),
 			_Width(0), 
-			//_RealWidth(0),
-			//_RealHeight(0),
+			_RealWidth(0),
+			_RealHeight(0),
+			_BufferWidth(0),
+			_BufferHeight(0),
 			_Positionable(false),
 			_TextureLoaded(false),
 			_LoadThread(),
@@ -50,10 +52,10 @@ namespace OvrMangaroll {
 		//MemBuffer Buffer;
 		unsigned char* Buffer;
 		void LoadTexture();
-		int _RealWidth;
-		int _RealHeight;
-		int _BufferWidth;
-		int _BufferHeight;
+		bool IsVisible();
+		bool IsLoaded();
+		bool IsTarget(float angle);
+		void SetSelected(bool state);
 	protected:
 		void UnloadTexture();
 		Thread::ThreadFn virtual GetWorker();
@@ -65,14 +67,19 @@ namespace OvrMangaroll {
 		GlTexture _Texture;
 		GlGeometry _Geometry;
 		int _Width;
-		
+		int _RealWidth;
+		int _RealHeight;
+		int _BufferWidth;
+		int _BufferHeight;
 		bool _Positionable;
 		bool _TextureLoaded;
 		Thread _LoadThread;
 		bool _Selected;
 		double _SelectionStart;
 		Matrix4f _Model;
-
+		float _AngularOffset;
+		float _AngularWidth;
+	
 		void ConsumeBuffer(unsigned char* buffer, int length);
 		//void FillBuffer();
 	private:

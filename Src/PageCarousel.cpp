@@ -36,7 +36,7 @@ namespace OvrMangaroll {
 			"}\n";
 
 
-	PageCarousel::PageCarousel(void) : GlObject(), _First(NULL)
+	PageCarousel::PageCarousel(void) : GlObject(), _First(NULL), _Selection(NULL)
 	{
 		_Prog = BuildProgram(VERTEX_SHADER, FRAGMENT_SHADER);
 	}
@@ -74,11 +74,37 @@ namespace OvrMangaroll {
 	void PageCarousel::Update(float angle) {
 		UpdateModel();
 
+		Page *ref = _First;
+		bool electionFinished = false;
+		Page *selectionCandidate = NULL;
+
 		if(_First != NULL) {
-			Page *ref = _First;
+
+
 			do {
 				ref->Update(angle);
-			} while( (ref = ref->GetNext()) != NULL);  
+				if(!electionFinished && ref->IsTarget(angle)) {
+					WARN("FOUND CANDIDATE");
+					if(_Selection == ref) {
+						selectionCandidate = ref;
+						electionFinished = true; // Prioritize
+					} else {
+						selectionCandidate = ref;
+					}
+				}
+			} while( (ref = ref->GetNext()) != NULL);
+		}
+
+		// Update selection (if anything changed)
+		if(selectionCandidate != _Selection) {
+			WARN("NEW SELECTION: %s", selectionCandidate);
+			if(_Selection != NULL) {
+				_Selection->SetSelected(false);
+			}
+			_Selection = selectionCandidate;
+			if(_Selection != NULL) {
+				_Selection->SetSelected(true);
+			}
 		}
 	}
 }

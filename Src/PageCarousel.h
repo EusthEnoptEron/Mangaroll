@@ -21,6 +21,7 @@ namespace OvrMangaroll {
 		int _Count;
 		Page *_First;
 		Page *_Last;
+		Page *_Selection;
 	};
 
 }

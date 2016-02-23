@@ -285,9 +285,9 @@ Matrix4f Mangaroll::Frame( const VrFrame & vrFrame )
 	Vector3f lookAt = m.Transform(v0).Normalized();
 
 	float angleA = RadToDegree(atan2(prevLookAt[0], prevLookAt[2]));
-    float angleB = RadToDegree(atan2(lookAt[0], lookAt[2]));
-    float angleDiff = deltaAngle(angleA, angleB);
-    //angleDiff *= -1;
+	float angleB = RadToDegree(atan2(lookAt[0], lookAt[2]));
+	float angleDiff = deltaAngle(angleA, angleB);
+	//angleDiff *= -1;
 	angle += angleDiff;
 
 	prevLookAt = lookAt;
