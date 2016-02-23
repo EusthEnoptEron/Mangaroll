@@ -36,3 +36,6 @@ build
 *.exe
 *.out
 *.app
+/Projects/Android/libs/armeabi-v7a/gdb.setup
+/Projects/Android/libs/armeabi-v7a/gdbserver
+/assets/oculussig_0915f9e51dc11d02
