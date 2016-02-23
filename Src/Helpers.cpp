@@ -8,4 +8,6 @@ namespace OvrMangaroll {
 	const VrFrame *Frame::Current = NULL;
 
 	Vector3f HMD::Direction = Vector3f(0, 0, -1.0f);
+	float HMD::HorizontalAngle = 0;
+	float HMD::VerticalAngle = 0;
 }

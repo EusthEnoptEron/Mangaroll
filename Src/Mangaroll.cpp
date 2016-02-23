@@ -279,16 +279,15 @@ float deltaAngle(float angle1, float angle2) {
 Matrix4f Mangaroll::Frame( const VrFrame & vrFrame )
 {
 	CenterEyeViewMatrix = vrapi_GetCenterEyeViewMatrix( &app->GetHeadModelParms(), &vrFrame.Tracking, NULL );
-	const Matrix4f m = CenterEyeViewMatrix;
 
 	Vector3f v0 = Vector3f(0, 0, -1.0f);
-	Vector3f lookAt = m.Transform(v0).Normalized();
+	Vector3f lookAt = ((Quatf)vrFrame.Tracking.HeadPose.Pose.Orientation) * v0;
 
 	float angleA = RadToDegree(atan2(prevLookAt[0], prevLookAt[2]));
 	float angleB = RadToDegree(atan2(lookAt[0], lookAt[2]));
 	float angleDiff = deltaAngle(angleA, angleB);
 	//angleDiff *= -1;
-	angle += angleDiff;
+	angle -= angleDiff;
 
 	prevLookAt = lookAt;
 

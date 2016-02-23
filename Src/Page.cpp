@@ -96,14 +96,20 @@ namespace OvrMangaroll {
 		if(_DisplayState == DisplayState::VISIBLE) {
 			if(_Selected) {
 				float radianOffset = Mathf::Pi / 2;// - widthInRadians / 2; // Makes sure this thing is centered
-				radianOffset += DegreeToRad(_Offset / PIXELS_PER_DEGREE);
-				radianOffset += DegreeToRad(_Width / PIXELS_PER_DEGREE) / 2.0f;
+				radianOffset += DegreeToRad(_AngularOffset);
+				radianOffset += DegreeToRad(_AngularWidth) / 2.0f;
 
 				float x = cos(radianOffset) * RADIUS;
 				float z = -sin(radianOffset) * RADIUS;
-				Vector3f dir = Vector3f(-x, 0.0f,-z);
+				float maxAngle = atan( (HEIGHT / 2) / RADIUS );
+				float verticalAngle = Acos(HMD::Direction.ProjectToPlane(Vector3f(0.0f, 1.0f, 0.0f)).Length());
+				if(HMD::Direction.y < 0) verticalAngle *= -1;
 
-				Position = Position.Lerp(dir * 0.4f, Time::Delta * 10);
+				float verticalShift = fmax(-1, fmin(1, verticalAngle / maxAngle));
+				
+				Vector3f targetPos = Vector3f(-x, 0.0f, -z) * 0.4f;
+
+				Position = Position.Lerp(targetPos, Time::Delta * 10) + (-verticalShift * (HEIGHT / 16) * Vector3f(0, 1, 0));
 				Touch();
 			} else {
 				Position = Position.Lerp(Vector3f::ZERO, Time::Delta * 10);
