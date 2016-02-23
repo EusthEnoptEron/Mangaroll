@@ -55,6 +55,7 @@ private:
 	GLint				VertexTransformAttribute;
 	GLuint				InstanceTransformBuffer;
 	PageCarousel *Carousel;
+	double LastPress;
 };
 
 } // namespace OvrTemplateApp

@@ -94,22 +94,29 @@ namespace OvrMangaroll {
 		UpdateStates(angle);
 
 		if(_DisplayState == DisplayState::VISIBLE) {
-			if(_Selected) {
+			if(_Selected && AppState::Guide >= GuideType::ENLARGE) {
 				float radianOffset = Mathf::Pi / 2;// - widthInRadians / 2; // Makes sure this thing is centered
 				radianOffset += DegreeToRad(_AngularOffset);
 				radianOffset += DegreeToRad(_AngularWidth) / 2.0f;
 
 				float x = cos(radianOffset) * RADIUS;
 				float z = -sin(radianOffset) * RADIUS;
-				float maxAngle = atan( (HEIGHT / 2) / RADIUS );
-				float verticalAngle = Acos(HMD::Direction.ProjectToPlane(Vector3f(0.0f, 1.0f, 0.0f)).Length());
-				if(HMD::Direction.y < 0) verticalAngle *= -1;
+				float distance = AppState::Guide == GuideType::ENLARGE ? 0.2f : 0.4f;
 
-				float verticalShift = fmax(-1, fmin(1, verticalAngle / maxAngle));
+				Vector3f targetPos = Vector3f(-x, 0.0f, -z) * distance;
+
+				Position = Position.Lerp(targetPos, Time::Delta * 10);
 				
-				Vector3f targetPos = Vector3f(-x, 0.0f, -z) * 0.4f;
+				if(AppState::Guide == GuideType::FOLLOW) {
+					float maxAngle = atan( (HEIGHT / 2) / RADIUS );
+					float verticalAngle = Acos(HMD::Direction.ProjectToPlane(Vector3f(0.0f, 1.0f, 0.0f)).Length());
+				
+					if(HMD::Direction.y < 0) verticalAngle *= -1;
 
-				Position = Position.Lerp(targetPos, Time::Delta * 10) + (-verticalShift * (HEIGHT / 16) * Vector3f(0, 1, 0));
+					float verticalShift = fmax(-1, fmin(1, verticalAngle / maxAngle));
+					Position += (-verticalShift * (HEIGHT / 24) * Vector3f(0, 1, 0));
+
+				}
 				Touch();
 			} else {
 				Position = Position.Lerp(Vector3f::ZERO, Time::Delta * 10);

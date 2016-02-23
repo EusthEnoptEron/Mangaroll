@@ -84,7 +84,6 @@ namespace OvrMangaroll {
 			do {
 				ref->Update(angle);
 				if(!electionFinished && ref->IsTarget(angle)) {
-					WARN("FOUND CANDIDATE");
 					if(_Selection == ref) {
 						selectionCandidate = ref;
 						electionFinished = true; // Prioritize
@@ -97,7 +96,6 @@ namespace OvrMangaroll {
 
 		// Update selection (if anything changed)
 		if(selectionCandidate != _Selection) {
-			WARN("NEW SELECTION: %s", selectionCandidate);
 			if(_Selection != NULL) {
 				_Selection->SetSelected(false);
 			}

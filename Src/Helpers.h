@@ -30,4 +30,14 @@ namespace OvrMangaroll {
 	/*	static Quatf Orientation;
 		static Vector3f Position;*/
 	};
+
+	enum GuideType {
+		NONE, ENLARGE, FOLLOW
+	};
+
+	class AppState {
+	public:
+		static GuideType Guide;
+
+	};
 }

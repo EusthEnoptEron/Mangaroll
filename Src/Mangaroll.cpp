@@ -112,6 +112,7 @@ Mangaroll::Mangaroll()
 	, SoundEffectPlayer( NULL )
 	, GuiSys( OvrGuiSys::Create() )
 	, Locale( NULL )
+	, LastPress(0)
 {
 	CenterEyeViewMatrix = ovrMatrix4f_CreateIdentity();
 }
@@ -259,6 +260,7 @@ void Mangaroll::OneTimeShutdown()
 
 bool Mangaroll::OnKeyEvent( const int keyCode, const int repeatCount, const KeyEventType eventType )
 {
+	WARN("KEY: %d", keyCode);
 	if ( GuiSys->OnKeyEvent( keyCode, repeatCount, eventType ) )
 	{
 		return true;
@@ -296,6 +298,11 @@ Matrix4f Mangaroll::Frame( const VrFrame & vrFrame )
 	Time::Elapsed = vrapi_GetTimeInSeconds();
 	Frame::Current = &vrFrame;
 	HMD::Direction = lookAt;
+
+	if(vrFrame.Input.buttonReleased && Time::Elapsed - LastPress > 0.5f ) {
+		AppState::Guide = (GuideType)((AppState::Guide + 1) % 3);
+		LastPress = Time::Elapsed;
+	}
 	// ---------------------
 
 	//WARN("Angle: %f", angle);
