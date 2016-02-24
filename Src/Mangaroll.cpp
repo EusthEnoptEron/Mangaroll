@@ -15,6 +15,7 @@ Copyright   :   Copyright 2014 Oculus VR, LLC. All Rights reserved.
 #include "Kernel/OVR_Hash.h"
 #include "Kernel/OVR_Types.h"
 #include "Helpers.h"
+#include "FolderBrowser.h"
 
 #if 0
 	#define GL( func )		func; EglCheckErrors();
@@ -177,7 +178,6 @@ Matrix4f Mangaroll::Frame( const VrFrame & vrFrame )
 	// Update GUI systems after the app frame, but before rendering anything.
 	GuiSys->Frame( vrFrame, CenterEyeViewMatrix );
 
-
 	Carousel->Update(angle);
 
 	return CenterEyeViewMatrix;
@@ -194,7 +194,7 @@ Matrix4f Mangaroll::DrawEyeView( const int eye, const float fovDegreesX, const f
 	GL( glClearColor( .5f, .5f, .5f, 1.0f ) );
 	GL( glClear( GL_COLOR_BUFFER_BIT ) );
 
-	Carousel->Draw(Matrix4f::Identity());
+	Carousel->Render(Matrix4f::Identity(), CenterEyeViewMatrix, eyeViewMatrix, eyeProjectionMatrix);
 
 	GL( glBindVertexArray( 0 ) );
 	GL( glUseProgram( 0 ) );
@@ -203,7 +203,7 @@ Matrix4f Mangaroll::DrawEyeView( const int eye, const float fovDegreesX, const f
 	frameParms.ExternalVelocity = Scene.GetExternalVelocity();
 	frameParms.Layers[VRAPI_FRAME_LAYER_TYPE_WORLD].Flags |= VRAPI_FRAME_LAYER_FLAG_CHROMATIC_ABERRATION_CORRECTION;
 
-	GuiSys->RenderEyeView( Scene.GetCenterEyeViewMatrix(), eyeViewMatrix, eyeProjectionMatrix );
+	GuiSys->RenderEyeView( CenterEyeViewMatrix, eyeViewMatrix, eyeProjectionMatrix );
 
 	return eyeViewProjection;
 }

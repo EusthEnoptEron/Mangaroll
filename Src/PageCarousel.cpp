@@ -46,6 +46,15 @@ namespace OvrMangaroll {
 		DeleteProgram(_Prog);
 	}
 
+	void PageCarousel::Render(const Matrix4f &m, const Matrix4f & centerViewMatrix, const Matrix4f & viewMatrix, const Matrix4f & projectionMatrix) {
+
+		glUseProgram( _Prog.program );
+		glUniformMatrix4fv( _Prog.uView, 1, GL_TRUE, viewMatrix.M[0] );
+		glUniformMatrix4fv( _Prog.uProjection, 1, GL_TRUE, projectionMatrix.M[0] );
+
+		Draw(m);
+	}
+
 	void PageCarousel::Draw(const Matrix4f &m) {
 		if(_First != NULL) {
 			Matrix4f mat = m * Mat;
@@ -79,8 +88,6 @@ namespace OvrMangaroll {
 		Page *selectionCandidate = NULL;
 
 		if(_First != NULL) {
-
-
 			do {
 				ref->Update(angle);
 				if(!electionFinished && ref->IsTarget(angle)) {

@@ -13,7 +13,8 @@ namespace OvrMangaroll {
 	public:
 		PageCarousel(void);
 		~PageCarousel(void);
-		void Draw(const Matrix4f &m);
+		void Render(const Matrix4f&, const Matrix4f&, const Matrix4f&, const Matrix4f&);
+		void Draw(const Matrix4f&);
 		void AddPage(Page *page);
 		void Update(float angle);
 	private:
