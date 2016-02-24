@@ -41,72 +41,6 @@ jlong Java_oculus_MainActivity_nativeSetAppInterface( JNIEnv * jni, jclass clazz
 namespace OvrMangaroll
 {
 
-	static const char VERTEX_SHADER[] =
-#if defined( OVR_OS_ANDROID )
-	"#version 300 es\n"
-#endif
-	"in vec3 Position;\n"
-	"in vec4 VertexColor;\n"
-	"in vec2 TexCoord;\n"
-	"uniform mat4 Viewm;\n"
-	"uniform mat4 Projectionm;\n"
-	"uniform mat4 Modelm;\n"
-	"out vec4 fragmentColor;\n"
-	"out vec2 oTexCoord;\n"
-	"void main()\n"
-	"{\n"
-	"	gl_Position = Projectionm * Viewm * Modelm * vec4( Position, 1.0 );\n"
-	"	fragmentColor = VertexColor;\n"
-	"   oTexCoord = TexCoord;\n"
-	"}\n";
-
-static const char FRAGMENT_SHADER[] =
-#if defined( OVR_OS_ANDROID )
-	"#version 300 es\n"
-#endif
-	"in lowp vec4 fragmentColor;\n"
-	"uniform sampler2D Texture0;\n"
-	"uniform int IsSelected;\n"
-	"in lowp vec2 oTexCoord;\n"
-	"out lowp vec4 outColor;\n"
-	"void main()\n"
-	"{\n"
-	"	outColor = IsSelected == 1 ? fragmentColor : texture( Texture0, oTexCoord );\n"
-	"	//outColor = fragmentColor;\n"
-	"}\n";
-
-// setup Cube
-struct ovrQuadVertices
-{
-	Vector3f positions[4];
-	Vector4f colors[4];
-	Vector2f uv0[4];
-};
-
-static ovrQuadVertices quadVertices =
-{
-	// positions
-	{
-		Vector3f( +1.0f, +1.0f, -5.0f ), Vector3f( -1.0f, +1.0f, -5.0f ), Vector3f( -1.0f, -1.0f, -5.0f ), Vector3f( +1.0f, -1.0f, -5.0f ),
-	},
-	// colors
-	{
-		Vector4f( 1.0f, 0.0f, 1.0f, 1.0f ), Vector4f( 0.0f, 1.0f, 0.0f, 1.0f ), Vector4f( 0.0f, 0.0f, 1.0f, 1.0f ), Vector4f( 1.0f, 0.0f, 0.0f, 1.0f )
-	},
-	// uvs
-	{
-		Vector2f(1, 1), Vector2f(0, 1), Vector2f(0, 0), Vector2f(1, 0)
-	}
-};
-
-
-static const unsigned short quadIndices[12] =
-{
-	0, 1, 2, 2, 3, 0,	// front
-	0, 2, 1, 2, 0, 3,	// back
-};
-
-
 Mangaroll::Mangaroll()
 	: SoundEffectContext( NULL )
 	, SoundEffectPlayer( NULL )
@@ -145,36 +79,8 @@ void Mangaroll::OneTimeInit( const char * fromPackage, const char * launchIntent
 	GetLocale().GetString( "@string/font_name", "efigs.fnt", fontName );
 	GuiSys->Init( this->app, *SoundEffectPlayer, fontName.ToCStr(), &app->GetDebugLines() );
 
-	int Width, Height;
-	WARN("WHOO %s", "Lol");
-	Page1 = OVR::LoadTextureFromApplicationPackage("assets/page0006.jpg", TextureFlags_t( TEXTUREFLAG_NO_DEFAULT ), Width, Height);
-	WARN("WIIIDITH %d",  Width);
-	// Create the program.
-	Program = BuildProgram( VERTEX_SHADER, FRAGMENT_SHADER );
 
-	// Create the quad.
-	VertexAttribs attribs;
-	attribs.position.Resize( 4 );
-	attribs.color.Resize( 4 );
-	attribs.uv0.Resize(4);
-	for ( int i = 0; i < 4; i++ )
-	{
-		attribs.position[i] = quadVertices.positions[i];
-		attribs.color[i] = quadVertices.colors[i];
-		attribs.uv0[i] = quadVertices.uv0[i];
-	}
-
-	Array< TriangleIndex > indices;
-	indices.Resize( 12 );
-	for ( int i = 0; i < 12; i++ )
-	{
-		indices[i] = quadIndices[i];
-	}
-
-	Quad.Create( attribs, indices );
-
-	
-
+	// --- LOAD MANGA PAGES ---
 	const OvrStoragePaths & paths = app->GetStoragePaths();
 
 	Array<String> SearchPaths;
@@ -203,42 +109,6 @@ void Mangaroll::OneTimeInit( const char * fromPackage, const char * launchIntent
 		}
 	}
 
-	// Create remote pages
-	//Carousel->AddPage(new RemotePage("http://192.168.1.39:8080/000a.jpg", java));
-	//Carousel->AddPage(new RemotePage("http://192.168.1.39:8080/000b.jpg", java));
-	//Carousel->AddPage(new RemotePage("http://192.168.1.39:8080/000c.jpg", java));
-	//Carousel->AddPage(new RemotePage("http://192.168.1.39:8080/001.jpg", java));
-	//Carousel->AddPage(new RemotePage("http://192.168.1.39:8080/002.jpg", java));
-	//Carousel->AddPage(new RemotePage("http://192.168.1.39:8080/003.jpg", java));
-	//Carousel->AddPage(new RemotePage("http://192.168.1.39:8080/004_005.jpg", java));
-
-/*
-	Pages.Resize(11);
-	Pages[0] = new Page("assets/page0006.jpg");
-	Pages[1] = new Page("assets/page0007.jpg");
-	Pages[2] = new Page("assets/page0008.jpg");
-	Pages[3] = new Page("assets/page0009.jpg");
-	Pages[4] = new Page("assets/page0010.jpg");
-	Pages[5] = new Page("assets/page0011.jpg");
-	Pages[6] = new Page("assets/page0012.jpg");
-	Pages[7] = new Page("assets/page0013.jpg");
-	Pages[8] = new Page("assets/page0014.jpg");
-	Pages[9] = new Page("assets/page0015.jpg");
-	Pages[10] = new Page("assets/page0016.jpg");
-
-	Pages[0]->SetNext(Pages[1]);
-	Pages[1]->SetNext(Pages[2]);
-	Pages[2]->SetNext(Pages[3]);
-	Pages[3]->SetNext(Pages[4]);
-	Pages[4]->SetNext(Pages[5]);
-	Pages[5]->SetNext(Pages[6]);
-	Pages[6]->SetNext(Pages[7]);
-	Pages[7]->SetNext(Pages[8]);
-	Pages[8]->SetNext(Pages[9]);
-	Pages[9]->SetNext(Pages[10]);
-	
-	Pages[0]->SetOffset(0);*/
-
 	Time::Delta = 0;
 	Time::Elapsed = vrapi_GetTimeInSeconds();
 }
@@ -251,8 +121,6 @@ void Mangaroll::OneTimeShutdown()
 
 	delete SoundEffectContext;
 	SoundEffectContext = NULL;
-
-	DeleteProgram( Program );
 
 	delete Carousel;
 
@@ -325,16 +193,9 @@ Matrix4f Mangaroll::DrawEyeView( const int eye, const float fovDegreesX, const f
 
 	GL( glClearColor( .5f, .5f, .5f, 1.0f ) );
 	GL( glClear( GL_COLOR_BUFFER_BIT ) );
-	GL( glUseProgram( Program.program ) );
-	GL( glUniformMatrix4fv( Program.uView, 1, GL_TRUE, eyeViewMatrix.M[0] ) );
-	GL( glUniformMatrix4fv( Program.uProjection, 1, GL_TRUE, eyeProjectionMatrix.M[0] ) );
 
 	Carousel->Draw(Matrix4f::Identity());
-/*
-	GL( glActiveTexture(GL_TEXTURE0) );
-	GL( glBindTexture(Page1.target, Page1.texture) );
-	GL( glBindVertexArray( Quad.vertexArrayObject ) );
-	GL( glDrawElements( GL_TRIANGLES, Quad.indexCount, GL_UNSIGNED_SHORT, NULL ) );*/
+
 	GL( glBindVertexArray( 0 ) );
 	GL( glUseProgram( 0 ) );
 
