@@ -23,6 +23,8 @@ Copyright   :   Copyright 2014 Oculus VR, LLC. All Rights reserved.
 #include "Page.h"
 #include "PageCarousel.h"
 #include "RemotePage.h"
+#include "MangaBrowser.h"
+
 
 namespace OvrMangaroll
 {
@@ -47,14 +49,11 @@ private:
 	OVR::OvrGuiSys::SoundEffectPlayer * SoundEffectPlayer;
 	OVR::OvrGuiSys *		GuiSys;
 	class OVR::ovrLocale *	Locale;
-	OVR::GlProgram			Program;
 	OVR::OvrSceneView		Scene;
-	OVR::GlTexture			Page1;
 	ovrMatrix4f			CenterEyeViewMatrix;
-	OVR::GlGeometry			Quad;
-	GLint				VertexTransformAttribute;
-	GLuint				InstanceTransformBuffer;
 	PageCarousel *Carousel;
+	MangaMetadata *Metadata;
+	MangaBrowser *Browser;
 	double LastPress;
 };
 

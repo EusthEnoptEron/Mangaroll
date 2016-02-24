@@ -15,7 +15,6 @@ Copyright   :   Copyright 2014 Oculus VR, LLC. All Rights reserved.
 #include "Kernel/OVR_Hash.h"
 #include "Kernel/OVR_Types.h"
 #include "Helpers.h"
-#include "FolderBrowser.h"
 
 #if 0
 	#define GL( func )		func; EglCheckErrors();
@@ -47,6 +46,9 @@ Mangaroll::Mangaroll()
 	, SoundEffectPlayer( NULL )
 	, GuiSys( OvrGuiSys::Create() )
 	, Locale( NULL )
+	, Carousel(NULL)
+	, Metadata(NULL)
+	, Browser(NULL)
 	, LastPress(0)
 {
 	CenterEyeViewMatrix = ovrMatrix4f_CreateIdentity();
@@ -106,9 +108,41 @@ void Mangaroll::OneTimeInit( const char * fromPackage, const char * launchIntent
 	for(int i = 0; i < images.GetSizeI(); i++) {
 		//WARN("%s -> %s", images[i].ToCStr(), images[i].GetExtension().ToCStr());
 		if(images[i].GetExtension() == ".jpg") {
-			Carousel->AddPage(new LocalPage(images[i]));
+			//Carousel->AddPage(new LocalPage(images[i]));
 		}
 	}
+
+	//// MAKE MENU
+	OvrMetaDataFileExtensions fileExtensions;
+	fileExtensions.GoodExtensions.PushBack(".jpg");
+
+	Metadata = new MangaMetadata();
+	Metadata->InitFromDirectory("Manga/", SearchPaths, fileExtensions);
+	Browser = (MangaBrowser *)MangaBrowser::Create(
+		*this,
+		*GuiSys,
+		*Metadata,
+		256, 20.0f,
+		256, 200.0f,
+		7,
+		5.4f
+	);
+	GuiSys->AddMenu(Browser);
+	
+	
+	Browser->SetFlags(VRMenuFlags_t(VRMENU_FLAG_PLACE_ON_HORIZON));
+	Browser->SetFolderTitleSpacingScale(0.37f);
+	Browser->SetPanelTextSpacingScale(0.34f);
+	Browser->SetScrollBarSpacingScale(0.9f);
+	Browser->SetScrollBarRadiusScale(1.0f);
+
+	//OvrMetaData *metadata = new OvrMetaData(); = MetaData->InitFromDirectory( videosDirectory, SearchPaths, fileExtensions );
+
+	Browser->OneTimeInit(*GuiSys);
+	Browser->BuildDirtyMenu(*GuiSys, *Metadata);
+
+	GuiSys->OpenMenu(OvrFolderBrowser::MENU_NAME);
+	GuiSys->GetGazeCursor().ShowCursor();
 
 	Time::Delta = 0;
 	Time::Elapsed = vrapi_GetTimeInSeconds();
