@@ -51,7 +51,7 @@ namespace OvrMangaroll {
 		_PrevLookAt = HMD::Direction;
 
 		//WARN("%.2f", _Angle);
-		if (vrFrame.Input.buttonReleased && Time::Elapsed - _LastPress > 0.5f) {
+		if (vrFrame.Input.buttonState & BUTTON_TOUCH_SINGLE) {
 			AppState::Guide = (GuideType)((AppState::Guide + 1) % 3);
 			_LastPress = Time::Elapsed;
 		}

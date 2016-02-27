@@ -45,7 +45,7 @@ public:
 	virtual OVR::Matrix4f DrawEyeView( const int eye, const float fovDegreesX, const float fovDegreesY, ovrFrameParms & frameParms );
 
 	class ovrLocale &	GetLocale() { return *Locale; }
-
+	OvrGuiSys &GetGuiSys(void);
 	Manga CurrentManga;
 	MangaCarousel Carousel;
 	MangaSettingsView MangaSettingsMenu;

@@ -149,6 +149,10 @@ bool Mangaroll::OnKeyEvent( const int keyCode, const int repeatCount, const KeyE
 	return ViewMgr.OnKeyEvent(keyCode, repeatCount, eventType);
 }
 
+OvrGuiSys &Mangaroll::GetGuiSys(void) {
+	return *GuiSys;
+}
+
 
 Matrix4f Mangaroll::Frame( const VrFrame & vrFrame )
 {

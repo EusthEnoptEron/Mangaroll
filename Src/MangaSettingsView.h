@@ -3,7 +3,9 @@
 #include "View.h"
 #include "UI\UILabel.h"
 #include "UI\UISlider.h"
+#include "UI\UIDiscreteSlider.h"
 #include "UI\UIProgressBar.h"
+#include "UI\UIContainer.h"
 
 using namespace OVR;
 namespace OvrMangaroll {
@@ -31,13 +33,18 @@ namespace OvrMangaroll {
 
 
 	private:
-		Mangaroll *_Manga;
+		Mangaroll *_Mangaroll;
+
+		UIMenu *_Menu;
+		UIContainer *_CenterContainer;
+		UIContainer *_LeftContainer;
+		UIContainer *_RightContainer;
 
 		UILabel *_TitleLabel;
 		UILabel *_PageLabel;
 		UIProgressBar *_ProgressBar;
 
-		UISlider *_GammaSlider;
+		UIDiscreteSlider *_GammaSlider;
 		UISlider *_ContrastSlider;
 		UISlider *_BrightnessSlider;
 

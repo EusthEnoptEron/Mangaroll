@@ -16,12 +16,17 @@ namespace OvrMangaroll {
 		void Draw(const Matrix4f&);
 		void AddPage(Page *page);
 		void Update(float angle);
+		int GetProgress(void);
+		int GetCount(void);
+		String Name;
 	private:
 		GlProgram _Prog;
 		int _Count;
 		Page *_First;
 		Page *_Last;
 		Page *_Selection;
+		int _SelectionIndex;
+
 	};
 
 }

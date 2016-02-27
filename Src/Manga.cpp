@@ -4,9 +4,12 @@ namespace OvrMangaroll {
 
 
 		Manga::Manga(void) 
-			: GlObject(),
-			_First(NULL), 
-			_Selection(NULL)
+			: GlObject()
+			, Name()
+			, _Count(0)
+			, _First(NULL)
+			, _Selection(NULL)
+			, _SelectionIndex(0)
 	{
 			WARN("YAY 2");
 	}
@@ -36,6 +39,15 @@ namespace OvrMangaroll {
 			_Last->SetNext(page);
 			_Last = page;
 		}
+		_Count++;
+	}
+
+	int Manga::GetProgress(void) {
+		return _SelectionIndex;
+	}
+
+	int Manga::GetCount(void) {
+		return _Count;
 	}
 
 	void Manga::Update(float angle) {
@@ -44,18 +56,21 @@ namespace OvrMangaroll {
 		Page *ref = _First;
 		bool electionFinished = false;
 		Page *selectionCandidate = NULL;
+		int selectionIndex = 0;
 
+		int i = 0;
 		if(_First != NULL) {
 			do {
 				ref->Update(angle);
 				if(!electionFinished && ref->IsTarget(angle)) {
+					selectionCandidate = ref;
+					selectionIndex = i;
 					if(_Selection == ref) {
-						selectionCandidate = ref;
 						electionFinished = true; // Prioritize
-					} else {
-						selectionCandidate = ref;
 					}
 				}
+
+				i++;
 			} while( (ref = ref->GetNext()) != NULL);
 		}
 
@@ -65,6 +80,7 @@ namespace OvrMangaroll {
 				_Selection->SetSelected(false);
 			}
 			_Selection = selectionCandidate;
+			_SelectionIndex = selectionIndex;
 			if(_Selection != NULL) {
 				_Selection->SetSelected(true);
 			}
