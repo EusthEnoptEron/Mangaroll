@@ -274,9 +274,9 @@ namespace OvrMangaroll {
 		attribs.uv0.Resize( Page::SEGMENTS * 2 );
 		indices.Resize( (Page::SEGMENTS - 1) * 2 * 3 ); // Number of faces * triangles per face * vertices per triangle
 
-		float widthInRadians = DegreeToRad(_Width / PIXELS_PER_DEGREE);
+		float widthInRadians = DegreeToRad(_AngularWidth);
 		float radianOffset = Mathf::Pi / 2;// - widthInRadians / 2; // Makes sure this thing is centered
-		radianOffset += DegreeToRad(_Offset / PIXELS_PER_DEGREE);
+		radianOffset += DegreeToRad(_AngularOffset);
 
 		float y0 = -Page::HEIGHT / 2.0f;
 		float y1 = +Page::HEIGHT / 2.0f;

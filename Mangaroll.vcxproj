@@ -62,7 +62,9 @@
   <ItemGroup>
     <ClCompile Include="Src\Helpers.cpp" />
     <ClCompile Include="Src\MangaBrowser.cpp" />
+    <ClCompile Include="Src\MangaMetadata.cpp" />
     <ClCompile Include="src\Mangaroll.cpp" />
+    <ClCompile Include="Src\OVR_TurboJpeg.cpp" />
     <ClCompile Include="Src\Page.cpp" />
     <ClCompile Include="Src\PageCarousel.cpp" />
     <ClCompile Include="Src\RemotePage.cpp" />
@@ -73,9 +75,11 @@
     <ClInclude Include="Src\MangaBrowser.h" />
     <ClInclude Include="Src\MangaMetadata.h" />
     <ClInclude Include="src\Mangaroll.h" />
+    <ClInclude Include="Src\OVR_TurboJpeg.h" />
     <ClInclude Include="Src\Page.h" />
     <ClInclude Include="Src\PageCarousel.h" />
     <ClInclude Include="Src\RemotePage.h" />
+    <ClInclude Include="Src\turbojpeg.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="projects\android\build\outputs\lint-results-release-fatal.html" />

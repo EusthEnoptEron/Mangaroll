@@ -18,14 +18,16 @@ Copyright   :   Copyright 2014 Oculus VR, LLC. All Rights reserved.
 #include "App.h"
 #include "SceneView.h"
 #include "SoundEffectContext.h"
-#include <memory>
 #include "GuiSys.h"
 #include "Page.h"
-#include "PageCarousel.h"
 #include "RemotePage.h"
-#include "MangaBrowser.h"
+#include "UI\UIMenu.h"
+#include "ViewManager.h"
+#include "MangaCarousel.h"
+#include "Manga.h"
+#include "MangaSettingsView.h"
 
-
+using namespace OVR;
 namespace OvrMangaroll
 {
 
@@ -42,19 +44,19 @@ public:
 	virtual OVR::Matrix4f Frame( const OVR::VrFrame & vrFrame );
 	virtual OVR::Matrix4f DrawEyeView( const int eye, const float fovDegreesX, const float fovDegreesY, ovrFrameParms & frameParms );
 
-	class OVR::ovrLocale &	GetLocale() { return *Locale; }
+	class ovrLocale &	GetLocale() { return *Locale; }
 
+	Manga CurrentManga;
+	MangaCarousel Carousel;
+	MangaSettingsView MangaSettingsMenu;
 private:
-	OVR::ovrSoundEffectContext * SoundEffectContext;
-	OVR::OvrGuiSys::SoundEffectPlayer * SoundEffectPlayer;
-	OVR::OvrGuiSys *		GuiSys;
+	ovrSoundEffectContext * SoundEffectContext;
+	OvrGuiSys::SoundEffectPlayer * SoundEffectPlayer;
+	OvrGuiSys *		GuiSys;
 	class OVR::ovrLocale *	Locale;
-	OVR::OvrSceneView		Scene;
 	ovrMatrix4f			CenterEyeViewMatrix;
-	PageCarousel *Carousel;
-	MangaMetadata *Metadata;
-	MangaBrowser *Browser;
-	double LastPress;
+	ViewManager ViewMgr;
+	double _LastPress;
 };
 
 } // namespace OvrTemplateApp

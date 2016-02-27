@@ -2,9 +2,11 @@
 
 #include "App.h"
 #include "GlObject.h"
+#include "ShaderManager.h"
 
 using namespace OVR;
 namespace OvrMangaroll {
+
 	const float PIXELS_PER_DEGREE = 20.0f;
 	const float REFERENCE_HEIGHT = 1000.0f;
 
@@ -33,7 +35,7 @@ namespace OvrMangaroll {
 			_Selected(false),
 			_Model(ovrMatrix4f_CreateIdentity())
 		{
-			
+			_Prog = *ShaderManager::Instance()->Get(PAGE_SHADER_NAME);
 		};
 
 		virtual ~Page(void);

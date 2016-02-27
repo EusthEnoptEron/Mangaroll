@@ -15,11 +15,14 @@ include ../../../../../cflags.mk
 LOCAL_MODULE			:= mangaroll
 LOCAL_SRC_FILES			:= ../../../Src/Mangaroll.cpp \
                            ../../../Src/Page.cpp \
-                           ../../../Src/PageCarousel.cpp \
+                           ../../../Src/Manga.cpp \
                            ../../../Src/RemotePage.cpp\
                            ../../../Src/Helpers.cpp \
-                           ../../../Src/MangaBrowser.cpp \
-                           ../../../Src/MangaMetadata.cpp \
+                           ../../../Src/MangaCarousel.cpp \
+                           ../../../Src/MangaSettingsView.cpp \
+                           ../../../Src/ShaderManager.cpp \
+                           ../../../Src/View.cpp \
+                           ../../../Src/ViewManager.cpp \
                            ../../../Src/OVR_TurboJpeg.cpp
 LOCAL_STATIC_LIBRARIES	:= vrsound vrmodel vrlocale vrgui vrappframework systemutils libovrkernel jpeg stbs
 LOCAL_SHARED_LIBRARIES	:= vrapi
