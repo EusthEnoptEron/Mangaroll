@@ -109,6 +109,7 @@ void Mangaroll::OneTimeInit( const char * fromPackage, const char * launchIntent
 
 	Array<String> images = DirectoryFileList(mangaPath.ToCStr());
 	
+	CurrentManga.Name = ExtractDirectory(mangaPath);
 	for(int i = 0; i < images.GetSizeI(); i++) {
 		//WARN("%s -> %s", images[i].ToCStr(), images[i].GetExtension().ToCStr());
 		if(images[i].GetExtension() == ".jpg") {

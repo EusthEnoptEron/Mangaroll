@@ -35,6 +35,10 @@ namespace OvrMangaroll {
 				_Menu->Open();
 				_Menu->GetVRMenu()->RepositionMenu(GetEyeViewMatrix(0));
 				_ProgressBar->SetProgress(_Mangaroll->CurrentManga.GetProgress() / (_Mangaroll->CurrentManga.GetCount() - 1.0f)  );
+				
+				
+				_PageLabel->SetText(String::Format("Page %d", _Mangaroll->CurrentManga.GetProgress() + 1));
+				_TitleLabel->SetText(_Mangaroll->CurrentManga.Name);
 			}
 			return true;
 		}
@@ -65,22 +69,38 @@ namespace OvrMangaroll {
 
 		_CenterContainer = new UIContainer(gui);
 		_CenterContainer->AddToMenu(_Menu);
-		_CenterContainer->SetLocalPose(forward, Vector3f(0, 0, -.8f));
+		_CenterContainer->SetLocalPose(forward, Vector3f(0, 0, -.9f));
 		
 		_TitleLabel = new UILabel(gui);
 		_TitleLabel->AddToMenu(_Menu, _CenterContainer);
-		_TitleLabel->SetLocalPose(forward, Vector3f(0, 0, 0));
-		_TitleLabel->SetFontScale(0.5f);
-		_TitleLabel->SetText("TEST");
+		// It's unknown what these parms actually do... but well, it works. "alpha" seems to control the thickness of the outline
+		_TitleLabel->SetFontParms(VRMenuFontParms(true, true, false, false, true, 0.5f, 0.4f, 1));
+		_TitleLabel->SetLocalPose(forward, Vector3f(0, 0.1f, 0));
+		_TitleLabel->SetFontScale(0.7f);
+		_TitleLabel->SetText("");
+
+		_PageLabel = new UILabel(gui);
+		_PageLabel->AddToMenu(_Menu, _CenterContainer);
+		_PageLabel->SetFontParms(VRMenuFontParms(true, true, false, false, true, 0.5f, 0.4f, 1));
+		_PageLabel->SetLocalPose(forward, Vector3f(0, 0, 0));
+		_PageLabel->SetFontScale(0.5f);
+		_PageLabel->SetText("");
 
 		UITexture *texture = new UITexture();
-		texture->LoadTextureFromApplicationPackage("assets/img_progressbar_background.png");
+		texture->LoadTextureFromApplicationPackage("assets/progress_bg.png");
 
+		UIImage *ProgressBar = new UIImage(gui);
+		ProgressBar->AddToMenu(_Menu, _CenterContainer);
+		ProgressBar->SetImage(0, eSurfaceTextureType::SURFACE_TEXTURE_DIFFUSE, *texture, 7 * 30, 30);
+		ProgressBar->SetLocalPose(forward, Vector3f(0, -0.05f, 0));
+		
 		_ProgressBar = new UIProgressBar(gui);
-		_ProgressBar->AddToMenu(_Menu, true, true, _CenterContainer);
-		_ProgressBar->SetLocalPose(forward, Vector3f(0, 0, 0));
-		_ProgressBar->SetColor(Vector4f(1, 1, 1, 1));
-		_ProgressBar->SetProgress(0.0f);
+		//_ProgressBar->AddToMenu(_Menu, true, true, _CenterContainer);
+		//_ProgressBar->SetLocalPose(forward, Vector3f(0, 0, 0));
+		//_ProgressBar->SetColor(Vector4f(1, 1, 1, 1));
+		//_ProgressBar->SetProgress(0.0f);
+		//_ProgressBar->SetDimensions(Vector2f(5, 10));
+		//_ProgressBar->SetBorder(UIRectf(10, 10, 10, 10));
 
 		/*_GammaSlider = new UIDiscreteSlider(gui);
 		_GammaSlider->AddToMenu(_Menu, _CenterContainer);
@@ -94,6 +114,7 @@ namespace OvrMangaroll {
 
 	void MangaSettingsView::OnOpen() {
 		CurViewState = eViewState::VIEWSTATE_OPEN;
+		
 	}
 	void MangaSettingsView::OnClose() {
 		CurViewState = eViewState::VIEWSTATE_CLOSED;
