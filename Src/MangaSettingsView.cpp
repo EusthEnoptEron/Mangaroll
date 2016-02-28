@@ -18,7 +18,11 @@ namespace OvrMangaroll {
 	}
 
 	void OnText(ScrubBarComponent *button, void *object, UILabel *label, int progress) {
-		label->SetText(String::Format("Page %d", progress));
+		label->SetText(String::Format("Page %d", progress + 1));
+	}
+
+	void OnPageProgressClick(ScrubBarComponent *slider, void *object, float progress) {
+		((MangaSettingsView *)object)->SetPageProgress(progress);
 	}
 
 
@@ -35,12 +39,6 @@ namespace OvrMangaroll {
 			switch (event.EventType) {
 			case VRMENU_EVENT_FOCUS_GAINED:
 				guiSys.GetGazeCursor().ForceDistance(event.HitResult.t, eGazeCursorStateType::CURSOR_STATE_HILIGHT);
-				return eMsgStatus::MSG_STATUS_CONSUMED;
-
-				break;
-			case VRMENU_EVENT_FOCUS_LOST:
-				return eMsgStatus::MSG_STATUS_CONSUMED;
-				break;
 			default:
 				return eMsgStatus::MSG_STATUS_ALIVE;
 
@@ -134,9 +132,9 @@ namespace OvrMangaroll {
 		_PageLabel->SetFontScale(0.5f);
 		_PageLabel->SetText("");
 
-		//GazeUpdaterComponent *component = new GazeUpdaterComponent();
-		//component->HandlesEvent(VRMenuEventFlags_t(VRMENU_EVENT_FOCUS_GAINED) | VRMENU_EVENT_FOCUS_LOST | VRMENU_EVENT_FRAME_UPDATE);
-		//_CenterContainer->AddComponent(component);
+		GazeUpdaterComponent *component = new GazeUpdaterComponent();
+		component->HandlesEvent(VRMenuEventFlags_t(VRMENU_EVENT_FOCUS_GAINED) /*| VRMENU_EVENT_FOCUS_LOST | VRMENU_EVENT_FRAME_UPDATE*/);
+		_CenterContainer->AddComponent(component);
 
 		_ProgressBGTexture.LoadTextureFromApplicationPackage("assets/progress_bg.png");
 		_ProgressFGTexture.LoadTextureFromApplicationPackage("assets/fill.png");
@@ -148,7 +146,7 @@ namespace OvrMangaroll {
 		_ProgressBG = new UIImage(gui);
 		_ProgressBG->AddToMenu(_Menu, _CenterContainer);
 		_ProgressBG->SetImage(0, eSurfaceTextureType::SURFACE_TEXTURE_DIFFUSE, _ProgressBGTexture, barWidth, barHeight);
-		_ProgressBG->SetLocalPose(forward, Vector3f(0, +0.05f, 0));
+		_ProgressBG->SetLocalPose(forward, Vector3f(0, -0.05f, 0));
 		_ProgressBG->AddComponent(&_ProgressComponent);
 		_ProgressBG->GetMenuObject()->AddFlags(VRMENUOBJECT_RENDER_HIERARCHY_ORDER);
 
@@ -165,10 +163,12 @@ namespace OvrMangaroll {
 		_PageSeekLabel->SetLocalPose(forward, Vector3f(0, 0, 0));
 		_PageSeekLabel->SetFontScale(0.5f);
 		_PageSeekLabel->SetText("");
+		_PageSeekLabel->SetTextOffset(Vector3f(0, -0.1f, 0));
 
 		_ProgressComponent.SetWidgets(_Menu, _ProgressBG, _ProgressFG, _PageLabel, _PageSeekLabel, barWidth - 6, barHeight - 3);
 		_ProgressComponent.SetOnText(OnText, this);
 		_ProgressComponent.SetProgress(0.5f);
+		_ProgressComponent.SetOnClick(OnPageProgressClick, this);
 		
 		
 		//_ProgressBar->AddToMenu(_Menu, true, true, _CenterContainer);
@@ -187,6 +187,10 @@ namespace OvrMangaroll {
 		//gui.GetGazeCursor().UpdateDistance(0.7f, eGazeCursorStateType::CURSOR_STATE_NORMAL);
 	}
 
+	void MangaSettingsView::SetPageProgress(float progress) {
+		_ProgressComponent.SetProgress(progress);
+		_Mangaroll->CurrentManga.SetProgress(progress * _Mangaroll->CurrentManga.GetCount());
+	}
 
 	void MangaSettingsView::OneTimeShutdown() {
 	}
@@ -282,6 +286,10 @@ namespace OvrMangaroll {
 		SetProgress(Progress);
 	}
 
+	int ScrubBarComponent::GetMax(void) {
+		return Max;
+	}
+
 	void ScrubBarComponent::SetOnClick(void(*callback)(ScrubBarComponent *, void *, float), void *object)
 	{
 		OnClickFunction = callback;
@@ -317,9 +325,9 @@ namespace OvrMangaroll {
 		ScrubBar->SetSurfaceDims(0, Vector2f(seekwidth, ScrubBarHeight));
 		ScrubBar->RegenerateSurfaceGeometry(0, false);
 
-		pos = CurrentTime->GetLocalPosition();
+		/*pos = CurrentTime->GetLocalPosition();
 		pos.x = PixelScale(ScrubBarWidth * -0.5f + seekwidth);
-		CurrentTime->SetLocalPosition(pos);
+		CurrentTime->SetLocalPosition(pos);*/
 
 		if (OnSetTextFunction != NULL) {
 			(OnSetTextFunction)(this, OnTextObject, CurrentTime, Max * progress);
@@ -400,7 +408,7 @@ namespace OvrMangaroll {
 			const Posef modelPose = Menu->GetVRMenu()->GetMenuPose() * Background->GetWorldPose();
 			Vector3f localHit = modelPose.Orientation.Inverted().Rotate(hitPos - modelPose.Position);
 
-			WARN("%.2f | %.2f | %.2f", modelPose.Orientation.x, modelPose.Orientation.y, modelPose.Orientation.z);
+			//WARN("%.2f | %.2f | %.2f", modelPose.Orientation.x, modelPose.Orientation.y, modelPose.Orientation.z);
 			Bounds3f bounds = Background->GetMenuObject()->GetLocalBounds(guiSys.GetDefaultFont()) * Background->GetParent()->GetWorldScale();
 			const float progress = (localHit.x - bounds.GetMins().x) / bounds.GetSize().x;
 
@@ -431,7 +439,7 @@ namespace OvrMangaroll {
 		Vector3f hitPos = event.HitResult.RayStart + event.HitResult.RayDir * event.HitResult.t;
 
 		// move hit position into local space
-		const Posef modelPose = Background->GetWorldPose();
+		const Posef modelPose = Menu->GetVRMenu()->GetMenuPose() * Background->GetWorldPose();
 		Vector3f localHit = modelPose.Orientation.Inverted().Rotate(hitPos - modelPose.Position);
 
 		Bounds3f bounds = Background->GetMenuObject()->GetLocalBounds(guiSys.GetDefaultFont()) * Background->GetParent()->GetWorldScale();

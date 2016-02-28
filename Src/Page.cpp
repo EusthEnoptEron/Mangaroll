@@ -21,11 +21,14 @@ namespace OvrMangaroll {
 			free(Buffer);
 			_Geometry.Free();
 		}
-		
 	}
 
 	Page *Page::GetNext() {
 		return _Next;
+	}
+
+	void Page::SetPrev(Page *p) {
+		_Prev = p;
 	}
 
 	bool Page::IsLoaded() {
@@ -57,10 +60,13 @@ namespace OvrMangaroll {
 		float pixelEnd   = angle * PIXELS_PER_DEGREE + 60 * PIXELS_PER_DEGREE;
 
 		if(_Positionable) {
-			int right = (_Offset + _Width);
-
+			int left = (_Offset + _Width);
+			bool initialIsVisible = _Origin == (PLACING_BOTTOM || _LoadState == LoadState::LOADED)
+				? _Offset > pixelStart && _Offset < pixelEnd
+				: _HighOffset > pixelStart && _HighOffset < pixelEnd;
+			
 			// If user's view is inside the valid range...
-			if((_Offset > pixelStart && _Offset < pixelEnd) || (_LoadState == LoadState::LOADED && right > pixelStart && right < pixelEnd)) {
+			if (initialIsVisible || (_LoadState == LoadState::LOADED && left > pixelStart && left < pixelEnd)) {
 				_DisplayState = DisplayState::VISIBLE;
 
 				if(_LoadState == LoadState::LOADED) {
@@ -208,8 +214,18 @@ namespace OvrMangaroll {
 				_Width = REFERENCE_HEIGHT / _RealHeight * _RealWidth;
 				_AngularWidth  = _Width / PIXELS_PER_DEGREE;
 
+				if (_Origin == PLACING_TOP) {
+					// Coming from the top!
+					_Offset = _HighOffset - _Width;
+					_AngularOffset = _Offset / PIXELS_PER_DEGREE;
+				}
+
 				if(_Next != NULL) {
 					_Next->SetOffset(_Offset + _Width);
+				}
+
+				if (_Prev != NULL) {
+					_Prev->SetHighOffset(_Offset);
 				}
 
 				LOG("LOADED %s", _Path.ToCStr());
@@ -232,11 +248,36 @@ namespace OvrMangaroll {
 	}
 
 
+	void Page::Reset(void) {
+		_Positionable = false;
+		_Origin = PLACING_NONE;
+		UnloadTexture();
+
+		if (_LoadState == LoadState::LOADED) {
+			free(Buffer);
+			_Geometry.Free();
+		}
+		
+		_LoadState = LoadState::UNLOADED;
+		_DisplayState = DisplayState::INVISIBLE;
+
+	}
 
 	void Page::SetOffset(int offset) {
-		_Offset = offset;
-		_AngularOffset = _Offset / PIXELS_PER_DEGREE;
-		_Positionable = true;
+		if (_Origin == PLACING_NONE) {
+			_Offset = offset;
+			_AngularOffset = _Offset / PIXELS_PER_DEGREE;
+			_Positionable = true;
+			_Origin = PLACING_BOTTOM;
+		}
+	}
+
+	void Page::SetHighOffset(int offset) {
+		if (_Origin == PLACING_NONE) {
+			_HighOffset = offset;
+			_Positionable = true;
+			_Origin = PLACING_TOP;
+		}
 	}
 
 	void Page::Draw(const Matrix4f &m) {

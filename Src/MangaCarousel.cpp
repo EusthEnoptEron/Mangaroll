@@ -68,7 +68,7 @@ namespace OvrMangaroll {
 
 		if (CurrentManga != NULL) {
 			CurrentManga->Selectionable = _Operatable;
-			CurrentManga->Update(_Angle, !_Operatable);
+			CurrentManga->Update(_Angle, false);
 		}
 
 		Scene.Frame(vrFrame, _Mangaroll->app->GetHeadModelParms());

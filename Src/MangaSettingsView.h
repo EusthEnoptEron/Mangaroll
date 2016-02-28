@@ -22,6 +22,7 @@ namespace OvrMangaroll {
 		virtual int				GetTypeId() const { return TYPE_ID; }
 
 		void					SetMax(const int duration);
+		int						GetMax(void);
 		void					SetOnClick(void(*callback)(ScrubBarComponent *, void *, float), void *object);
 		void					SetOnText(void(*callback)(ScrubBarComponent *, void*, UILabel *label, int progress), void *object);
 		void					SetWidgets(UIMenu *menu, UIObject *background, UIObject *scrubBar, UILabel *currentTime, UILabel *seekTime, const int scrubBarWidth, const int scrubBarHeight);
@@ -79,6 +80,7 @@ namespace OvrMangaroll {
 
 		void 		OnOpen() ;
 		void 		OnClose() ;
+		void SetPageProgress(float);
 
 	private:
 		void ShowGUI(void);

@@ -17,7 +17,9 @@ namespace OvrMangaroll {
 		void AddPage(Page *page);
 		void Update(float angle, bool onlyVisual = false);
 		int GetProgress(void);
+		void SetProgress(int page);
 		int GetCount(void);
+		Page &GetPage(int);
 		String Name;
 		bool Selectionable;
 	private:
@@ -27,6 +29,7 @@ namespace OvrMangaroll {
 		Page *_Last;
 		Page *_Selection;
 		int _SelectionIndex;
+		float _Angle;
 
 	};
 

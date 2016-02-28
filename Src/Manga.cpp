@@ -30,6 +30,7 @@ namespace OvrMangaroll {
 
 	void Manga::AddPage(Page *page) {
 		if(_First == NULL) {
+			// First page
 			_First = page;
 			_Last  = page;
 
@@ -37,6 +38,8 @@ namespace OvrMangaroll {
 		} else {
 
 			_Last->SetNext(page);
+			page->SetPrev(_Last);
+
 			_Last = page;
 		}
 		_Count++;
@@ -46,11 +49,44 @@ namespace OvrMangaroll {
 		return _SelectionIndex;
 	}
 
+	void Manga::SetProgress(int page) {
+		Page *activePage;
+		Page *p = _First;
+
+		for (int i = 0; i < _Count; i++) {
+			if (page == i) {
+				activePage = p;
+			}
+			p->Reset();
+			p = p->GetNext();
+		}
+
+		if (activePage == NULL) {
+			WARN("INVALID PAGE");
+			activePage = _First;
+		}
+
+		activePage->SetOffset(_Angle * PIXELS_PER_DEGREE);
+	}
+
+	Page &Manga::GetPage(int pageNo) {
+		if (pageNo < 0) return *_First;
+		if (pageNo >= _Count) return *_Last;
+
+		Page *p = _First;
+		for (int i = 0; i < pageNo; i++) {
+			p = p->GetNext();
+		}
+
+		return *p;
+	}
+
 	int Manga::GetCount(void) {
 		return _Count;
 	}
 
 	void Manga::Update(float angle, bool onlyVisual) {
+		_Angle = angle;
 		UpdateModel();
 
 		Page *ref = _First;

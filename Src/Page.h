@@ -12,6 +12,7 @@ namespace OvrMangaroll {
 
 	enum LoadState { UNLOADED, LOADING, LOADED };
 	enum DisplayState { VISIBLE, INVISIBLE, LIMBO };
+	enum PlacingOrigin { PLACING_NONE, PLACING_BOTTOM, PLACING_TOP };
 
 	class Page : public GlObject {
 	public:
@@ -22,6 +23,7 @@ namespace OvrMangaroll {
 			_LoadState(UNLOADED), 
 			_DisplayState(INVISIBLE), 
 			_Next(NULL), 
+			_Prev(NULL),
 			_Texture(),
 			_Geometry(),
 			_Width(0), 
@@ -33,7 +35,10 @@ namespace OvrMangaroll {
 			_TextureLoaded(false),
 			_LoadThread(),
 			_Selected(false),
-			_Model(ovrMatrix4f_CreateIdentity())
+			_Model(ovrMatrix4f_CreateIdentity()),
+			_HighOffset(0),
+			_Origin(PLACING_NONE)
+			
 		{
 			_Prog = *ShaderManager::Instance()->Get(PAGE_SHADER_NAME);
 		};
@@ -45,11 +50,13 @@ namespace OvrMangaroll {
 		static const float RADIUS;
 		void Update(float angle, bool onlyVisual = false);
 		void SetNext(Page *next);
+		void SetPrev(Page *prev);
 		void SetProgram(GlProgram &prog) { _Prog = prog; }
 		Page *GetNext(void);
 		void Load(void);
 		void Draw(const Matrix4f &m);
 		void SetOffset(int offset);
+		void SetHighOffset(int offset);
 		String GetPath() { return _Path; }
 		//MemBuffer Buffer;
 		unsigned char* Buffer;
@@ -58,6 +65,7 @@ namespace OvrMangaroll {
 		bool IsLoaded();
 		bool IsTarget(float angle);
 		void SetSelected(bool state);
+		void Reset(void);
 	protected:
 		void UnloadTexture();
 		Thread::ThreadFn virtual GetWorker();
@@ -66,6 +74,7 @@ namespace OvrMangaroll {
 		LoadState _LoadState;
 		DisplayState _DisplayState;
 		Page *_Next;
+		Page *_Prev;
 		GlTexture _Texture;
 		GlGeometry _Geometry;
 		int _Width;
@@ -81,7 +90,8 @@ namespace OvrMangaroll {
 		Matrix4f _Model;
 		float _AngularOffset;
 		float _AngularWidth;
-	
+		int _HighOffset;
+		PlacingOrigin _Origin;
 		void ConsumeBuffer(unsigned char* buffer, int length);
 		//void FillBuffer();
 	private:
