@@ -36,6 +36,10 @@ namespace OvrMangaroll {
 
 	void MangaCarousel::OneTimeInit(const char * launchIntent) {
 		_Prog = ShaderManager::Instance()->Get(PAGE_SHADER_NAME);
+		glUseProgram(_Prog->program);
+		glUniform1f(glGetUniformLocation(_Prog->program, "Contrast"), 1.0f);
+		glUniform1f(glGetUniformLocation(_Prog->program, "Brightness"), 0.0f);
+
 
 		const char * scenePath = "assets/stars.ovrscene";
 
@@ -93,6 +97,8 @@ namespace OvrMangaroll {
 
 		if (CurrentManga != NULL) {
 			glUseProgram(_Prog->program);
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glUniformMatrix4fv(_Prog->uView, 1, GL_TRUE, eyeViewMatrix.M[0]);
 			glUniformMatrix4fv(_Prog->uProjection, 1, GL_TRUE, eyeProjectionMatrix.M[0]);
 

@@ -231,6 +231,7 @@ namespace OvrMangaroll {
 				LOG("LOADED %s", _Path.ToCStr());
 				CreateMesh();
 
+				_DisplayTime = Time::Elapsed;
 				this->_LoadState = LoadState::LOADED;
 			}
 		}
@@ -287,7 +288,7 @@ namespace OvrMangaroll {
 			//LOG("DRAW %s", _Path.ToCStr());
 
 			// Draw
-			//glUniform1i(glGetUniformLocation( prog.program, "IsSelected" ), this->_Selected);
+			glUniform1f(glGetUniformLocation( _Prog.program, "DisplayTime" ), Time::Elapsed - this->_DisplayTime);
 			glUniformMatrix4fv( _Prog.uModel, 1, GL_TRUE, (m * Mat).M[0]);
 
 			glActiveTexture(GL_TEXTURE0);

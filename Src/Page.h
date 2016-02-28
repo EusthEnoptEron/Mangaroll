@@ -37,8 +37,8 @@ namespace OvrMangaroll {
 			_Selected(false),
 			_Model(ovrMatrix4f_CreateIdentity()),
 			_HighOffset(0),
-			_Origin(PLACING_NONE)
-			
+			_Origin(PLACING_NONE),
+			_DisplayTime(0)
 		{
 			_Prog = *ShaderManager::Instance()->Get(PAGE_SHADER_NAME);
 		};
@@ -93,6 +93,7 @@ namespace OvrMangaroll {
 		int _HighOffset;
 		PlacingOrigin _Origin;
 		void ConsumeBuffer(unsigned char* buffer, int length);
+		float _DisplayTime;
 		//void FillBuffer();
 	private:
 		void UpdateStates(float);

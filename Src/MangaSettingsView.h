@@ -27,7 +27,7 @@ namespace OvrMangaroll {
 		void					SetOnText(void(*callback)(ScrubBarComponent *, void*, UILabel *label, int progress), void *object);
 		void					SetWidgets(UIMenu *menu, UIObject *background, UIObject *scrubBar, UILabel *currentTime, UILabel *seekTime, const int scrubBarWidth, const int scrubBarHeight);
 		void 					SetProgress(const float progress);
-
+		float					GetProgress(void);
 		bool					IsScrubbing() const { return TouchDown; }
 
 	private:
@@ -60,6 +60,27 @@ namespace OvrMangaroll {
 		void 					OnClick(OvrGuiSys & guiSys, VrFrame const & vrFrame, VRMenuEvent const & event);
 
 		//void 					SetTimeText(UILabel *label, const int time);
+	};
+
+	class UIScrubBar : public UIObject {
+	public:
+		UIScrubBar(OvrGuiSys &guiSys, int width, int height);
+		~UIScrubBar();
+
+		void AddToMenu(UIMenu *menu, UIObject *parent = NULL);
+		ScrubBarComponent &GetComponent(void);
+		void SetIndicators(UILabel *, UILabel *);
+		void SetFillColor(Vector4f);
+	private:
+		int _Width;
+		int _Height;
+		ScrubBarComponent _ProgressComponent;
+		void Init(void);
+		UITexture _BGTexture;
+		UITexture _FGTexture;
+
+		UIImage *_BGImage;
+		UIImage *_FGImage;
 	};
 
 	class MangaSettingsView : public View
@@ -98,8 +119,10 @@ namespace OvrMangaroll {
 		UILabel *_PageLabel;
 
 		UIDiscreteSlider *_GammaSlider;
-		UISlider *_ContrastSlider;
-		UISlider *_BrightnessSlider;
+		UIScrubBar *_ContrastSlider;
+		UILabel *_ContrastLabel;
+		UIScrubBar *_BrightnessSlider;
+		UILabel *_BrightnessLabel;
 
 		SineFader _Fader;
 		ScrubBarComponent _ProgressComponent;

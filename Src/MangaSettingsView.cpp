@@ -21,10 +21,29 @@ namespace OvrMangaroll {
 		label->SetText(String::Format("Page %d", progress + 1));
 	}
 
+
+	float lastProgressClick = 0;
 	void OnPageProgressClick(ScrubBarComponent *slider, void *object, float progress) {
-		((MangaSettingsView *)object)->SetPageProgress(progress);
+		if (Time::Elapsed - lastProgressClick > 0.1f) {
+			((MangaSettingsView *)object)->SetPageProgress(progress);
+			lastProgressClick = Time::Elapsed;
+		}
+	}
+	void OnContrastClick(ScrubBarComponent *slider, void *object, float progress) {
+		slider->SetProgress(progress);
+		
+		GlProgram *prog = ShaderManager::Instance()->Get(PAGE_SHADER_NAME);
+		glUseProgram(prog->program);
+		glUniform1f(glGetUniformLocation(prog->program, "Contrast"), progress*2);
 	}
 
+	void OnBrightnessClick(ScrubBarComponent *slider, void *object, float progress) {
+		slider->SetProgress(progress);
+
+		GlProgram *prog = ShaderManager::Instance()->Get(PAGE_SHADER_NAME);
+		glUseProgram(prog->program);
+		glUniform1f(glGetUniformLocation(prog->program, "Brightness"), progress - 0.5f);
+	}
 
 	class GazeUpdaterComponent : public VRMenuComponent {
 	public:
@@ -61,6 +80,7 @@ namespace OvrMangaroll {
 		, _GammaSlider(NULL)
 		, _ContrastSlider(NULL)
 		, _BrightnessSlider(NULL)
+		, _BrightnessLabel(NULL)
 		, _Fader(0)
 		, _ProgressComponent()
 		, _PageSeekLabel(NULL)
@@ -106,6 +126,7 @@ namespace OvrMangaroll {
 	void MangaSettingsView::OneTimeInit(const char * launchIntent) {
 		// BUILD GUI
 		const Quatf forward(Vector3f(0.0f, 1.0f, 0.0f), 0.0f);
+		const Quatf leftTilt(Vector3f(0, 1, 0), 0.8f);
 
 		OvrGuiSys &gui = _Mangaroll->GetGuiSys();
 		_Menu = new UIMenu(gui);
@@ -115,7 +136,11 @@ namespace OvrMangaroll {
 		_CenterContainer = new UIContainer(gui);
 		_CenterContainer->AddToMenu(_Menu);
 		_CenterContainer->SetLocalPose(forward, Vector3f(0, 0, -.9f));
-		_CenterContainer->SetColor(Vector4f(1, 1, 1, 0.5f));
+
+		_LeftContainer = new UIContainer(gui);
+		_LeftContainer->AddToMenu(_Menu);
+		_LeftContainer->SetLocalPose(leftTilt, Vector3f(-.5f, 0, -.7f));
+
 
 		_TitleLabel = new UILabel(gui);
 		_TitleLabel->AddToMenu(_Menu, _CenterContainer);
@@ -155,7 +180,7 @@ namespace OvrMangaroll {
 		_ProgressFG->SetLocalPosition(PixelPos(-3, 0, 1));
 		_ProgressFG->SetImage(0, SURFACE_TEXTURE_ADDITIVE, _ProgressFGTexture, 0, 0);
 		_ProgressFG->GetMenuObject()->AddFlags(VRMenuObjectFlags_t(VRMENUOBJECT_DONT_HIT_ALL));
-
+		_ProgressFG->SetColor(Vector4f(0.12f, 0.3f, 0.06f, 1));
 
 		_PageSeekLabel = new UILabel(gui);
 		_PageSeekLabel->AddToMenu(_Menu, _ProgressBG);
@@ -170,7 +195,35 @@ namespace OvrMangaroll {
 		_ProgressComponent.SetProgress(0.5f);
 		_ProgressComponent.SetOnClick(OnPageProgressClick, this);
 		
-		
+
+		_ContrastLabel = new UILabel(gui);
+		_ContrastLabel->AddToMenu(_Menu, _LeftContainer);
+		_ContrastLabel->SetFontParms(VRMenuFontParms(true, true, false, false, true, 0.5f, 0.4f, 0.4f));
+		_ContrastLabel->SetText("Contrast");
+		_ContrastLabel->SetMargin(UIRectf(5));
+				
+		_ContrastSlider = new UIScrubBar(gui, 100, 20);
+		_ContrastSlider->AddToMenu(_Menu, _LeftContainer);
+		_ContrastSlider->AlignToMargin(RectPosition::BOTTOM, _ContrastLabel, RectPosition::TOP);
+		_ContrastSlider->GetComponent().SetProgress(0.5f);
+		_ContrastSlider->SetColor(Vector4f(0.596f, 0.051f, 0.051f, 1));
+		_ContrastSlider->GetComponent().SetOnClick(OnContrastClick, this);
+		_ContrastSlider->SetMargin(UIRectf(3));
+
+		_BrightnessLabel = new UILabel(gui);
+		_BrightnessLabel->AddToMenu(_Menu, _LeftContainer);
+		_BrightnessLabel->SetFontParms(VRMenuFontParms(true, true, false, false, true, 0.5f, 0.4f, 0.4f));
+		_BrightnessLabel->SetText("Brightness");
+		_BrightnessLabel->SetMargin(UIRectf(3));
+		_BrightnessLabel->SetLocalPosition(Vector3f(0, -.1f, 0));
+
+		_BrightnessSlider = new UIScrubBar(gui, 100, 20);
+		_BrightnessSlider->AddToMenu(_Menu, _LeftContainer);
+		_BrightnessSlider->AlignToMargin(RectPosition::BOTTOM, _BrightnessLabel, RectPosition::TOP);
+		_BrightnessSlider->GetComponent().SetProgress(0.5f);
+		_BrightnessSlider->SetColor(Vector4f(0.596f, 0.051f, 0.051f, 1));
+		_BrightnessSlider->GetComponent().SetOnClick(OnBrightnessClick, this);
+
 		//_ProgressBar->AddToMenu(_Menu, true, true, _CenterContainer);
 		//_ProgressBar->SetLocalPose(forward, Vector3f(0, 0, 0));
 		//_ProgressBar->SetColor(Vector4f(1, 1, 1, 1));
@@ -188,8 +241,12 @@ namespace OvrMangaroll {
 	}
 
 	void MangaSettingsView::SetPageProgress(float progress) {
+		int prevPage = _ProgressComponent.GetMax() * _ProgressComponent.GetProgress();
 		_ProgressComponent.SetProgress(progress);
-		_Mangaroll->CurrentManga.SetProgress(progress * _Mangaroll->CurrentManga.GetCount());
+		int newPage = _ProgressComponent.GetMax() * progress;
+		
+		if (prevPage != newPage)
+			_Mangaroll->CurrentManga.SetProgress(progress * _Mangaroll->CurrentManga.GetCount());
 	}
 
 	void MangaSettingsView::OneTimeShutdown() {
@@ -225,9 +282,14 @@ namespace OvrMangaroll {
 
 			// Update visual representation
 			_CenterContainer->SetColor(Vector4f(_Fader.GetFadeAlpha()));
+			_LeftContainer->SetColor(Vector4f(_Fader.GetFadeAlpha()));
 
 			Vector3f pos = _CenterContainer->GetLocalPosition();
 			_CenterContainer->SetLocalPosition(Vector3f(pos.x, (1 - _Fader.GetFadeAlpha()) * -0.05f, pos.z));
+			
+			pos = _LeftContainer->GetLocalPosition();
+			_LeftContainer->SetLocalPosition(Vector3f(pos.x, (1 - _Fader.GetFadeAlpha()) * -0.05f, pos.z));
+
 		}
 	}
 
@@ -254,6 +316,71 @@ namespace OvrMangaroll {
 
 
 //##################################################################
+
+	UIScrubBar::UIScrubBar(OvrGuiSys &gui, int width, int height) 
+		: UIObject(gui)
+		, _Width(width)
+		, _Height(height)
+		, _ProgressComponent()
+		, _BGTexture()
+		, _FGTexture()
+		, _BGImage(NULL)
+		, _FGImage(NULL)
+	{
+	}
+
+	UIScrubBar::~UIScrubBar() {
+		
+	}
+
+	void UIScrubBar::AddToMenu(UIMenu *menu, UIObject *parent) {
+		const Posef pose(Quatf(Vector3f(0.0f, 1.0f, 0.0f), 0.0f), Vector3f(0.0f, 0.0f, 0.0f));
+
+		Vector3f defaultScale(1.0f);
+		VRMenuFontParms fontParms(HORIZONTAL_CENTER, VERTICAL_CENTER, false, false, false, 1.0f);
+
+		VRMenuObjectParms parms(VRMENU_CONTAINER, Array< VRMenuComponent* >(), VRMenuSurfaceParms(),
+			"", pose, defaultScale, fontParms, menu->AllocId(),
+			VRMenuObjectFlags_t(), VRMenuObjectInitFlags_t(VRMENUOBJECT_INIT_FORCE_POSITION));
+		
+		AddToMenuWithParms(menu, parent, parms);
+
+		Init();
+	}
+
+	void UIScrubBar::Init(void) {
+
+		_BGTexture.LoadTextureFromApplicationPackage("assets/progress_bg.png");
+		_FGTexture.LoadTextureFromApplicationPackage("assets/fill.png");
+
+		_BGImage = new UIImage(GuiSys);
+		_BGImage->AddToMenu(Menu, this);
+		_BGImage->SetImage(0, eSurfaceTextureType::SURFACE_TEXTURE_DIFFUSE, _BGTexture, _Width, _Height);
+		_BGImage->SetLocalPosition(Vector3f(0, -0.05f, 0));
+		_BGImage->AddComponent(&_ProgressComponent);
+		_BGImage->GetMenuObject()->AddFlags(VRMENUOBJECT_RENDER_HIERARCHY_ORDER);
+
+		_FGImage = new UIImage(GuiSys);
+		_FGImage->AddToMenu(Menu, _BGImage);
+		_FGImage->SetLocalPosition(PixelPos(-3, 0, 1));
+		_FGImage->SetImage(0, SURFACE_TEXTURE_ADDITIVE, _FGTexture, 0, 0);
+		_FGImage->GetMenuObject()->AddFlags(VRMenuObjectFlags_t(VRMENUOBJECT_DONT_HIT_ALL));
+
+		_ProgressComponent.SetWidgets(Menu, _BGImage, _FGImage, NULL, NULL, _Width - 5, _Height - 5);
+		_ProgressComponent.SetMax(100);
+	}
+
+	void UIScrubBar::SetFillColor(Vector4f col) {
+		_FGImage->SetColor(col);
+	}
+
+	ScrubBarComponent &UIScrubBar::GetComponent(void) {
+		return _ProgressComponent;
+	}
+
+	void UIScrubBar::SetIndicators(UILabel *valueIndicator, UILabel *seekIndicator) {
+		_ProgressComponent.SetWidgets(Menu, _BGImage, _FGImage, valueIndicator, seekIndicator, _Width, _Height);
+	}
 
 
 
@@ -311,7 +438,12 @@ namespace OvrMangaroll {
 		ScrubBarWidth = scrubBarWidth;
 		ScrubBarHeight = scrubBarHeight;
 
-		SeekTime->SetVisible(false);
+		if (SeekTime != NULL)
+			SeekTime->SetVisible(false);
+	}
+
+	float ScrubBarComponent::GetProgress(void) {
+		return Progress;
 	}
 
 	void ScrubBarComponent::SetProgress(const float progress)
@@ -329,7 +461,7 @@ namespace OvrMangaroll {
 		pos.x = PixelScale(ScrubBarWidth * -0.5f + seekwidth);
 		CurrentTime->SetLocalPosition(pos);*/
 
-		if (OnSetTextFunction != NULL) {
+		if (OnSetTextFunction != NULL && CurrentTime != NULL) {
 			(OnSetTextFunction)(this, OnTextObject, CurrentTime, Max * progress);
 		}
 		//SetTimeText(CurrentTime, Max * progress);
@@ -399,9 +531,12 @@ namespace OvrMangaroll {
 			}
 		}
 
-		SeekTime->SetVisible(HasFocus);
+		if (SeekTime != nullptr)
+			SeekTime->SetVisible(HasFocus);
 		if (HasFocus)
 		{
+			guiSys.GetGazeCursor().ForceDistance(event.HitResult.t, CURSOR_STATE_HILIGHT);
+
 			Vector3f hitPos = event.HitResult.RayStart + event.HitResult.RayDir * event.HitResult.t;
 
 			// move hit position into local space
@@ -414,13 +549,17 @@ namespace OvrMangaroll {
 
 			if ((progress >= 0.0f) && (progress <= 1.0f))
 			{
-				const float seekwidth = ScrubBarWidth * progress;
-				Vector3f pos = SeekTime->GetLocalPosition();
-				pos.x = PixelScale(ScrubBarWidth * -0.5f + seekwidth);
-				SeekTime->SetLocalPosition(pos);
 
-				if (OnSetTextFunction != NULL) {
-					(OnSetTextFunction)(this, OnTextObject, SeekTime, Max * progress);
+				if (SeekTime != NULL) {
+					const float seekwidth = ScrubBarWidth * progress;
+
+					Vector3f pos = SeekTime->GetLocalPosition();
+					pos.x = PixelScale(ScrubBarWidth * -0.5f + seekwidth);
+					SeekTime->SetLocalPosition(pos);
+
+					if (OnSetTextFunction != NULL) {
+						(OnSetTextFunction)(this, OnTextObject, SeekTime, Max * progress);
+					}
 				}
 				//SetTimeText(SeekTime, Max * progress);
 			}
