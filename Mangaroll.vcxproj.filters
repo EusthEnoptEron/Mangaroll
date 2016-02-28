@@ -27,19 +27,34 @@
     <ClInclude Include="Src\GlObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Src\PageCarousel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Src\RemotePage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Src\Helpers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Src\MangaBrowser.h">
+    <ClInclude Include="Src\OVR_TurboJpeg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Src\MangaMetadata.h">
+    <ClInclude Include="Src\turbojpeg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Manga.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\MangaSettingsView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\ShaderManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\MangaCarousel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\ViewManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\View.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -50,16 +65,31 @@
     <ClCompile Include="Src\Page.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\PageCarousel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Src\RemotePage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Src\Helpers.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\MangaBrowser.cpp">
+    <ClCompile Include="Src\OVR_TurboJpeg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\MangaSettingsView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\MangaCarousel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Manga.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\ShaderManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\ViewManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\View.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

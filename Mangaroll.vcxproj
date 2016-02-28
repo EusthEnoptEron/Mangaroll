@@ -61,25 +61,31 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Src\Helpers.cpp" />
-    <ClCompile Include="Src\MangaBrowser.cpp" />
-    <ClCompile Include="Src\MangaMetadata.cpp" />
+    <ClCompile Include="Src\Manga.cpp" />
+    <ClCompile Include="Src\MangaCarousel.cpp" />
     <ClCompile Include="src\Mangaroll.cpp" />
+    <ClCompile Include="Src\MangaSettingsView.cpp" />
     <ClCompile Include="Src\OVR_TurboJpeg.cpp" />
     <ClCompile Include="Src\Page.cpp" />
-    <ClCompile Include="Src\PageCarousel.cpp" />
     <ClCompile Include="Src\RemotePage.cpp" />
+    <ClCompile Include="Src\ShaderManager.cpp" />
+    <ClCompile Include="Src\View.cpp" />
+    <ClCompile Include="Src\ViewManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\GlObject.h" />
     <ClInclude Include="Src\Helpers.h" />
-    <ClInclude Include="Src\MangaBrowser.h" />
-    <ClInclude Include="Src\MangaMetadata.h" />
+    <ClInclude Include="Src\Manga.h" />
+    <ClInclude Include="Src\MangaCarousel.h" />
     <ClInclude Include="src\Mangaroll.h" />
+    <ClInclude Include="Src\MangaSettingsView.h" />
     <ClInclude Include="Src\OVR_TurboJpeg.h" />
     <ClInclude Include="Src\Page.h" />
-    <ClInclude Include="Src\PageCarousel.h" />
     <ClInclude Include="Src\RemotePage.h" />
+    <ClInclude Include="Src\ShaderManager.h" />
     <ClInclude Include="Src\turbojpeg.h" />
+    <ClInclude Include="Src\View.h" />
+    <ClInclude Include="Src\ViewManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="projects\android\build\outputs\lint-results-release-fatal.html" />
