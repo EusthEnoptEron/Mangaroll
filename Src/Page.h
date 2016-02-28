@@ -43,7 +43,7 @@ namespace OvrMangaroll {
 		static const int SEGMENTS;
 		static const float HEIGHT;
 		static const float RADIUS;
-		void Update(float angle);
+		void Update(float angle, bool onlyVisual = false);
 		void SetNext(Page *next);
 		void SetProgram(GlProgram &prog) { _Prog = prog; }
 		Page *GetNext(void);

@@ -90,8 +90,10 @@ namespace OvrMangaroll {
 		}
 	}
 
-	void Page::Update(float angle) {
-		UpdateStates(angle);
+	void Page::Update(float angle, bool onlyVisual) {
+		if (!onlyVisual) {
+			UpdateStates(angle);
+		}
 
 		if(_DisplayState == DisplayState::VISIBLE) {
 			if(_Selected && AppState::Guide >= GuideType::ENLARGE) {

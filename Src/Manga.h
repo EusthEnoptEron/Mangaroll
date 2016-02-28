@@ -15,10 +15,11 @@ namespace OvrMangaroll {
 		~Manga(void);
 		void Draw(const Matrix4f&);
 		void AddPage(Page *page);
-		void Update(float angle);
+		void Update(float angle, bool onlyVisual = false);
 		int GetProgress(void);
 		int GetCount(void);
 		String Name;
+		bool Selectionable;
 	private:
 		GlProgram _Prog;
 		int _Count;

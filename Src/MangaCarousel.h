@@ -5,6 +5,7 @@
 #include "Input.h"
 #include "SceneView.h"
 #include "Manga.h"
+#include "Fader.h"
 
 using namespace OVR;
 namespace OvrMangaroll {
@@ -27,6 +28,8 @@ namespace OvrMangaroll {
 		OvrSceneView Scene;
 		Manga *CurrentManga;
 		Manga *NextManga;
+		void MoveOut(void);
+		void MoveIn(void);
 	private:
 		GlProgram *_Prog;
 		ovrMatrix4f _CenterEyeViewMatrix;
@@ -34,6 +37,8 @@ namespace OvrMangaroll {
 		Vector3f _PrevLookAt;
 		float _Angle;
 		float _LastPress;
+		SineFader _Fader;
+		bool _Operatable;
 	};
 
 

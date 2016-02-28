@@ -50,7 +50,7 @@ namespace OvrMangaroll {
 		return _Count;
 	}
 
-	void Manga::Update(float angle) {
+	void Manga::Update(float angle, bool onlyVisual) {
 		UpdateModel();
 
 		Page *ref = _First;
@@ -61,8 +61,8 @@ namespace OvrMangaroll {
 		int i = 0;
 		if(_First != NULL) {
 			do {
-				ref->Update(angle);
-				if(!electionFinished && ref->IsTarget(angle)) {
+				ref->Update(angle, onlyVisual);
+				if (Selectionable && !electionFinished && ref->IsTarget(angle)) {
 					selectionCandidate = ref;
 					selectionIndex = i;
 					if(_Selection == ref) {

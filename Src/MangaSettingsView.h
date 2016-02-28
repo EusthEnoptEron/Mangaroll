@@ -33,6 +33,10 @@ namespace OvrMangaroll {
 
 
 	private:
+		void ShowGUI(void);
+		void HideGUI(void);
+		void UpdateMenuState(void);
+
 		Mangaroll *_Mangaroll;
 
 		UIMenu *_Menu;
@@ -48,5 +52,6 @@ namespace OvrMangaroll {
 		UISlider *_ContrastSlider;
 		UISlider *_BrightnessSlider;
 
+		SineFader _Fader;
 	};
 }

@@ -3,6 +3,7 @@
 #include "GLES3\gl3_loader.h"
 #include "DefaultComponent.h"
 #include "VRMenuMgr.h"
+#include "Helpers.h"
 
 namespace OvrMangaroll {
 
@@ -48,6 +49,7 @@ namespace OvrMangaroll {
 		, _GammaSlider(NULL)
 		, _ContrastSlider(NULL)
 		, _BrightnessSlider(NULL)
+		, _Fader(0)
 	{
 	}
 
@@ -58,24 +60,18 @@ namespace OvrMangaroll {
 	bool MangaSettingsView::OnKeyEvent(const int keyCode, const int repeatCount, const KeyEventType eventType) {
 		if (keyCode == OVR_KEY_BACK && eventType == KeyEventType::KEY_EVENT_SHORT_PRESS) {
 			if (_Menu->IsOpen()) {
-				_Mangaroll->GetGuiSys().GetGazeCursor().HideCursor();
-				_Menu->Close();
+				HideGUI();
 			}
 			else {
-				_Mangaroll->GetGuiSys().GetGazeCursor().ShowCursor();
-				_Menu->Open();
-				_Menu->GetVRMenu()->RepositionMenu(GetEyeViewMatrix(0));
-				_ProgressBar->SetProgress(_Mangaroll->CurrentManga.GetProgress() / (_Mangaroll->CurrentManga.GetCount() - 1.0f)  );
-				
-				
-				_PageLabel->SetText(String::Format("Page %d", _Mangaroll->CurrentManga.GetProgress() + 1));
-				_TitleLabel->SetText(_Mangaroll->CurrentManga.Name);
+				ShowGUI();
 			}
 			return true;
 		}
 		return false;
 	}
 	Matrix4f MangaSettingsView::Frame(const VrFrame & vrFrame) {		
+		UpdateMenuState();
+
 		return _Mangaroll->Carousel.Frame(vrFrame);
 	}
 	Matrix4f MangaSettingsView::GetEyeViewMatrix(const int eye) const {
@@ -96,11 +92,12 @@ namespace OvrMangaroll {
 		OvrGuiSys &gui = _Mangaroll->GetGuiSys();
 		_Menu = new UIMenu(gui);
 		_Menu->Create("MangaMenu");
-		_Menu->SetFlags(VRMENU_FLAG_PLACE_ON_HORIZON);
+		_Menu->SetFlags(VRMenuFlags_t(VRMENU_FLAG_PLACE_ON_HORIZON) | VRMENU_FLAG_SHORT_PRESS_HANDLED_BY_APP);
 
 		_CenterContainer = new UIContainer(gui);
 		_CenterContainer->AddToMenu(_Menu);
 		_CenterContainer->SetLocalPose(forward, Vector3f(0, 0, -.9f));
+		_CenterContainer->SetColor(Vector4f(1, 1, 1, 0.5f));
 
 		_TitleLabel = new UILabel(gui);
 		_TitleLabel->AddToMenu(_Menu, _CenterContainer);
@@ -160,5 +157,50 @@ namespace OvrMangaroll {
 		_Menu->Close();
 
 	}
+
+	void MangaSettingsView::UpdateMenuState(void) {
+		
+		if (_Fader.GetFadeState() != Fader::FADE_NONE) {
+			Fader::eFadeState prevState = _Fader.GetFadeState();
+
+			if (_Fader.GetFadeState() == Fader::FADE_IN && !_Menu->IsOpen()) {
+				// We're fading in - show menu
+				_Menu->Open();
+			}
+
+			_Fader.Update(3, Time::Delta);
+
+			if (_Fader.GetFadeState() == Fader::FADE_NONE && prevState == Fader::FADE_OUT) {
+				// We're done - close menu
+				_Menu->Close();
+			}
+
+			// Update visual representation
+			_CenterContainer->SetColor(Vector4f(_Fader.GetFadeAlpha()));
+
+			Vector3f pos = _CenterContainer->GetLocalPosition();
+			_CenterContainer->SetLocalPosition(Vector3f(pos.x, (1 - _Fader.GetFadeAlpha()) * -0.05f, pos.z));
+		}
+	}
+
+	void MangaSettingsView::ShowGUI(void) {
+		// Update values
+		_Menu->GetVRMenu()->RepositionMenu(GetEyeViewMatrix(0));
+		_ProgressBar->SetProgress(_Mangaroll->CurrentManga.GetProgress() / (_Mangaroll->CurrentManga.GetCount() - 1.0f));
+		_PageLabel->SetText(String::Format("Page %d", _Mangaroll->CurrentManga.GetProgress() + 1));
+		_TitleLabel->SetText(_Mangaroll->CurrentManga.Name);
+
+
+		_Fader.StartFadeIn();
+		_Mangaroll->Carousel.MoveOut();
+		_Mangaroll->GetGuiSys().GetGazeCursor().ShowCursor();
+	}
+
+	void MangaSettingsView::HideGUI(void) {
+		_Fader.StartFadeOut();
+		_Mangaroll->Carousel.MoveIn();
+		_Mangaroll->GetGuiSys().GetGazeCursor().HideCursor();
+	}
+
 
 }

@@ -15,16 +15,18 @@ namespace OvrMangaroll {
 		return  a;
 	}
 
-	MangaCarousel::MangaCarousel(Mangaroll *app) 
+	MangaCarousel::MangaCarousel(Mangaroll *app)
 		: Scene()
 		, CurrentManga(NULL)
 		, NextManga(NULL)
 		, _Prog(NULL)
 		, _CenterEyeViewMatrix()
-		, _Mangaroll (app)
+		, _Mangaroll(app)
 		, _PrevLookAt(0, 0, -1.0f)
 		, _Angle(0)
 		, _LastPress(0)
+		, _Fader(1)
+		, _Operatable(true)
 	{
 	}
 
@@ -56,17 +58,21 @@ namespace OvrMangaroll {
 
 		_PrevLookAt = HMD::Direction;
 
-		//WARN("%.2f", _Angle);
-		if (vrFrame.Input.buttonState & BUTTON_TOUCH_SINGLE) {
-			AppState::Guide = (GuideType)((AppState::Guide + 1) % 3);
-			_LastPress = Time::Elapsed;
+		if (_Operatable) {
+			// Only update this when operatable
+			if (vrFrame.Input.buttonState & BUTTON_TOUCH_SINGLE) {
+				AppState::Guide = (GuideType)((AppState::Guide + 1) % 3);
+				_LastPress = Time::Elapsed;
+			}
 		}
 
 		if (CurrentManga != NULL) {
-			CurrentManga->Update(_Angle);
+			CurrentManga->Selectionable = _Operatable;
+			CurrentManga->Update(_Angle, !_Operatable);
 		}
 
 		Scene.Frame(vrFrame, _Mangaroll->app->GetHeadModelParms());
+		_Fader.Update(3, Time::Delta);
 
 		return _CenterEyeViewMatrix;
 	}
@@ -90,7 +96,7 @@ namespace OvrMangaroll {
 			glUniformMatrix4fv(_Prog->uView, 1, GL_TRUE, eyeViewMatrix.M[0]);
 			glUniformMatrix4fv(_Prog->uProjection, 1, GL_TRUE, eyeProjectionMatrix.M[0]);
 
-			CurrentManga->Draw(Matrix4f::Identity());
+			CurrentManga->Draw(Matrix4f::Scaling((1-_Fader.GetFadeAlpha()) + 1));
 		}
 
 		glBindVertexArray(0);
@@ -107,4 +113,15 @@ namespace OvrMangaroll {
 		CurrentManga = manga;
 	}
 
+	void MangaCarousel::MoveOut(void) {
+		_Operatable = false;
+
+		_Fader.StartFadeOut();
+	}
+
+	void MangaCarousel::MoveIn(void) {
+		_Operatable = true;
+
+		_Fader.StartFadeIn();
+	}
 }
