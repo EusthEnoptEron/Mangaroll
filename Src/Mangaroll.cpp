@@ -64,6 +64,10 @@ void Mangaroll::Configure( ovrSettings & settings )
 {
 	settings.PerformanceParms.CpuLevel = 2;
 	settings.PerformanceParms.GpuLevel = 2;
+
+	settings.EyeBufferParms.colorFormat = COLOR_8888;
+	settings.EyeBufferParms.multisamples = 2;
+
 }
 
 void Mangaroll::OneTimeInit( const char * fromPackage, const char * launchIntentJSON, const char * launchIntentURI )

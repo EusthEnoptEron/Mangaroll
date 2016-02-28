@@ -34,9 +34,15 @@ namespace OvrMangaroll {
 
 	void MangaCarousel::OneTimeInit(const char * launchIntent) {
 		_Prog = ShaderManager::Instance()->Get(PAGE_SHADER_NAME);
+
+		const char * scenePath = "assets/stars.ovrscene";
+
+		MaterialParms materialParms;
+		materialParms.UseSrgbTextureFormats = false;
+		Scene.LoadWorldModelFromApplicationPackage(scenePath, materialParms);
+		Scene.SetYawOffset(-Mathf::Pi * 0.5f);
 	}
 	void MangaCarousel::OneTimeShutdown(){
-
 	}
 
 	Matrix4f MangaCarousel::Frame(const VrFrame & vrFrame){
@@ -76,10 +82,8 @@ namespace OvrMangaroll {
 	Matrix4f MangaCarousel::DrawEyeView(const int eye, const float fovDegreesX, const float fovDegreesY, ovrFrameParms & frameParms) {
 		const Matrix4f eyeViewMatrix = GetEyeViewMatrix(eye);
 		const Matrix4f eyeProjectionMatrix = GetEyeProjectionMatrix(eye, fovDegreesX, fovDegreesY);
-		const Matrix4f eyeViewProjection = eyeProjectionMatrix * eyeViewMatrix;
+		const Matrix4f eyeViewProjection = Scene.DrawEyeView(eye, fovDegreesX, fovDegreesY);
 
-		glClearColor(.5f, .5f, .5f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
 
 		if (CurrentManga != NULL) {
 			glUseProgram(_Prog->program);

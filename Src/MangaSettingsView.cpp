@@ -1,8 +1,39 @@
 #include "MangaSettingsView.h"
 #include "Mangaroll.h"
 #include "GLES3\gl3_loader.h"
+#include "DefaultComponent.h"
+#include "VRMenuMgr.h"
 
 namespace OvrMangaroll {
+
+	class GazeUpdaterComponent : public VRMenuComponent {
+	public:
+
+		GazeUpdaterComponent() : VRMenuComponent(VRMenuEventFlags_t(VRMENU_EVENT_FOCUS_GAINED) | VRMENU_EVENT_FOCUS_LOST | VRMENU_EVENT_FRAME_UPDATE) {
+
+		}
+	private:
+
+		eMsgStatus OnEvent_Impl(OvrGuiSys & guiSys, VrFrame const & vrFrame,
+			VRMenuObject * self, VRMenuEvent const & event) {
+			switch (event.EventType) {
+			case VRMENU_EVENT_FOCUS_GAINED:
+				guiSys.GetGazeCursor().ForceDistance(event.HitResult.t, eGazeCursorStateType::CURSOR_STATE_HILIGHT);
+				return eMsgStatus::MSG_STATUS_CONSUMED;
+
+				break;
+			case VRMENU_EVENT_FOCUS_LOST:
+				return eMsgStatus::MSG_STATUS_CONSUMED;
+				break;
+			default:
+				return eMsgStatus::MSG_STATUS_ALIVE;
+
+				break;
+			}
+
+		}
+
+	};
 
 	MangaSettingsView::MangaSettingsView(Mangaroll *app) : 
 		View("MangaSettingsView")
@@ -44,7 +75,7 @@ namespace OvrMangaroll {
 		}
 		return false;
 	}
-	Matrix4f MangaSettingsView::Frame(const VrFrame & vrFrame) {
+	Matrix4f MangaSettingsView::Frame(const VrFrame & vrFrame) {		
 		return _Mangaroll->Carousel.Frame(vrFrame);
 	}
 	Matrix4f MangaSettingsView::GetEyeViewMatrix(const int eye) const {
@@ -70,7 +101,7 @@ namespace OvrMangaroll {
 		_CenterContainer = new UIContainer(gui);
 		_CenterContainer->AddToMenu(_Menu);
 		_CenterContainer->SetLocalPose(forward, Vector3f(0, 0, -.9f));
-		
+
 		_TitleLabel = new UILabel(gui);
 		_TitleLabel->AddToMenu(_Menu, _CenterContainer);
 		// It's unknown what these parms actually do... but well, it works. "alpha" seems to control the thickness of the outline
@@ -86,6 +117,10 @@ namespace OvrMangaroll {
 		_PageLabel->SetFontScale(0.5f);
 		_PageLabel->SetText("");
 
+		GazeUpdaterComponent *component = new GazeUpdaterComponent();
+		//component->HandlesEvent(VRMenuEventFlags_t(VRMENU_EVENT_FOCUS_GAINED) | VRMENU_EVENT_FOCUS_LOST | VRMENU_EVENT_FRAME_UPDATE);
+		_CenterContainer->AddComponent(component);
+
 		UITexture *texture = new UITexture();
 		texture->LoadTextureFromApplicationPackage("assets/progress_bg.png");
 
@@ -95,6 +130,7 @@ namespace OvrMangaroll {
 		ProgressBar->SetLocalPose(forward, Vector3f(0, -0.05f, 0));
 		
 		_ProgressBar = new UIProgressBar(gui);
+		
 		//_ProgressBar->AddToMenu(_Menu, true, true, _CenterContainer);
 		//_ProgressBar->SetLocalPose(forward, Vector3f(0, 0, 0));
 		//_ProgressBar->SetColor(Vector4f(1, 1, 1, 1));
@@ -107,6 +143,8 @@ namespace OvrMangaroll {
 		_GammaSlider->AddCells(10, 0, 0);
 		_GammaSlider->SetLocalPose(forward, Vector3f(0, 0, 0));*/
 		//_GammaSlider->SetColor(Vector4f(1, 1, 1, 1));
+
+		//gui.GetGazeCursor().UpdateDistance(0.7f, eGazeCursorStateType::CURSOR_STATE_NORMAL);
 	}
 
 	void MangaSettingsView::OneTimeShutdown() {
@@ -122,4 +160,5 @@ namespace OvrMangaroll {
 		_Menu->Close();
 
 	}
+
 }
