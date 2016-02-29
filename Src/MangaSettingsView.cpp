@@ -71,6 +71,7 @@ namespace OvrMangaroll {
 	MangaSettingsView::MangaSettingsView(Mangaroll *app) : 
 		View("MangaSettingsView")
 		, _Mangaroll(app)
+		, _CloseRequested(false)
 		, _Menu(NULL)
 		, _CenterContainer(NULL)
 		, _LeftContainer(NULL)
@@ -98,7 +99,7 @@ namespace OvrMangaroll {
 	bool MangaSettingsView::OnKeyEvent(const int keyCode, const int repeatCount, const KeyEventType eventType) {
 		if (keyCode == OVR_KEY_BACK && eventType == KeyEventType::KEY_EVENT_SHORT_PRESS) {
 			if (_Menu->IsOpen()) {
-				HideGUI();
+				_Mangaroll->SelectManga();
 			}
 			else {
 				ShowGUI();
@@ -253,14 +254,14 @@ namespace OvrMangaroll {
 	}
 
 	void MangaSettingsView::OnOpen() {
+		_CloseRequested = false; // We're only just starting
 		CurViewState = eViewState::VIEWSTATE_OPEN;
 		
 	}
 	void MangaSettingsView::OnClose() {
-		CurViewState = eViewState::VIEWSTATE_CLOSED;
-
-		_Menu->Close();
-
+		_CloseRequested = true;
+		//CurViewState = eViewState::VIEWSTATE_CLOSED;
+		HideGUI();
 	}
 
 	void MangaSettingsView::UpdateMenuState(void) {
@@ -278,6 +279,10 @@ namespace OvrMangaroll {
 			if (_Fader.GetFadeState() == Fader::FADE_NONE && prevState == Fader::FADE_OUT) {
 				// We're done - close menu
 				_Menu->Close();
+
+				if (_CloseRequested) {
+					CurViewState = eViewState::VIEWSTATE_CLOSED;
+				}
 			}
 
 			// Update visual representation
@@ -303,14 +308,10 @@ namespace OvrMangaroll {
 
 
 		_Fader.StartFadeIn();
-		_Mangaroll->Carousel.MoveOut();
-		_Mangaroll->GetGuiSys().GetGazeCursor().ShowCursor();
 	}
 
 	void MangaSettingsView::HideGUI(void) {
 		_Fader.StartFadeOut();
-		_Mangaroll->Carousel.MoveIn();
-		_Mangaroll->GetGuiSys().GetGazeCursor().HideCursor();
 	}
 
 

@@ -16,6 +16,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="projects\android\build\outputs\lint-results-release-fatal.html" />
+    <None Include="assets\MangaPage.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="assets\MangaPage.frag">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Mangaroll.h">
@@ -57,6 +63,9 @@
     <ClInclude Include="Src\View.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Src\MangaSelectionView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Mangaroll.cpp">
@@ -90,6 +99,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Src\View.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\MangaSelectionView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

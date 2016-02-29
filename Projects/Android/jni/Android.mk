@@ -23,6 +23,7 @@ LOCAL_SRC_FILES			:= ../../../Src/Mangaroll.cpp \
                            ../../../Src/ShaderManager.cpp \
                            ../../../Src/View.cpp \
                            ../../../Src/ViewManager.cpp \
+                           ../../../Src/MangaSelectionView.cpp \
                            ../../../Src/OVR_TurboJpeg.cpp
 LOCAL_STATIC_LIBRARIES	:= vrsound vrmodel vrlocale vrgui vrappframework systemutils libovrkernel jpeg stbs
 LOCAL_SHARED_LIBRARIES	:= vrapi

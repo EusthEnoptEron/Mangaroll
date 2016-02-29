@@ -26,6 +26,7 @@ Copyright   :   Copyright 2014 Oculus VR, LLC. All Rights reserved.
 #include "MangaCarousel.h"
 #include "Manga.h"
 #include "MangaSettingsView.h"
+#include "MangaSelectionView.h"
 
 using namespace OVR;
 namespace OvrMangaroll
@@ -44,11 +45,14 @@ public:
 	virtual OVR::Matrix4f Frame( const OVR::VrFrame & vrFrame );
 	virtual OVR::Matrix4f DrawEyeView( const int eye, const float fovDegreesX, const float fovDegreesY, ovrFrameParms & frameParms );
 
+	void SelectManga();
+
 	class ovrLocale &	GetLocale() { return *Locale; }
 	OvrGuiSys &GetGuiSys(void);
 	Manga CurrentManga;
 	MangaCarousel Carousel;
 	MangaSettingsView MangaSettingsMenu;
+	MangaSelectionView MangaSelectionMenu;
 private:
 	ovrSoundEffectContext * SoundEffectContext;
 	OvrGuiSys::SoundEffectPlayer * SoundEffectPlayer;
@@ -57,6 +61,7 @@ private:
 	ovrMatrix4f			CenterEyeViewMatrix;
 	ViewManager ViewMgr;
 	double _LastPress;
+	bool _MenuOpen;
 };
 
 } // namespace OvrTemplateApp

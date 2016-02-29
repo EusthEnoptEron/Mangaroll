@@ -46,11 +46,13 @@ Mangaroll::Mangaroll()
 	: CurrentManga()
 	, Carousel(this)
 	, MangaSettingsMenu(this)
+	, MangaSelectionMenu(*this)
 	, SoundEffectContext( NULL )
 	, SoundEffectPlayer( NULL )
 	, GuiSys( OvrGuiSys::Create() )
 	, Locale( NULL )
 	, ViewMgr()
+	, _MenuOpen(false)
 {
 	CenterEyeViewMatrix = ovrMatrix4f_CreateIdentity();
 }
@@ -89,8 +91,10 @@ void Mangaroll::OneTimeInit( const char * fromPackage, const char * launchIntent
 
 	Carousel.OneTimeInit(launchIntentURI);
 	MangaSettingsMenu.OneTimeInit(launchIntentURI);
+	MangaSelectionMenu.OneTimeInit(launchIntentURI);
 
 	ViewMgr.AddView(&MangaSettingsMenu);
+	ViewMgr.AddView(&MangaSelectionMenu);
 
 	// --- LOAD MANGA PAGES ---
 	const OvrStoragePaths & paths = app->GetStoragePaths();
@@ -132,6 +136,9 @@ void Mangaroll::OneTimeInit( const char * fromPackage, const char * launchIntent
 
 }
 
+void Mangaroll::SelectManga() {
+	ViewMgr.OpenView(MangaSelectionMenu);
+}
 
 void Mangaroll::OneTimeShutdown()
 {
@@ -169,6 +176,19 @@ Matrix4f Mangaroll::Frame( const VrFrame & vrFrame )
 	Time::Elapsed = vrapi_GetTimeInSeconds();
 	Frame::Current = &vrFrame;
 	HMD::Direction = lookAt;
+
+	if (GetGuiSys().IsAnyMenuOpen() != _MenuOpen) {
+		_MenuOpen = !_MenuOpen;
+
+		if (_MenuOpen) {
+			GetGuiSys().GetGazeCursor().ShowCursor();
+			Carousel.MoveOut();
+		}
+		else {
+			GetGuiSys().GetGazeCursor().HideCursor();
+			Carousel.MoveIn();
+		}
+	}
 
 	// FRAME STEPS
 	CenterEyeViewMatrix = ViewMgr.Frame(vrFrame);

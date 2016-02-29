@@ -87,20 +87,20 @@ namespace OvrMangaroll {
 	{
 	public:
 		MangaSettingsView(Mangaroll *app);
-		~MangaSettingsView();
+		virtual ~MangaSettingsView();
 
 
-		bool 		OnKeyEvent(const int keyCode, const int repeatCount, const KeyEventType eventType) ;
-		Matrix4f 	Frame(const VrFrame & vrFrame) ;
-		Matrix4f	GetEyeViewMatrix(const int eye) const ;
-		Matrix4f	GetEyeProjectionMatrix(const int eye, const float fovDegreesX, const float fovDegreesY) const ;
-		Matrix4f 	DrawEyeView(const int eye, const float fovDegreesX, const float fovDegreesY, ovrFrameParms & frameParms) ;
+		virtual bool 		OnKeyEvent(const int keyCode, const int repeatCount, const KeyEventType eventType);
+		virtual Matrix4f 	Frame(const VrFrame & vrFrame);
+		virtual Matrix4f	GetEyeViewMatrix(const int eye) const;
+		virtual Matrix4f	GetEyeProjectionMatrix(const int eye, const float fovDegreesX, const float fovDegreesY) const;
+		virtual Matrix4f 	DrawEyeView(const int eye, const float fovDegreesX, const float fovDegreesY, ovrFrameParms & frameParms);
 
-		void 		OneTimeInit(const char * launchIntent) ;
-		void		OneTimeShutdown() ;
+		virtual void 		OneTimeInit(const char * launchIntent);
+		virtual void		OneTimeShutdown();
 
-		void 		OnOpen() ;
-		void 		OnClose() ;
+		virtual void 		OnOpen();
+		virtual void 		OnClose();
 		void SetPageProgress(float);
 
 	private:
@@ -109,6 +109,7 @@ namespace OvrMangaroll {
 		void UpdateMenuState(void);
 
 		Mangaroll *_Mangaroll;
+		bool _CloseRequested;
 
 		UIMenu *_Menu;
 		UIContainer *_CenterContainer;
