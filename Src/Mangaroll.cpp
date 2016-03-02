@@ -107,6 +107,12 @@ void Mangaroll::SelectManga() {
 	ViewMgr.OpenView(MangaSelectionMenu);
 }
 
+void Mangaroll::ShowManga(Manga *manga) {
+	CurrentManga = manga;
+	Carousel.SetManga(manga);
+	ViewMgr.OpenView(MangaSettingsMenu);
+}
+
 void Mangaroll::OneTimeShutdown()
 {
 	delete SoundEffectPlayer;

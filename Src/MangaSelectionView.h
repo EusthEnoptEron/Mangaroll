@@ -17,6 +17,24 @@ namespace OvrMangaroll {
 	class Manga;
 	class MangaSelectorComponent;
 
+
+	class MangaPanelComponent : public VRMenuComponent {
+	public:
+		MangaPanelComponent(OvrGuiSys &guiSys);
+		virtual ~MangaPanelComponent() { }
+		void AddToMenu(UIMenu *menu, UIObject *parent = NULL);
+		MangaSelectorComponent *Selector;
+		Manga *_Manga;
+	private:
+		virtual eMsgStatus OnEvent_Impl(OvrGuiSys & guiSys, VrFrame const & vrFrame,
+			VRMenuObject * self, VRMenuEvent const & event);
+		UIMenu *_Menu;
+		UIObject *_Parent;
+		OvrGuiSys &_Gui;
+		bool _Focused;
+
+	};
+
 	class MangaPanel : public UIObject {
 	public:
 		MangaPanel(OvrGuiSys &guiSys);
@@ -32,21 +50,10 @@ namespace OvrMangaroll {
 		Manga *_Manga;
 		void Init(void);
 		UIImage *_Background;
+		UILabel *_Title;
+		MangaPanelComponent *_Component;
 	};
 
-	class MangaPanelComponent : public VRMenuComponent {
-	public:
-		MangaPanelComponent(OvrGuiSys &guiSys);
-		virtual ~MangaPanelComponent() { }
-		void AddToMenu(UIMenu *menu, UIObject *parent = NULL);
-	private:
-		virtual eMsgStatus OnEvent_Impl(OvrGuiSys & guiSys, VrFrame const & vrFrame,
-			VRMenuObject * self, VRMenuEvent const & event);
-		UIMenu *_Menu;
-		UIObject *_Parent;
-		OvrGuiSys &_Gui;
-
-	};
 
 	class MangaSelectorComponent : public VRMenuComponent {
 	public:
@@ -59,6 +66,8 @@ namespace OvrMangaroll {
 			this->_Callback = cb;
 			this->_CallbackObject = obj;
 		}
+
+		void SelectManga(Manga *manga);
 		static int const NUM_PANELS = 10;
 		// Number of visible panels on either side
 		static int const NUM_VISIBLE_PANELS = 3;
@@ -108,6 +117,7 @@ namespace OvrMangaroll {
 		virtual Matrix4f	GetEyeProjectionMatrix(const int eye, const float fovDegreesX, const float fovDegreesY) const;
 		virtual Matrix4f 	DrawEyeView(const int eye, const float fovDegreesX, const float fovDegreesY, ovrFrameParms & frameParms);
 
+		void OnSelectManga(Manga *);
 
 	private:
 		Mangaroll &_Mangaroll;

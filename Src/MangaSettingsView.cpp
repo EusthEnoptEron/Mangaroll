@@ -247,7 +247,7 @@ namespace OvrMangaroll {
 		int newPage = _ProgressComponent.GetMax() * progress;
 		
 		if (prevPage != newPage)
-			_Mangaroll->CurrentManga.SetProgress(progress * _Mangaroll->CurrentManga.GetCount());
+			_Mangaroll->CurrentManga->SetProgress(progress * _Mangaroll->CurrentManga->GetCount());
 	}
 
 	void MangaSettingsView::OneTimeShutdown() {
@@ -301,10 +301,10 @@ namespace OvrMangaroll {
 	void MangaSettingsView::ShowGUI(void) {
 		// Update values
 		_Menu->GetVRMenu()->RepositionMenu(GetEyeViewMatrix(0));
-		_ProgressComponent.SetMax(_Mangaroll->CurrentManga.GetCount());
-		_ProgressComponent.SetProgress(_Mangaroll->CurrentManga.GetProgress() / (_Mangaroll->CurrentManga.GetCount() - 1.0f));
-		_PageLabel->SetText(String::Format("Page %d", _Mangaroll->CurrentManga.GetProgress() + 1));
-		_TitleLabel->SetText(_Mangaroll->CurrentManga.Name);
+		_ProgressComponent.SetMax(_Mangaroll->CurrentManga->GetCount());
+		_ProgressComponent.SetProgress(_Mangaroll->CurrentManga->GetProgress() / (_Mangaroll->CurrentManga->GetCount() - 1.0f));
+		_PageLabel->SetText(String::Format("Page %d", _Mangaroll->CurrentManga->GetProgress() + 1));
+		_TitleLabel->SetText(_Mangaroll->CurrentManga->Name);
 
 
 		_Fader.StartFadeIn();
