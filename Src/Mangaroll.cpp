@@ -96,43 +96,10 @@ void Mangaroll::OneTimeInit( const char * fromPackage, const char * launchIntent
 	ViewMgr.AddView(&MangaSettingsMenu);
 	ViewMgr.AddView(&MangaSelectionMenu);
 
-	// --- LOAD MANGA PAGES ---
-	const OvrStoragePaths & paths = app->GetStoragePaths();
-
-	Array<String> SearchPaths;
-	paths.PushBackSearchPathIfValid( EST_SECONDARY_EXTERNAL_STORAGE, EFT_ROOT, "RetailMedia/", SearchPaths );
-	paths.PushBackSearchPathIfValid( EST_SECONDARY_EXTERNAL_STORAGE, EFT_ROOT, "", SearchPaths );
-	paths.PushBackSearchPathIfValid( EST_PRIMARY_EXTERNAL_STORAGE, EFT_ROOT, "RetailMedia/", SearchPaths );
-	paths.PushBackSearchPathIfValid( EST_PRIMARY_EXTERNAL_STORAGE, EFT_ROOT, "", SearchPaths );
-
-	StringHash<String> results = RelativeDirectoryFileList(SearchPaths, "Manga/");
-	String mangaPath;
-
-	for(StringHash<String>::Iterator it = results.Begin(); it != results.End(); ++it) {
-		if(it->Second.GetCharAt(it->Second.GetLengthI()-1) == '/') {
-			mangaPath = GetFullPath(SearchPaths, it->Second);
-			break;
-		}
-	}
-
-	Array<String> images = DirectoryFileList(mangaPath.ToCStr());
-	
-	CurrentManga.Name = ExtractDirectory(mangaPath);
-	for(int i = 0; i < images.GetSizeI(); i++) {
-		//WARN("%s -> %s", images[i].ToCStr(), images[i].GetExtension().ToCStr());
-		if(images[i].GetExtension() == ".jpg") {
-			CurrentManga.AddPage(new LocalPage(images[i]));
-		}
-	}
-
-	Carousel.SetManga(&CurrentManga);
-
-	//GuiSys->GetGazeCursor().ShowCursor();
-
 	Time::Delta = 0;
 	Time::Elapsed = vrapi_GetTimeInSeconds();
 
-	ViewMgr.OpenView(MangaSettingsMenu);
+	ViewMgr.OpenView(MangaSelectionMenu);
 
 }
 
