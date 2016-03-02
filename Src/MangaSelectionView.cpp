@@ -1,6 +1,7 @@
 #include "MangaSelectionView.h"
 #include "Mangaroll.h"
 #include "Helpers.h"
+#include "DefaultComponent.h"
 
 namespace OvrMangaroll {
 
@@ -183,6 +184,7 @@ namespace OvrMangaroll {
 		_Title->AddFlags(VRMENUOBJECT_DONT_HIT_ALL);
 
 		_Component = new MangaPanelComponent(GuiSys);
+		AddComponent(new OvrDefaultComponent());
 		AddComponent(_Component);
 
 	}
@@ -191,7 +193,7 @@ namespace OvrMangaroll {
 
 	MangaPanelComponent::MangaPanelComponent(OvrGuiSys &guiSys)
 		: VRMenuComponent(
-		VRMenuEventFlags_t(VRMENU_EVENT_FRAME_UPDATE) | VRMENU_EVENT_FOCUS_GAINED | VRMENU_EVENT_FOCUS_LOST | VRMENU_EVENT_TOUCH_UP)
+		VRMenuEventFlags_t(VRMENU_EVENT_TOUCH_DOWN) | VRMENU_EVENT_FOCUS_GAINED | VRMENU_EVENT_FOCUS_LOST | VRMENU_EVENT_TOUCH_UP)
 		, Selector(NULL)
 		, _Manga(NULL)
 		, _Gui(guiSys)
@@ -205,22 +207,23 @@ namespace OvrMangaroll {
 
 		if (Selector != NULL && _Manga != NULL)  {
 			switch (event.EventType) {
-			case VRMENU_EVENT_FRAME_UPDATE:
+			case VRMENU_EVENT_TOUCH_DOWN:
+				_Touched = _Focused;
 				break;
 			case VRMENU_EVENT_FOCUS_GAINED:
 				_Focused = true;
-				self->SetLocalScale(Vector3f(1.2f));
-
 				break;
 
 			case VRMENU_EVENT_FOCUS_LOST:
 				_Focused = false;
-				self->SetLocalScale(Vector3f(1.0f));
-
+				_Touched = false;
 				break;
 			case VRMENU_EVENT_TOUCH_UP:
-				Selector->SelectManga(_Manga);
-				return MSG_STATUS_CONSUMED;
+				if (_Touched) {
+					Selector->SelectManga(_Manga);
+					_Touched = false;
+					return MSG_STATUS_CONSUMED;
+				}
 				break;
 
 			default:

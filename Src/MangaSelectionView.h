@@ -32,6 +32,7 @@ namespace OvrMangaroll {
 		UIObject *_Parent;
 		OvrGuiSys &_Gui;
 		bool _Focused;
+		bool _Touched;
 
 	};
 
