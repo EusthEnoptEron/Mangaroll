@@ -64,7 +64,7 @@ namespace OvrMangaroll {
 		
 		_Selector = new MangaSelectorComponent(gui);
 		_Selector->AddToMenu(_Menu, _SelectorContainer);
-		_SelectorContainer->SetLocalPosition(Vector3f(0, 0.3f, -1));
+		_SelectorContainer->SetLocalPosition(Vector3f(0, -0.3f, -1));
 		_Selector->SetOnSelectManga(OnSelectMangaLocal, this);
 
 
@@ -310,35 +310,28 @@ namespace OvrMangaroll {
 		}
 		LOG("I/DEBUG YEAH");
 		int y = 0;
-		int j = 0;
 		for (int i = minIndex; i <= maxIndex; i++) {
 			if (i >= 0 && i < _Mangas.GetSizeI()) {
 				LOG("I/DEBUG %d - %d (%d) PANELS: %d", minIndex, maxIndex, i, _Panels.GetSizeI());
-				if (i < startIndex) {
-					MangaPanel *panel = _Panels.Pop();
-					panel->SetManga(_Mangas[i]);
-					panel->SetVisible(true);
-					panel->RemoveFlags(VRMENUOBJECT_DONT_RENDER);
-					panel->SetColor(Vector4f(0, 1, 0, 1));
-					panel->Index = i;
-					_UsedPanels.InsertAt(j, panel);
-				}
-				else if (i > endIndex) {
-					MangaPanel *panel = _Panels.Pop();
-					panel->SetManga(_Mangas[i]);
-					panel->SetVisible(true);
-					panel->RemoveFlags(VRMENUOBJECT_DONT_RENDER);
-					panel->SetColor(Vector4f(0, 1, 0, 1));
 
+				if (i < startIndex || i > endIndex) {
+					MangaPanel *panel = _Panels.Pop();
+					panel->SetManga(_Mangas[i]);
+					panel->SetVisible(true);
 
 					panel->Index = i;
 					_UsedPanels.PushBack(panel);
 				}
 
-				_UsedPanels[i]->SetLocalPosition(Vector3f(0, _PanelHeight * -y, -Alg::Abs(_Index - i) / 5));
-				j++;
+				float diff = _UsedPanels[y]->Index - _Index;
+				float distance = Alg::Abs(diff);
+
+				_UsedPanels[y]->SetLocalPosition(Vector3f(0, 
+					_PanelHeight * -(diff), -distance / 5));
+				_UsedPanels[y]->SetColor(Vector4f(1, 1, 1, 1 - (distance / NUM_VISIBLE_PANELS)));
+
+				y++;
 			}
-			y++;
 		}
 	}
 
@@ -348,9 +341,9 @@ namespace OvrMangaroll {
 
 	void MangaSelectorComponent::UpdatePositions(void) {
 		// All right, now let's actually position those panels...
-		int baseIndex = ceil(_Index);
-		float progress = _Index - baseIndex;
-		_Container->SetLocalPosition(Vector3f(0, progress * _PanelHeight, 0));
+		//int baseIndex = ceil(_Index);
+		//float progress = _Index - baseIndex;
+		//_Container->SetLocalPosition(Vector3f(0, progress * _PanelHeight, 0));
 	}
 
 	void MangaSelectorComponent::SelectManga(Manga *manga) {
@@ -369,10 +362,10 @@ namespace OvrMangaroll {
 			_Speed = Alg::Lerp<float>(_Speed, 0, Time::Delta);
 
 			int anchor = round(_Index);
-			_Index = Alg::Lerp<float>(_Index, anchor, _Gravity * Time::Delta);
+			_Index = _Index + (anchor - _Index) * _Gravity * Time::Delta;// Alg::Lerp<float>(_Index, anchor, _Gravity * Time::Delta);
 
+			_Index = Alg::Clamp<float>(_Index, 0, _Mangas.GetSizeI() - 1);
 		}
-		_Index = Alg::Clamp<float>(_Index, 0, _Mangas.GetSizeI() - 1);
 		WARN("Index: %.2f", _Index);
 		RearrangePanels();
 		UpdatePositions();

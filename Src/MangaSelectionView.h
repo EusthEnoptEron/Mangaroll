@@ -71,7 +71,7 @@ namespace OvrMangaroll {
 		void SelectManga(Manga *manga);
 		static int const NUM_PANELS = 10;
 		// Number of visible panels on either side
-		static int const NUM_VISIBLE_PANELS = 3;
+		static int const NUM_VISIBLE_PANELS = 2;
 	private:
 		virtual eMsgStatus OnEvent_Impl(OvrGuiSys & guiSys, VrFrame const & vrFrame,
 			VRMenuObject * self, VRMenuEvent const & event);
