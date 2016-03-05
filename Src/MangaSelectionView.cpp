@@ -2,6 +2,8 @@
 #include "Mangaroll.h"
 #include "Helpers.h"
 #include "DefaultComponent.h"
+#include "Kernel\OVR_MemBuffer.h"
+#include "AsyncTexture.h"
 
 namespace OvrMangaroll {
 
@@ -13,6 +15,7 @@ namespace OvrMangaroll {
 		, _LocalSrcLabel(NULL)
 		, _RemoteSrcLabel(NULL)
 		, _Selector(NULL)
+		, _AsyncTex(NULL)
 	{
 
 	}
@@ -61,7 +64,15 @@ namespace OvrMangaroll {
 		WARN("[%.2f, %.2f, %.2f, %.2f]", r.Left, r.Top, r.Right, r.Bottom);
 
 		_RemoteSrcLabel->AlignTo(RectPosition::LEFT, _LocalSrcLabel, RectPosition::RIGHT);
+	
+		UIImage *testImage = new UIImage(gui);
+		testImage->AddToMenu(_Menu, _MainContainer);
+		testImage->SetLocalPosition(Vector3f(0.5f, 0, 0));
 		
+		// Load image d00d
+		_AsyncTex = new AsyncTexture("sdcard/Manga/Nagasarete_Airantou_v02[Raw]/na02_000.jpg", 1);
+		testImage->SetImage(0, SURFACE_TEXTURE_DIFFUSE, _AsyncTex->Display(), 100, 300);
+
 		_Selector = new MangaSelectorComponent(gui);
 		_Selector->AddToMenu(_Menu, _SelectorContainer);
 		_SelectorContainer->SetLocalPosition(Vector3f(0, -0.3f, -1));
@@ -123,6 +134,10 @@ namespace OvrMangaroll {
 		return false;
 	}
 	Matrix4f MangaSelectionView::Frame(const VrFrame & vrFrame) {
+		if (_AsyncTex != NULL) {
+			_AsyncTex->Update();
+		}
+		 
 		return _Mangaroll.Carousel.Frame(vrFrame);
 	}
 	Matrix4f MangaSelectionView::GetEyeViewMatrix(const int eye) const {
@@ -138,7 +153,10 @@ namespace OvrMangaroll {
 	//#######################################
 
 	MangaPanel::MangaPanel(OvrGuiSys &guiSys) 
-		: UIObject(guiSys) {
+		: UIObject(guiSys)
+	, _Cover(NULL) 
+	, _CoverTexture(NULL)
+	{
 
 	}
 
@@ -165,6 +183,29 @@ namespace OvrMangaroll {
 		_Manga = manga;
 		_Title->SetText(manga->Name);
 		_Component->_Manga = _Manga;
+		_Title->CalculateTextDimensions();
+		if (_CoverTexture == NULL) {
+			_CoverTexture = new UITexture();
+		}
+		else {
+			_CoverTexture->Free();
+		}
+
+		WARN("LOADING FILE...");
+
+		MemBufferFile buffer(manga->GetPage(0).GetPath().ToCStr());
+		MemBuffer mem = buffer.ToMemBuffer();
+		_CoverTexture->LoadTextureFromBuffer(manga->GetPage(0).GetPath().ToCStr(), mem);
+		mem.FreeData();
+		buffer.FreeData();
+		
+		WARN("LOADED FILE... %d", _CoverTexture->Width);
+
+		_Cover->SetImage(0, SURFACE_TEXTURE_DIFFUSE, *_CoverTexture, 40, 40.0f / _CoverTexture->Width * _CoverTexture->Height);
+		WARN("%.2f, %f", _Cover->GetWorldPosition().z, _Title->GetDimensions().x);
+		_Cover->AlignTo(RIGHT, _Title, LEFT);
+		_Cover->SetLocalPosition(_Cover->GetLocalPosition() + Vector3f(0, 0, 0.05f));
+
 	}
 
 	void MangaPanel::Init(void) {
@@ -174,15 +215,23 @@ namespace OvrMangaroll {
 		_Background = new UIImage(GuiSys);
 		_Background->AddToMenu(Menu, this);
 		_Background->SetImage(0, eSurfaceTextureType::SURFACE_TEXTURE_DIFFUSE, *_BGTexture, 300, 50);
-		_Background->SetMargin(UIRectf(50.0f));
+		_Background->SetMargin(UIRectf(60.0f));
+		_Background->SetColor(Vector4f(0, 0, 0, 0.5f));
+		_Background->SetPadding(UIRectf(10));
 
 		_Title = new UILabel(GuiSys);
 		_Title->AddToMenu(Menu, _Background);
 		_Title->SetText("");
 		_Title->SetTextOffset(Vector3f(0, 0, 0.04f));
-		_Title->SetFontScale(0.5f);
+		_Title->SetFontParms(VRMenuFontParms(true, true, false, false, true, 0.5f, 0.4f, 0.5));
 		_Title->AddFlags(VRMENUOBJECT_DONT_HIT_ALL);
-
+		_Title->SetMargin(UIRectf(50, 0, 0, 0));
+		_Title->CalculateTextDimensions();
+		
+		_Cover = new UIImage(GuiSys);
+		_Cover->AddToMenu(Menu, this);
+		_Cover->AddFlags(VRMENUOBJECT_DONT_HIT_ALL);
+		
 		_Component = new MangaPanelComponent(GuiSys);
 		AddComponent(new OvrDefaultComponent());
 		AddComponent(_Component);
@@ -289,16 +338,14 @@ namespace OvrMangaroll {
 
 	// Populates the list of elements correctly
 	void MangaSelectorComponent::RearrangePanels(void) {
-		int minIndex = _Index - NUM_VISIBLE_PANELS;
-		int maxIndex = _Index + NUM_VISIBLE_PANELS;
+		int minIndex = ceil(_Index - NUM_VISIBLE_PANELS);
+		int maxIndex = floor(_Index + NUM_VISIBLE_PANELS);
 		int startIndex = 1000;
 		int endIndex = -1000;
 		// Clean up
 		for (int i = _UsedPanels.GetSizeI() - 1; i >= 0; i--) {
 			if (_UsedPanels[i]->Index > maxIndex || _UsedPanels[i]->Index < minIndex) {
 				_UsedPanels[i]->SetVisible(false);
-				_UsedPanels[i]->AddFlags(VRMENUOBJECT_DONT_RENDER);
-				_UsedPanels[i]->SetColor(Vector4f(1, 0, 0, 1));
 
 				_Panels.PushBack(_UsedPanels[i]);
 				_UsedPanels.RemoveAt(i);
@@ -308,11 +355,11 @@ namespace OvrMangaroll {
 				endIndex = Alg::Max(endIndex, _UsedPanels[i]->Index);
 			}
 		}
-		LOG("I/DEBUG YEAH");
+		//LOG("I/DEBUG YEAH");
 		int y = 0;
 		for (int i = minIndex; i <= maxIndex; i++) {
 			if (i >= 0 && i < _Mangas.GetSizeI()) {
-				LOG("I/DEBUG %d - %d (%d) PANELS: %d", minIndex, maxIndex, i, _Panels.GetSizeI());
+				//LOG("I/DEBUG %d - %d (%d) PANELS: %d", minIndex, maxIndex, i, _Panels.GetSizeI());
 
 				if (i < startIndex || i > endIndex) {
 					MangaPanel *panel = _Panels.Pop();
@@ -366,27 +413,23 @@ namespace OvrMangaroll {
 
 			_Index = Alg::Clamp<float>(_Index, 0, _Mangas.GetSizeI() - 1);
 		}
-		WARN("Index: %.2f", _Index);
 		RearrangePanels();
 		UpdatePositions();
 	}
 
 	void MangaSelectorComponent::OnTouchDown(VrInput input) {
-		WARN("TOUCH");
 		_Speed = 0;
 		_LastTouch = input.touch;
 		_TouchStartTime = Time::Elapsed;
 		_IsTouching = true;
 	}
 	void MangaSelectorComponent::OnTouchUp(VrInput input) {
-		WARN("TOUCH UP");
 
 		float elapsed = (Time::Elapsed - _TouchStartTime) * 500;
 		_Speed = (input.touchRelative.y / -elapsed);
 		_IsTouching = false;
 	}
 	void MangaSelectorComponent::OnTouchMove(VrInput input) {
-		WARN("MOVE %.2f", _Index);
 		Vector2f diff = input.touch - _LastTouch;
 		_Index -= diff.y / 500;
 		_LastTouch = input.touch;

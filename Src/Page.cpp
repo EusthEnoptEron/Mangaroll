@@ -158,7 +158,7 @@ namespace OvrMangaroll {
 	void *LocalPage::LoadFile(Thread *thread, void *v) {
 		LocalPage *page = (LocalPage *)v;
 
-		MemBufferFile bufferFile = MemBufferFile( page->GetPath().ToCStr() );
+		MemBufferFile bufferFile( page->GetPath().ToCStr() );
 		MemBuffer fileBuffer = bufferFile.ToMemBuffer();
 		
 		page->ConsumeBuffer((unsigned char*)(fileBuffer.Buffer), fileBuffer.Length);

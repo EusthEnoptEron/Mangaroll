@@ -45,7 +45,7 @@
     <NMakeIncludeSearchPath>E:\Dev\Oculus\Mobile\LibOVRKernel\Src;E:\Dev\Oculus\Mobile\VrApi\Include;E:\Dev\Oculus\Mobile\VrAppFramework\Include;E:\Dev\Oculus\Mobile\VrAppSupport\VrSound\Include;E:\Dev\Oculus\Mobile\VrAppSupport\VrGUI\Src;E:\Dev\Oculus\Mobile\VrAppSupport\VrLocale\Src;E:\Dev\Oculus\Mobile\VrCapture\Include;E:\Dev\Oculus\Mobile\VrAppSupport\SystemUtils\Include;E:\Dev\Oculus\Mobile\VrAppSupport\MediaSurfacePlugin\Src;$(IncludePath);E:\Dev\Oculus\Mobile\1stParty\OpenGL_Loader\Include;E:\Dev\Oculus\Mobile\3rdParty\stb\src</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>E:\Dev\Oculus\Mobile\1stParty\OpenGL_Loader\Include</NMakeForcedIncludes>
     <SourcePath>E:\Dev\Oculus\Mobile\VrAppFramework\Src;$(SourcePath)</SourcePath>
-    <AdditionalOptions>/D lol NULL</AdditionalOptions>
+    <AdditionalOptions>/D lol /D NULL=0</AdditionalOptions>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <NMakeBuildCommandLine>cd Projects\Android &amp; build.bat</NMakeBuildCommandLine>
@@ -57,10 +57,12 @@
     <NMakeIncludeSearchPath>E:\Dev\Oculus\Mobile\LibOVRKernel\Src;E:\Dev\Oculus\Mobile\VrApi\Include;E:\Dev\Oculus\Mobile\VrAppFramework\Include;E:\Dev\Oculus\Mobile\VrAppSupport\VrSound\Include;E:\Dev\Oculus\Mobile\VrAppSupport\VrGUI\Src;E:\Dev\Oculus\Mobile\VrAppSupport\VrLocale\Src;E:\Dev\Oculus\Mobile\VrCapture\Include;E:\Dev\Oculus\Mobile\VrAppSupport\SystemUtils\Include;E:\Dev\Oculus\Mobile\VrAppSupport\MediaSurfacePlugin\Src;$(IncludePath);E:\Dev\Oculus\Mobile\1stParty\OpenGL_Loader\Include;E:\Dev\Oculus\Mobile\3rdParty\stb\src</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>E:\Dev\Oculus\Mobile\1stParty\OpenGL_Loader\Include</NMakeForcedIncludes>
     <SourcePath>E:\Dev\Oculus\Mobile\VrAppFramework\Src;$(SourcePath)</SourcePath>
+    <AdditionalOptions>/D lol /D NULL=0</AdditionalOptions>
   </PropertyGroup>
   <ItemDefinitionGroup>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Src\AsyncTexture.cpp" />
     <ClCompile Include="Src\Helpers.cpp" />
     <ClCompile Include="Src\Manga.cpp" />
     <ClCompile Include="Src\MangaCarousel.cpp" />
@@ -75,6 +77,7 @@
     <ClCompile Include="Src\ViewManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Src\AsyncTexture.h" />
     <ClInclude Include="Src\GlObject.h" />
     <ClInclude Include="Src\Helpers.h" />
     <ClInclude Include="Src\Manga.h" />

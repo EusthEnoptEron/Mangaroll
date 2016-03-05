@@ -8,6 +8,7 @@
 #include "UI\UITexture.h"
 #include "UI\UIImage.h"
 #include "VRMenuComponent.h"
+#include "AsyncTexture.h"
 
 using namespace OVR;
 namespace OvrMangaroll {
@@ -52,6 +53,8 @@ namespace OvrMangaroll {
 		void Init(void);
 		UIImage *_Background;
 		UILabel *_Title;
+		UIImage *_Cover;
+		UITexture *_CoverTexture;
 		MangaPanelComponent *_Component;
 	};
 
@@ -129,6 +132,7 @@ namespace OvrMangaroll {
 		UILabel *_RemoteSrcLabel;
 		MangaSelectorComponent *_Selector;
 		UIContainer *_SelectorContainer;
+		AsyncTexture *_AsyncTex;
 	};
 
 

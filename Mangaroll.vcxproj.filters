@@ -66,6 +66,9 @@
     <ClInclude Include="Src\MangaSelectionView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Src\AsyncTexture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Mangaroll.cpp">
@@ -102,6 +105,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Src\MangaSelectionView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\AsyncTexture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
