@@ -65,13 +65,13 @@ namespace OvrMangaroll {
 
 		_RemoteSrcLabel->AlignTo(RectPosition::LEFT, _LocalSrcLabel, RectPosition::RIGHT);
 	
-		UIImage *testImage = new UIImage(gui);
-		testImage->AddToMenu(_Menu, _MainContainer);
-		testImage->SetLocalPosition(Vector3f(0.5f, 0, 0));
-		
-		// Load image d00d
-		_AsyncTex = new AsyncTexture("sdcard/Manga/Nagasarete_Airantou_v02[Raw]/na02_000.jpg", 1);
-		testImage->SetImage(0, SURFACE_TEXTURE_DIFFUSE, _AsyncTex->Display(), 100, 300);
+		//UIImage *testImage = new UIImage(gui);
+		//testImage->AddToMenu(_Menu, _MainContainer);
+		//testImage->SetLocalPosition(Vector3f(0.5f, 0, 0));
+		//
+		//// Load image d00d
+		//_AsyncTex = new AsyncTexture("sdcard/Manga/Nagasarete_Airantou_v02[Raw]/na02_000.jpg", 1);
+		//testImage->SetImage(0, SURFACE_TEXTURE_DIFFUSE, _AsyncTex->Display(), 100, 300);
 
 		_Selector = new MangaSelectorComponent(gui);
 		_Selector->AddToMenu(_Menu, _SelectorContainer);

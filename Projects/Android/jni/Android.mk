@@ -28,6 +28,7 @@ LOCAL_SRC_FILES			:= ../../../Src/Mangaroll.cpp \
                            ../../../Src/OVR_TurboJpeg.cpp
 LOCAL_STATIC_LIBRARIES	:= vrsound vrmodel vrlocale vrgui vrappframework systemutils libovrkernel jpeg stbs
 LOCAL_SHARED_LIBRARIES	:= vrapi
+LOCAL_STATIC_LIBRARIES  += vrcapture
 
 include $(BUILD_SHARED_LIBRARY)
 
@@ -39,3 +40,5 @@ $(call import-module,VrAppSupport/VrGui/Projects/AndroidPrebuilt/jni)
 $(call import-module,VrAppSupport/VrLocale/Projects/AndroidPrebuilt/jni)
 $(call import-module,VrAppSupport/VrModel/Projects/AndroidPrebuilt/jni)
 $(call import-module,VrAppSupport/VrSound/Projects/AndroidPrebuilt/jni)
+
+include E:/Dev/Oculus/Mobile/VrCapture/Projects/Android/jni/Android.mk

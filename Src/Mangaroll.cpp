@@ -15,7 +15,7 @@ Copyright   :   Copyright 2014 Oculus VR, LLC. All Rights reserved.
 #include "Kernel/OVR_Hash.h"
 #include "Kernel/OVR_Types.h"
 #include "Helpers.h"
-
+#include <OVR_Capture.h>
 
 #if 0
 	#define GL( func )		func; EglCheckErrors();
@@ -64,16 +64,17 @@ Mangaroll::~Mangaroll()
 
 void Mangaroll::Configure( ovrSettings & settings )
 {
-	settings.PerformanceParms.CpuLevel = 2;
+	settings.PerformanceParms.CpuLevel = 0;
 	settings.PerformanceParms.GpuLevel = 2;
 
 	settings.EyeBufferParms.colorFormat = COLOR_8888;
 	settings.EyeBufferParms.multisamples = 2;
-
 }
 
 void Mangaroll::OneTimeInit( const char * fromPackage, const char * launchIntentJSON, const char * launchIntentURI )
 {
+	OVR::Capture::InitForRemoteCapture();
+
 	OVR_UNUSED( fromPackage );
 	OVR_UNUSED( launchIntentJSON );
 	OVR_UNUSED( launchIntentURI );
@@ -115,6 +116,7 @@ void Mangaroll::ShowManga(Manga *manga) {
 
 void Mangaroll::OneTimeShutdown()
 {
+	OVR::Capture::Shutdown();
 	delete SoundEffectPlayer;
 	SoundEffectPlayer = NULL;
 

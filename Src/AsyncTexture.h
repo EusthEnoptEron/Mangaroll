@@ -5,6 +5,8 @@
 #include "Kernel\OVR_Threads.h"
 #include "Kernel/OVR_Types.h"
 #include "GazeCursor.h"
+#include "Kernel\OVR_Array.h"
+#include "MessageQueue.h"
 
 using namespace OVR;
 
@@ -23,6 +25,9 @@ namespace OvrMangaroll {
 		TEXTURE_UPLOADED = 1 << 1
 	};
 
+	typedef void(*QueueCb)(void*);
+
+
 	class AsyncTexture {
 	public:
 		AsyncTexture(String path, int mipmapCount = 1);
@@ -32,8 +37,11 @@ namespace OvrMangaroll {
 		void Hide();
 		void Unload();
 		void Update();
-		eTextureState GetState();
-
+		eTextureState GetState() { return _State; }
+		eTextureState GetFutureState() { return _TargetState; }
+		int GetWidth() { return _Width; }
+		int GetHeight() { return _Height; }
+		GLenum GetTarget() { return GL_TEXTURE_2D; }
 		int MaxHeight;
 	private:
 		void GenerateTexture();
@@ -42,6 +50,7 @@ namespace OvrMangaroll {
 		void Loaded2Displayed();
 		void Displayed2Loaded();
 		void Loaded2Unloaded();
+
 
 		// # THREADS
 
@@ -81,6 +90,9 @@ namespace OvrMangaroll {
 
 		Thread *_LoadThread;
 		Thread *_UploadThread;
+		static ovrMessageQueue *S_Queue;
+		static Thread *S_WorkerThread;
+		static void *S_WorkerFn(Thread *, void *);
 	};
 
 }

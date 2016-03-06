@@ -4,9 +4,35 @@
 #include "stb_image.h"
 #include "ImageData.h"
 #include "Kernel\OVR_LogUtils.h"
+#include <ctime>
+#include <OVR_Capture.h>
+#include "Kernel\OVR_String_Utils.h"
 
 namespace OvrMangaroll {
+
 	PFNGLMAPBUFFEROESPROC glMapBuffer = (PFNGLMAPBUFFEROESPROC)eglGetProcAddress("glMapBufferOES");
+
+	void *AsyncTexture::S_WorkerFn(Thread *thread, void *) {
+		
+
+		while (!thread->GetExitFlag()) {
+			S_Queue->SleepUntilMessage();
+			const char *msg = S_Queue->GetNextMessage();
+			
+			QueueCb cb;
+			void *obj;
+			sscanf(msg, "call %p %p", &cb, obj);
+
+			cb(obj);
+		}
+		return NULL;
+	}
+
+
+	ovrMessageQueue *AsyncTexture::S_Queue = new ovrMessageQueue(20);
+	Thread *AsyncTexture::S_WorkerThread = new Thread(Thread::CreateParams(AsyncTexture::S_WorkerFn, NULL, 131072U, -1, Thread::ThreadState::Running, Thread::BelowNormalPriority));
+
+
 
 	AsyncTexture::AsyncTexture(String path, int mipmapCount)
 		: MaxHeight(2000)
@@ -73,22 +99,29 @@ namespace OvrMangaroll {
 		}
 
 		if (_ThreadEvents & TEXTURE_UPLOADED) {
+			OVR_CAPTURE_CPU_ZONE(Texture_Upload);
+
 			WARN("Finished writing to PBO!");
 			// Unmap the buffer
 			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _BID);
 			glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+			glBindTexture(GL_TEXTURE_2D, _TID);
 
 			// Unpack
 			int mipmapWidth = _InternalWidth;
 			int mipmapHeight = _InternalHeight;
+			
+			clock_t start = clock();
 			for (int i = 0; i < _MipmapCount; i++) {
-				glBindTexture(GL_TEXTURE_2D, _TID);
-				glTexImage2D(GL_TEXTURE_2D, i, GL_RGBA, _InternalWidth, _InternalHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, (void *)_BufferOffsets[i]);
+				glTexImage2D(GL_TEXTURE_2D, i, GL_RGBA, mipmapWidth, mipmapHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, (void *)_BufferOffsets[i]);
 				mipmapWidth = Alg::Max(1, mipmapWidth >> 1);
 				mipmapHeight = Alg::Max(1, mipmapHeight >> 1);
 			}
+			clock_t end = clock();
+
 			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 			glDeleteBuffers(1, &_BID);
+			WARN("TIME PASSED: %.2f", (float(end - start) / CLOCKS_PER_SEC) * 1000);
 
 			_State = TEXTURE_APPLIED;
 			WARN("APPLIED!");
@@ -99,16 +132,17 @@ namespace OvrMangaroll {
 	}
 
 	void AsyncTexture::Unloaded2Loaded() {
-		WARN("UNLOADED2LOADED");
+		WARN("%s UNLOADED2LOADED", _Path.ToCStr());
 		_State = TEXTURE_LOADING;
 
 		// If local / remote...
-		_LoadThread = new Thread(Thread::CreateParams(LoadFile, this));
+		_LoadThread = new Thread(Thread::CreateParams(LoadFile, this, 131072U, -1, Thread::ThreadState::NotRunning, Thread::LowestPriority));
 		_LoadThread->Start();
 	}
 
 	void AsyncTexture::Loaded2Displayed() {
-		WARN("Loaded2Displayed");
+		WARN("%s Loaded2Displayed", _Path.ToCStr());
+		OVR_CAPTURE_CPU_ZONE(CreateBuffer);
 
 		_State = TEXTURE_APPLYING;
 
@@ -125,12 +159,12 @@ namespace OvrMangaroll {
 		// Get outta this context
 		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-		_UploadThread = new Thread(Thread::CreateParams(UploadTexture, this));
+		_UploadThread = new Thread(Thread::CreateParams(UploadTexture, this, 131072U, -1, Thread::ThreadState::NotRunning, Thread::LowestPriority));
 		_UploadThread->Start();
 	}
 
 	void AsyncTexture::Displayed2Loaded() {
-		WARN("Displayed2Loaded");
+		WARN("%s Displayed2Loaded", _Path.ToCStr());
 
 		_State = TEXTURE_LOADED;
 		DeleteTexture();
@@ -138,7 +172,7 @@ namespace OvrMangaroll {
 
 	void AsyncTexture::Loaded2Unloaded() {
 		_State = TEXTURE_UNLOADED;
-		WARN("Displayed2LoadedLoaded2Unloaded");
+		WARN("%s Displayed2LoadedLoaded2Unloaded", _Path.ToCStr());
 
 
 		while (_Buffers.GetSizeI() > 0) {
@@ -168,14 +202,16 @@ namespace OvrMangaroll {
 	void AsyncTexture::GenerateTexture() {
 		if (_TextureGenerated)
 			return;
+		WARN("%s GENERATE", _Path.ToCStr());
 
 		// Create texture
 		glGenTextures(1, &_TID);
 
 		glBindTexture(GL_TEXTURE_2D, _TID);
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, _MipmapCount-1);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
@@ -185,6 +221,8 @@ namespace OvrMangaroll {
 	void AsyncTexture::DeleteTexture() {
 		if (!_TextureGenerated)
 			return;
+
+		WARN("%s DELETE", _Path.ToCStr());
 
 		glDeleteTextures(1, &_TID);
 		_TextureGenerated = false;
@@ -206,7 +244,9 @@ namespace OvrMangaroll {
 
 	// ------- THREAD FUNCTIONS --------
 	void *AsyncTexture::LoadFile(Thread *thread, void *v) {
+
 		AsyncTexture *tex = (AsyncTexture *)v;
+		WARN("%s LOAD FILE", tex->_Path.ToCStr());
 
 		MemBufferFile bufferFile = MemBufferFile(tex->_Path.ToCStr());
 		MemBuffer fileBuffer = bufferFile.ToMemBuffer();
@@ -253,7 +293,10 @@ namespace OvrMangaroll {
 	}
 
 	void *AsyncTexture::UploadTexture(Thread *thread, void *v) {
+		OVR_CAPTURE_CPU_ZONE(UploadTexture);
+
 		AsyncTexture *tex = (AsyncTexture *)v;
+		WARN("%s UPLOAD FILE", tex->_Path.ToCStr());
 
 		for (int i = 0; i < tex->_MipmapCount; i++) {
 			memcpy(
@@ -268,6 +311,9 @@ namespace OvrMangaroll {
 	}
 
 	void AsyncTexture::ConsumeBuffer(unsigned char *buffer, int length) {
+		WARN("%s CONSUME", this->_Path.ToCStr());
+		OVR_CAPTURE_CPU_ZONE(ConsumeBuffer);
+
 		int comp;
 		unsigned char *Buffer = stbi_load_from_memory(buffer, length, &(_Width), &(_Height), &comp, 4);
 
@@ -277,11 +323,14 @@ namespace OvrMangaroll {
 		if (Buffer != NULL) {
 			while (_InternalHeight > MaxHeight) {
 				unsigned char *oldBuffer = Buffer;
-				//Buffer = ScaleImageRGBA(Buffer, _RealWidth, _RealHeight, 1024, 1024, ImageFilter::IMAGE_FILTER_CUBIC, true);
-				Buffer = QuarterImageSize(Buffer, _InternalWidth, _InternalHeight, false);
+				/*Buffer = ScaleImageRGBA(Buffer, _Width, _Height, MaxHeight, MaxHeight, ImageFilter::IMAGE_FILTER_LINEAR, true);
+				_InternalWidth = MaxHeight;
+				_InternalHeight = MaxHeight;*/
 
+				Buffer = QuarterImageSize(Buffer, _InternalWidth, _InternalHeight, false);
 				_InternalWidth = OVR::Alg::Max(1, _InternalWidth >> 1);
 				_InternalHeight = OVR::Alg::Max(1, _InternalHeight >> 1);
+
 				free(oldBuffer);
 			}
 		}
