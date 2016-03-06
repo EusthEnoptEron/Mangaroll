@@ -4,6 +4,7 @@
 #include "DefaultComponent.h"
 #include "Kernel\OVR_MemBuffer.h"
 #include "AsyncTexture.h"
+#include "GazeUpdateComponent.h"
 
 namespace OvrMangaroll {
 
@@ -31,6 +32,9 @@ namespace OvrMangaroll {
 
 	void MangaSelectionView::OneTimeInit(const char *launchIntent) {
 		OvrGuiSys &gui = _Mangaroll.GetGuiSys();
+		GazeUpdaterComponent *gazeComponent = new GazeUpdaterComponent();
+
+
 		_Menu = new UIMenu(gui);
 		_Menu->Create("MangaSelectionMenu");
 		_Menu->SetFlags(VRMenuFlags_t(VRMENU_FLAG_PLACE_ON_HORIZON) | VRMENU_FLAG_BACK_KEY_EXITS_APP);
@@ -38,10 +42,12 @@ namespace OvrMangaroll {
 		_MainContainer = new UIContainer(gui);
 		_MainContainer->AddToMenu(_Menu);
 		_MainContainer->SetLocalPosition(Vector3f(0, 0, -1));
+		_MainContainer->AddComponent(gazeComponent);
 
 		_SelectorContainer = new UIContainer(gui);
 		_SelectorContainer->AddToMenu(_Menu);
 		_SelectorContainer->SetLocalPosition(Vector3f(0, 0, -1));
+		_SelectorContainer->AddComponent(gazeComponent);
 
 		UITexture *fill = new UITexture();
 		fill->LoadTextureFromApplicationPackage("assets/fill.png");
@@ -179,29 +185,16 @@ namespace OvrMangaroll {
 		_Component->Selector = selector;
 	}
 
+	Manga *MangaPanel::GetManga() {
+		return _Manga;
+	}
 	void MangaPanel::SetManga(Manga *manga) {
 		_Manga = manga;
 		_Title->SetText(manga->Name);
 		_Component->_Manga = _Manga;
 		_Title->CalculateTextDimensions();
-		if (_CoverTexture == NULL) {
-			_CoverTexture = new UITexture();
-		}
-		else {
-			_CoverTexture->Free();
-		}
 
-		WARN("LOADING FILE...");
-
-		MemBufferFile buffer(manga->GetPage(0).GetPath().ToCStr());
-		MemBuffer mem = buffer.ToMemBuffer();
-		_CoverTexture->LoadTextureFromBuffer(manga->GetPage(0).GetPath().ToCStr(), mem);
-		mem.FreeData();
-		buffer.FreeData();
-		
-		WARN("LOADED FILE... %d", _CoverTexture->Width);
-
-		_Cover->SetImage(0, SURFACE_TEXTURE_DIFFUSE, *_CoverTexture, 40, 40.0f / _CoverTexture->Width * _CoverTexture->Height);
+		_Cover->SetImage(0, SURFACE_TEXTURE_DIFFUSE, manga->GetCover()->Display(), 40, 60);
 		WARN("%.2f, %f", _Cover->GetWorldPosition().z, _Title->GetDimensions().x);
 		_Cover->AlignTo(RIGHT, _Title, LEFT);
 		_Cover->SetLocalPosition(_Cover->GetLocalPosition() + Vector3f(0, 0, 0.05f));
@@ -346,11 +339,12 @@ namespace OvrMangaroll {
 		for (int i = _UsedPanels.GetSizeI() - 1; i >= 0; i--) {
 			if (_UsedPanels[i]->Index > maxIndex || _UsedPanels[i]->Index < minIndex) {
 				_UsedPanels[i]->SetVisible(false);
-
+				_UsedPanels[i]->GetManga()->GetCover()->Hide();
 				_Panels.PushBack(_UsedPanels[i]);
 				_UsedPanels.RemoveAt(i);
 			}
 			else {
+				_UsedPanels[i]->GetManga()->GetCover()->Display();
 				startIndex = Alg::Min(startIndex, _UsedPanels[i]->Index);
 				endIndex = Alg::Max(endIndex, _UsedPanels[i]->Index);
 			}

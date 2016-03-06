@@ -27,7 +27,6 @@ namespace OvrMangaroll {
 
 	typedef void(*QueueCb)(void*);
 
-
 	class AsyncTexture {
 	public:
 		AsyncTexture(String path, int mipmapCount = 1);
@@ -50,7 +49,7 @@ namespace OvrMangaroll {
 		void Loaded2Displayed();
 		void Displayed2Loaded();
 		void Loaded2Unloaded();
-
+		void SetTarget(eTextureState state);
 
 		// # THREADS
 
@@ -89,6 +88,7 @@ namespace OvrMangaroll {
 		int _ThreadEvents;
 		static ovrMessageQueue *S_Queue;
 		static Thread *S_WorkerThread;
+		static Thread *S_WorkerThread2;
 		static void *S_WorkerFn(Thread *, void *);
 	};
 
@@ -110,6 +110,27 @@ namespace OvrMangaroll {
 		static BufferManager *S_Instance;
 		static Array<GLuint> *S_Buffers;
 		static GLuint *S_Buffers_Arr;
+	};
+
+	class AsyncTextureManager {
+	public :
+		void Update();
+		void Register(AsyncTexture *texture);
+		static AsyncTextureManager &Instance() {
+			if (S_Instance == NULL) {
+				S_Instance = new AsyncTextureManager();
+			}
+			return *S_Instance;
+		}
+
+	private:
+		AsyncTextureManager() {
+			S_Textures = new Array<AsyncTexture*>();
+		}
+		AsyncTextureManager(const AsyncTextureManager &);
+
+		static AsyncTextureManager *S_Instance;
+		static Array<AsyncTexture*> *S_Textures;
 	};
 
 }

@@ -16,6 +16,7 @@ Copyright   :   Copyright 2014 Oculus VR, LLC. All Rights reserved.
 #include "Kernel/OVR_Types.h"
 #include "Helpers.h"
 #include <OVR_Capture.h>
+#include "AsyncTexture.h"
 
 #if 0
 	#define GL( func )		func; EglCheckErrors();
@@ -153,6 +154,13 @@ Matrix4f Mangaroll::Frame( const VrFrame & vrFrame )
 	Frame::Current = &vrFrame;
 	HMD::Direction = lookAt;
 
+	
+	AsyncTextureManager::Instance().Update();
+
+	// FRAME STEPS
+	CenterEyeViewMatrix = ViewMgr.Frame(vrFrame);
+	GuiSys->Frame( vrFrame, CenterEyeViewMatrix );
+
 	if (GetGuiSys().IsAnyMenuOpen() != _MenuOpen) {
 		_MenuOpen = !_MenuOpen;
 
@@ -165,10 +173,6 @@ Matrix4f Mangaroll::Frame( const VrFrame & vrFrame )
 			Carousel.MoveIn();
 		}
 	}
-
-	// FRAME STEPS
-	CenterEyeViewMatrix = ViewMgr.Frame(vrFrame);
-	GuiSys->Frame( vrFrame, CenterEyeViewMatrix );
 
 	return CenterEyeViewMatrix;
 }

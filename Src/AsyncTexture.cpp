@@ -23,11 +23,13 @@ namespace OvrMangaroll {
 			S_Queue->SleepUntilMessage();
 			const char *msg = S_Queue->GetNextMessage();
 			
-			QueueCb cb;
-			void *obj;
-			sscanf(msg, "call %p %p", &cb, &obj);
+			if (msg != NULL) {
+				QueueCb cb;
+				void *obj;
+				sscanf(msg, "call %p %p", &cb, &obj);
 
-			cb(obj);
+				cb(obj);
+			}
 		}
 		return NULL;
 	}
@@ -35,7 +37,10 @@ namespace OvrMangaroll {
 
 	ovrMessageQueue *AsyncTexture::S_Queue = new ovrMessageQueue(20);
 	Thread *AsyncTexture::S_WorkerThread = new Thread(Thread::CreateParams(AsyncTexture::S_WorkerFn, NULL, 128 * 1024, -1, Thread::ThreadState::Running, Thread::BelowNormalPriority));
-	
+	Thread *AsyncTexture::S_WorkerThread2 = new Thread(Thread::CreateParams(AsyncTexture::S_WorkerFn, NULL, 128 * 1024, -1, Thread::ThreadState::Running, Thread::BelowNormalPriority));
+
+
+	// #################### BUFFER MANAGER #######################
 	Array<GLuint> *BufferManager::S_Buffers = NULL;
 	GLuint *BufferManager::S_Buffers_Arr = NULL;
 	BufferManager *BufferManager::S_Instance = NULL;
@@ -65,6 +70,30 @@ namespace OvrMangaroll {
 	}
 
 
+	// ###########################################################
+	// #################### ASYNC TEXTURE MANAGER ################
+	AsyncTextureManager *AsyncTextureManager::S_Instance = NULL;
+	Array<AsyncTexture*> *AsyncTextureManager::S_Textures = NULL;
+
+	void AsyncTextureManager::Update() {
+		for (int i = S_Textures->GetSizeI() - 1; i >= 0; --i) {
+			
+			AsyncTexture *texture = S_Textures->At(i);
+			texture->Update();
+		
+			if (texture->GetState() == texture->GetFutureState()) {
+				S_Textures->RemoveAt(i);
+			}
+		}
+	}
+
+	void AsyncTextureManager::Register(AsyncTexture *texture) {
+		S_Textures->PushBack(texture);
+	}
+
+	// ###########################################################
+
+
 	AsyncTexture::AsyncTexture(String path, int mipmapCount)
 		: MaxHeight(2000)
 		, _TID(0)
@@ -89,6 +118,12 @@ namespace OvrMangaroll {
 
 	AsyncTexture::~AsyncTexture() {
 		DeleteTexture();
+	}
+	void AsyncTexture::SetTarget(eTextureState state) {
+		_TargetState = state;
+		if (state != _State) {
+			AsyncTextureManager::Instance().Register(this);
+		}
 	}
 
 	void AsyncTexture::Update() {
@@ -170,6 +205,7 @@ namespace OvrMangaroll {
 
 		_State = TEXTURE_APPLYING;
 
+#ifdef USE_PBO
 		// Make buffers
 		_BID = BufferManager::Instance().GetBuffer();
 		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _BID);
@@ -181,6 +217,22 @@ namespace OvrMangaroll {
 		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
 		S_Queue->PostPrintf("call %p %p", UploadTexture, this);
+#else
+		glBindTexture(GL_TEXTURE_2D, _TID);
+
+		// Unpack
+		int mipmapWidth = _InternalWidth;
+		int mipmapHeight = _InternalHeight;
+
+		for (int i = 0; i < _MipmapCount; i++) {
+			glTexImage2D(GL_TEXTURE_2D, i, GL_RGBA, mipmapWidth, mipmapHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, (void *)_Buffers[i]);
+			mipmapWidth = Alg::Max(1, mipmapWidth >> 1);
+			mipmapHeight = Alg::Max(1, mipmapHeight >> 1);
+		}
+
+		_State = TEXTURE_APPLIED;
+#endif
+
 	}
 
 	void AsyncTexture::Displayed2Loaded() {
@@ -205,13 +257,13 @@ namespace OvrMangaroll {
 
 	void AsyncTexture::Load() {
 		if (_TargetState < TEXTURE_LOADING) {
-			_TargetState = TEXTURE_LOADED;
+			SetTarget(TEXTURE_LOADED);
 		}
 	}
 
 	GLuint AsyncTexture::Display() {
 		if (_TargetState < TEXTURE_APPLYING) {
-			_TargetState = TEXTURE_APPLIED;
+			SetTarget(TEXTURE_APPLIED);
 		}
 
 		GenerateTexture();
@@ -250,13 +302,13 @@ namespace OvrMangaroll {
 
 	void AsyncTexture::Hide() {
 		if (_TargetState >= TEXTURE_APPLYING) {
-			_TargetState = TEXTURE_LOADED;
+			SetTarget(TEXTURE_LOADED);
 		}
 	}
 
 	void AsyncTexture::Unload() {
 		if (_TargetState >= TEXTURE_LOADING) {
-			_TargetState = TEXTURE_UNLOADED;
+			SetTarget(TEXTURE_UNLOADED);
 		}
 	}
 

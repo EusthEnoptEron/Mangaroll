@@ -102,10 +102,10 @@ namespace OvrMangaroll {
 		virtual void 		OnOpen();
 		virtual void 		OnClose();
 		void SetPageProgress(float);
-
-	private:
 		void ShowGUI(void);
 		void HideGUI(void);
+	private:
+
 		void UpdateMenuState(void);
 
 		Mangaroll *_Mangaroll;

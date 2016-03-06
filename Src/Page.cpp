@@ -59,6 +59,10 @@ namespace OvrMangaroll {
 
 		if(_Positionable) {
 			int left = (_Offset + _Width);
+
+			// "On-Load" if unloaded
+			Load();
+
 			bool initialIsVisible = (_Origin == PLACING_BOTTOM || textureLoaded)
 				? _Offset > pixelStart && _Offset < pixelEnd // Right end within view
 				: _HighOffset > pixelStart && _HighOffset < pixelEnd; // left end within view
@@ -69,8 +73,7 @@ namespace OvrMangaroll {
 
 				_ATexture->Load();
 
-				// Load if unloaded
-				Load();
+	
 			} else {
 				// Otherwise - disappear!
 				_DisplayState = DisplayState::INVISIBLE;
@@ -96,8 +99,6 @@ namespace OvrMangaroll {
 			UpdateStates(angle);
 		}
 
-		_ATexture->Update();
-
 		if(_DisplayState == DisplayState::VISIBLE) {
 			if(_Selected && AppState::Guide >= GuideType::ENLARGE) {
 				float radianOffset = Mathf::Pi / 2;// - widthInRadians / 2; // Makes sure this thing is centered
@@ -117,7 +118,7 @@ namespace OvrMangaroll {
 
 					float verticalShift = fmax(-1, fmin(1, verticalAngle / maxAngle));
 
-					targetPos += (-verticalShift * (HEIGHT / 24) * Vector3f(0, 1, 0));
+					targetPos += (-verticalShift * (HEIGHT / 3) * Vector3f(0, 1, 0));
 				}
 				Position = Position.Lerp(targetPos, Time::Delta * 10);
 
@@ -185,6 +186,7 @@ namespace OvrMangaroll {
 			_Positionable = true;
 			_Origin = PLACING_TOP;
 		}
+		
 	}
 
 	void Page::Draw(const Matrix4f &m) {

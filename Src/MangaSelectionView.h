@@ -45,6 +45,7 @@ namespace OvrMangaroll {
 
 		void AddToMenu(UIMenu *menu, UIObject *parent = NULL);
 		void SetManga(Manga *manga);
+		Manga *GetManga();
 		float Position;
 		int Index;
 	private:

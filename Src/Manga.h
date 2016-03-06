@@ -3,6 +3,7 @@
 #include "App.h"
 #include "GlObject.h"
 #include "Page.h"
+#include "AsyncTexture.h"
 
 using namespace OVR;
 
@@ -22,6 +23,8 @@ namespace OvrMangaroll {
 		Page &GetPage(int);
 		String Name;
 		bool Selectionable;
+		AsyncTexture *GetCover();
+		void Unload();
 	private:
 		GlProgram _Prog;
 		int _Count;
@@ -31,6 +34,7 @@ namespace OvrMangaroll {
 		int _SelectionIndex;
 		float _Angle;
 		int _Progress;
+		AsyncTexture *_Cover;
 	};
 
 }

@@ -29,12 +29,17 @@ namespace OvrMangaroll {
 		}
 	}
 
+	AsyncTexture *Manga::GetCover() {
+		return _Cover;
+	}
+
 	void Manga::AddPage(Page *page) {
 		if(_First == NULL) {
 			// First page
 			_First = page;
 			_Last  = page;
-
+			_Cover = new AsyncTexture(page->GetPath());
+			_Cover->MaxHeight = 100;
 			page->SetOffset(0);
 		} else {
 
@@ -67,7 +72,7 @@ namespace OvrMangaroll {
 			activePage = _First;
 		}
 
-		activePage->SetOffset(_Angle * PIXELS_PER_DEGREE);
+		activePage->SetOffset(_Angle * PIXELS_PER_DEGREE - PIXELS_PER_DEGREE * 10);
 	}
 
 	Page &Manga::GetPage(int pageNo) {
@@ -84,6 +89,14 @@ namespace OvrMangaroll {
 
 	int Manga::GetCount(void) {
 		return _Count;
+	
+	}
+	void Manga::Unload() {
+		Page *p = _First;
+		for (int i = 0; i < _Count; i++) {
+			p->Reset();
+			p = p->GetNext();
+		}
 	}
 
 	void Manga::Update(float angle, bool onlyVisual) {
@@ -111,14 +124,19 @@ namespace OvrMangaroll {
 			} while( (ref = ref->GetNext()) != NULL);
 		}
 
+
 		// Update selection (if anything changed)
-		if(selectionCandidate != _Selection) {
-			if(_Selection != NULL) {
+		if (selectionCandidate != _Selection) {
+			if (_Selection != NULL) {
 				_Selection->SetSelected(false);
 			}
 			_Selection = selectionCandidate;
-			_SelectionIndex = selectionIndex;
-			if(_Selection != NULL) {
+
+			if (Selectionable) {
+				// Because it's needed for progress
+				_SelectionIndex = selectionIndex;
+			}
+			if (_Selection != NULL) {
 				_Selection->SetSelected(true);
 			}
 
@@ -129,6 +147,7 @@ namespace OvrMangaroll {
 				WARN("SELECTION: %s", _Selection->GetPath().ToCStr());
 			}
 		}
+		
 	
 	}
 }

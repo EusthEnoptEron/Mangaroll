@@ -5,6 +5,7 @@
 #include "VRMenuMgr.h"
 #include "Helpers.h"
 #include "Kernel\OVR_String_Utils.h"
+#include "GazeUpdateComponent.h"
 
 namespace OvrMangaroll {
 
@@ -19,6 +20,10 @@ namespace OvrMangaroll {
 
 	void OnText(ScrubBarComponent *button, void *object, UILabel *label, int progress) {
 		label->SetText(String::Format("Page %d", progress + 1));
+	}
+
+	void OnCloseClick(UIButton *button, void *obj) {
+		((MangaSettingsView *)obj)->HideGUI();
 	}
 
 
@@ -44,29 +49,6 @@ namespace OvrMangaroll {
 		glUseProgram(prog->program);
 		glUniform1f(glGetUniformLocation(prog->program, "Brightness"), progress - 0.5f);
 	}
-
-	class GazeUpdaterComponent : public VRMenuComponent {
-	public:
-
-		GazeUpdaterComponent() : VRMenuComponent(VRMenuEventFlags_t(VRMENU_EVENT_FOCUS_GAINED) | VRMENU_EVENT_FOCUS_LOST | VRMENU_EVENT_FRAME_UPDATE) {
-
-		}
-	private:
-
-		eMsgStatus OnEvent_Impl(OvrGuiSys & guiSys, VrFrame const & vrFrame,
-			VRMenuObject * self, VRMenuEvent const & event) {
-			switch (event.EventType) {
-			case VRMENU_EVENT_FOCUS_GAINED:
-				guiSys.GetGazeCursor().ForceDistance(event.HitResult.t, eGazeCursorStateType::CURSOR_STATE_HILIGHT);
-			default:
-				return eMsgStatus::MSG_STATUS_ALIVE;
-
-				break;
-			}
-
-		}
-
-	};
 
 	MangaSettingsView::MangaSettingsView(Mangaroll *app) : 
 		View("MangaSettingsView")
@@ -128,6 +110,7 @@ namespace OvrMangaroll {
 		// BUILD GUI
 		const Quatf forward(Vector3f(0.0f, 1.0f, 0.0f), 0.0f);
 		const Quatf leftTilt(Vector3f(0, 1, 0), 0.8f);
+		const Quatf rightTilt(Vector3f(0, 1, 0), -0.8f);
 
 		OvrGuiSys &gui = _Mangaroll->GetGuiSys();
 		_Menu = new UIMenu(gui);
@@ -141,6 +124,11 @@ namespace OvrMangaroll {
 		_LeftContainer = new UIContainer(gui);
 		_LeftContainer->AddToMenu(_Menu);
 		_LeftContainer->SetLocalPose(leftTilt, Vector3f(-.5f, 0, -.7f));
+		
+		_RightContainer = new UIContainer(gui);
+		_RightContainer->AddToMenu(_Menu);
+		_RightContainer->SetLocalPose(rightTilt, Vector3f(.5f, 0, -.7f));
+
 
 		_TitleLabel = new UILabel(gui);
 		_TitleLabel->AddToMenu(_Menu, _CenterContainer);
@@ -151,15 +139,24 @@ namespace OvrMangaroll {
 		_TitleLabel->SetText("");
 		
 
-		OvrDefaultComponent *defaultComponent = new OvrDefaultComponent();
+		OvrDefaultComponent *defaultComponent = new OvrDefaultComponent(
+			Vector3f(0),
+			1.05f,
+			0.25f,
+			0
+			);
+		GazeUpdaterComponent *component = new GazeUpdaterComponent();
+
 
 		_CloseTexture.LoadTextureFromApplicationPackage("assets/close.png");
 		_CloseButton = new UIButton(gui);
-		_CloseButton->AddToMenu(_Menu, _CenterContainer);
+		_CloseButton->AddToMenu(_Menu, _RightContainer);
 		_CloseButton->SetButtonImages(_CloseTexture, _CloseTexture, _CloseTexture);
-		_CloseButton->SetLocalPosition(Vector3f(0.3f, 0.3f, 0));
+		_CloseButton->SetOnClick(OnCloseClick, this);
+		_CloseButton->SetLocalPosition(Vector3f(0, 0, 0));
 		_CloseButton->SetDimensions(Vector2f(50, 50));
 		_CloseButton->SetButtonColors(Vector4f(0.8f, 0.8f, 0.8f, 1), Vector4f(1, 1, 1, 1), Vector4f(1, 1, 1, 1));
+		_CloseButton->AddComponent(component);
 		_CloseButton->AddComponent(defaultComponent);
 
 		_PageLabel = new UILabel(gui);
@@ -169,7 +166,6 @@ namespace OvrMangaroll {
 		_PageLabel->SetFontScale(0.5f);
 		_PageLabel->SetText("");
 
-		GazeUpdaterComponent *component = new GazeUpdaterComponent();
 		component->HandlesEvent(VRMenuEventFlags_t(VRMENU_EVENT_FOCUS_GAINED) /*| VRMENU_EVENT_FOCUS_LOST | VRMENU_EVENT_FRAME_UPDATE*/);
 		_CenterContainer->AddComponent(component);
 
@@ -299,6 +295,7 @@ namespace OvrMangaroll {
 			// Update visual representation
 			_CenterContainer->SetColor(Vector4f(_Fader.GetFadeAlpha()));
 			_LeftContainer->SetColor(Vector4f(_Fader.GetFadeAlpha()));
+			_RightContainer->SetColor(Vector4f(_Fader.GetFadeAlpha()));
 
 			Vector3f pos = _CenterContainer->GetLocalPosition();
 			_CenterContainer->SetLocalPosition(Vector3f(pos.x, (1 - _Fader.GetFadeAlpha()) * -0.05f, pos.z));
@@ -306,6 +303,8 @@ namespace OvrMangaroll {
 			pos = _LeftContainer->GetLocalPosition();
 			_LeftContainer->SetLocalPosition(Vector3f(pos.x, (1 - _Fader.GetFadeAlpha()) * -0.05f, pos.z));
 
+			pos = _RightContainer->GetLocalPosition();
+			_RightContainer->SetLocalPosition(Vector3f(pos.x, (1 - _Fader.GetFadeAlpha()) * -0.05f, pos.z));
 		}
 	}
 
@@ -317,9 +316,6 @@ namespace OvrMangaroll {
 		_PageLabel->SetText(String::Format("Page %d", _Mangaroll->CurrentManga->GetProgress() + 1));
 		_TitleLabel->SetText(_Mangaroll->CurrentManga->Name);
 		_TitleLabel->CalculateTextDimensions();
-
-		_CloseButton->AlignTo(LEFT, _CloseButton, RIGHT);
-		_CloseButton->AlignTo(TOP, _CloseButton, TOP);
 
 
 		_Fader.StartFadeIn();
