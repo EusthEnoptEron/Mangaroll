@@ -7,7 +7,6 @@
 #include "GazeCursor.h"
 #include "Kernel\OVR_Array.h"
 #include "MessageQueue.h"
-#include "Kernel\OVR_StringHash.h"
 
 using namespace OVR;
 
@@ -88,7 +87,6 @@ namespace OvrMangaroll {
 		void *_GPUBuffer;
 		bool _TextureGenerated;
 		int _ThreadEvents;
-
 		static ovrMessageQueue *S_Queue;
 		static Thread *S_WorkerThread;
 		static void *S_WorkerFn(Thread *, void *);
@@ -104,16 +102,13 @@ namespace OvrMangaroll {
 		}
 
 		GLuint GetBuffer();
-		GLuint GetTexture(int width, int height, int mipCount);
 		void ReleaseBuffer(GLuint);
-		void ReleaseTexture(GLuint, int width, int height, int mipCount);
 	private:
 		BufferManager();
 		BufferManager(const BufferManager &);
 
 		static BufferManager *S_Instance;
 		static Array<GLuint> *S_Buffers;
-		static Hash<String, Array<GLuint>> *S_Textures;
 		static GLuint *S_Buffers_Arr;
 	};
 

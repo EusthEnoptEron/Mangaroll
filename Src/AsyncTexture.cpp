@@ -4,13 +4,13 @@
 #include "stb_image.h"
 #include "ImageData.h"
 #include "Kernel\OVR_LogUtils.h"
+#include <ctime>
 #include <OVR_Capture.h>
 #include "Kernel\OVR_String_Utils.h"
 
 using namespace OVR;
 
 namespace OvrMangaroll {
-	//typedef unsigned int GLuint;
 
 	PFNGLMAPBUFFEROESPROC glMapBuffer = (PFNGLMAPBUFFEROESPROC)eglGetProcAddress("glMapBufferOES");
 
@@ -37,14 +37,11 @@ namespace OvrMangaroll {
 	Thread *AsyncTexture::S_WorkerThread = new Thread(Thread::CreateParams(AsyncTexture::S_WorkerFn, NULL, 128 * 1024, -1, Thread::ThreadState::Running, Thread::BelowNormalPriority));
 	
 	Array<GLuint> *BufferManager::S_Buffers = NULL;
-	Hash<String, Array<GLuint>> *BufferManager::S_Textures = NULL;
 	GLuint *BufferManager::S_Buffers_Arr = NULL;
 	BufferManager *BufferManager::S_Instance = NULL;
 
 	BufferManager::BufferManager() {
 		S_Buffers = new Array<GLuint>();
-		S_Textures = new Hash<String, Array<GLuint>>();
-
 		S_Buffers_Arr = new GLuint[5];
 		// Create buffers
 		glGenBuffers(5, S_Buffers_Arr);
@@ -60,59 +57,12 @@ namespace OvrMangaroll {
 
 	GLuint BufferManager::GetBuffer() {
 		return S_Buffers->Pop();
-	}
-	int COUNTER = 0;
-	GLuint BufferManager::GetTexture(int width, int height, int mipCount) {
-		String key = String::Format("%d-%d@%d", width, height, mipCount);
-		Array<GLuint> *arr = S_Textures->Get(key);
-		if (arr == NULL) {
-			arr = new Array<GLuint>();
-			S_Textures->Set(key, *arr);
-		}
-		
-		if (arr->GetSizeI() == 0) {
-			// Drained...
-			WARN("CREATE TEXTURE");
-			GLuint buf = GetBuffer();
-			GLuint *tex = new GLuint();
 
-			glGenTextures(1, tex);
-			glBindTexture(GL_TEXTURE_2D, *tex);
-			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buf);
-
-
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, mipCount - 1);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-			//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-			for (int i = 0; i < mipCount; i++) {
-				int w = Alg::Max(1, width >> i);
-				int h = Alg::Max(1, height >> i);
-				glTexImage2D(GL_TEXTURE_2D, i, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-			}
-
-			ReleaseBuffer(buf);
-			WARN("CREATED TEXTURE %d", COUNTER++);
-			return *tex;
-		}
-		else {
-			return arr->Pop();
-		}
 	}
 
 	void BufferManager::ReleaseBuffer(GLuint buffer) {
-		S_Buffers->PushBack(buffer);
+		S_Buffers->InsertAt(0, buffer);
 	}
-
-	void BufferManager::ReleaseTexture(GLuint tex, int width, int height, int mipCount) {
-		String key = String::Format("%d-%d@%d", width, height, mipCount);
-
-		S_Textures->Get(key)->PushBack(tex);
-	}
-
-
 
 
 	AsyncTexture::AsyncTexture(String path, int mipmapCount)
@@ -189,15 +139,11 @@ namespace OvrMangaroll {
 			int mipmapWidth = _InternalWidth;
 			int mipmapHeight = _InternalHeight;
 			
-			WARN("START CREATION...");
 			for (int i = 0; i < _MipmapCount; i++) {
-				WARN("MAKE MIP %d", i);
-				glTexSubImage2D(GL_TEXTURE_2D, i, 0, 0, mipmapWidth, mipmapHeight, GL_RGBA, GL_UNSIGNED_BYTE, (void *)_BufferOffsets[i]);
+				glTexImage2D(GL_TEXTURE_2D, i, GL_RGBA, mipmapWidth, mipmapHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, (void *)_BufferOffsets[i]);
 				mipmapWidth = Alg::Max(1, mipmapWidth >> 1);
 				mipmapHeight = Alg::Max(1, mipmapHeight >> 1);
 			}
-			WARN("END CREATION...");
-
 
 			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 			BufferManager::Instance().ReleaseBuffer(_BID);
@@ -226,7 +172,6 @@ namespace OvrMangaroll {
 
 		// Make buffers
 		_BID = BufferManager::Instance().GetBuffer();
-
 		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _BID);
 
 		// Map buffer
@@ -234,7 +179,6 @@ namespace OvrMangaroll {
 
 		// Get outta this context
 		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-		WARN("%s CALLING THREAD, Dude!", _Path.ToCStr());
 
 		S_Queue->PostPrintf("call %p %p", UploadTexture, this);
 	}
@@ -276,16 +220,21 @@ namespace OvrMangaroll {
 	}
 
 	void AsyncTexture::GenerateTexture() {
-		if (_TextureGenerated || _State < TEXTURE_LOADED)
+		if (_TextureGenerated)
 			return;
 		WARN("%s GENERATE", _Path.ToCStr());
 
 		// Create texture
+		glGenTextures(1, &_TID);
 
-	/*	glGenTextures(1, &_TID); */
-		_TID = BufferManager::Instance().GetTexture(_InternalWidth, _InternalHeight, _MipmapCount);
-		
-		WARN("GOT MY TEXTURE");
+		glBindTexture(GL_TEXTURE_2D, _TID);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, _MipmapCount-1);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
 		_TextureGenerated = true;
 	}
 
@@ -295,8 +244,7 @@ namespace OvrMangaroll {
 
 		WARN("%s DELETE", _Path.ToCStr());
 
-		BufferManager::Instance().ReleaseTexture(_TID, _InternalWidth, _InternalHeight, _MipmapCount);
-		//glDeleteTextures(1, &_TID);
+		glDeleteTextures(1, &_TID);
 		_TextureGenerated = false;
 	}
 
@@ -393,13 +341,13 @@ namespace OvrMangaroll {
 		if (Buffer != NULL) {
 			while (_InternalHeight > MaxHeight) {
 				unsigned char *oldBuffer = Buffer;
-				Buffer = ScaleImageRGBA(Buffer, _Width, _Height, MaxHeight, MaxHeight, ImageFilter::IMAGE_FILTER_LINEAR, true);
+				/*Buffer = ScaleImageRGBA(Buffer, _Width, _Height, MaxHeight, MaxHeight, ImageFilter::IMAGE_FILTER_LINEAR, true);
 				_InternalWidth = MaxHeight;
-				_InternalHeight = MaxHeight;
+				_InternalHeight = MaxHeight;*/
 
-				//Buffer = QuarterImageSize(Buffer, _InternalWidth, _InternalHeight, false);
-				//_InternalWidth = OVR::Alg::Max(1, _InternalWidth >> 1);
-				//_InternalHeight = OVR::Alg::Max(1, _InternalHeight >> 1);
+				Buffer = QuarterImageSize(Buffer, _InternalWidth, _InternalHeight, false);
+				_InternalWidth = OVR::Alg::Max(1, _InternalWidth >> 1);
+				_InternalHeight = OVR::Alg::Max(1, _InternalHeight >> 1);
 
 				free(oldBuffer);
 			}
