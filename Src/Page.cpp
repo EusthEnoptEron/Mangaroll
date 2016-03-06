@@ -59,7 +59,7 @@ namespace OvrMangaroll {
 
 		if(_Positionable) {
 			int left = (_Offset + _Width);
-			bool initialIsVisible = _Origin == (PLACING_BOTTOM || textureLoaded)
+			bool initialIsVisible = (_Origin == PLACING_BOTTOM || textureLoaded)
 				? _Offset > pixelStart && _Offset < pixelEnd
 				: _HighOffset > pixelStart && _HighOffset < pixelEnd;
 			
@@ -109,9 +109,6 @@ namespace OvrMangaroll {
 				float distance = AppState::Guide == GuideType::ENLARGE ? 0.2f : 0.4f;
 
 				Vector3f targetPos = Vector3f(-x, 0.0f, -z) * distance;
-
-				Position = Position.Lerp(targetPos, Time::Delta * 10);
-				
 				if(AppState::Guide == GuideType::FOLLOW) {
 					float maxAngle = atan( (HEIGHT / 2) / RADIUS );
 					float verticalAngle = Acos(HMD::Direction.ProjectToPlane(Vector3f(0.0f, 1.0f, 0.0f)).Length());
@@ -119,9 +116,11 @@ namespace OvrMangaroll {
 					if(HMD::Direction.y < 0) verticalAngle *= -1;
 
 					float verticalShift = fmax(-1, fmin(1, verticalAngle / maxAngle));
-					Position += (-verticalShift * (HEIGHT / 24) * Vector3f(0, 1, 0));
 
+					targetPos += (-verticalShift * (HEIGHT / 24) * Vector3f(0, 1, 0));
 				}
+				Position = Position.Lerp(targetPos, Time::Delta * 10);
+
 				Touch();
 			} else {
 				Position = Position.Lerp(Vector3f::ZERO, Time::Delta * 10);

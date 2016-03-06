@@ -7,6 +7,7 @@
 #include "GazeCursor.h"
 #include "Kernel\OVR_Array.h"
 #include "MessageQueue.h"
+#include "Kernel\OVR_StringHash.h"
 
 using namespace OVR;
 
@@ -55,13 +56,13 @@ namespace OvrMangaroll {
 		// # THREADS
 
 		// Load file from the Internet
-		static void *DownloadFile(Thread *thread, void *v);
+		static void DownloadFile(void *v);
 
 		// Load file from the file system
-		static void *LoadFile(Thread *thread, void *v);
+		static void LoadFile(void *v);
 
 		// Upload file to the graphics card
-		static void *UploadTexture(Thread *thread, void *v);
+		static void UploadTexture(void *v);
 
 		// Prepare a buffer for upload to the graphics card
 		void ConsumeBuffer(unsigned char *buffer, int length);
@@ -88,11 +89,32 @@ namespace OvrMangaroll {
 		bool _TextureGenerated;
 		int _ThreadEvents;
 
-		Thread *_LoadThread;
-		Thread *_UploadThread;
 		static ovrMessageQueue *S_Queue;
 		static Thread *S_WorkerThread;
 		static void *S_WorkerFn(Thread *, void *);
+	};
+
+	class BufferManager {
+	public:
+		static BufferManager &Instance() {
+			if (S_Instance == NULL) {
+				S_Instance = new BufferManager();
+			}
+			return *S_Instance;
+		}
+
+		GLuint GetBuffer();
+		GLuint GetTexture(int width, int height, int mipCount);
+		void ReleaseBuffer(GLuint);
+		void ReleaseTexture(GLuint, int width, int height, int mipCount);
+	private:
+		BufferManager();
+		BufferManager(const BufferManager &);
+
+		static BufferManager *S_Instance;
+		static Array<GLuint> *S_Buffers;
+		static Hash<String, Array<GLuint>> *S_Textures;
+		static GLuint *S_Buffers_Arr;
 	};
 
 }

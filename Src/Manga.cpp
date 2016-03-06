@@ -120,6 +120,14 @@ namespace OvrMangaroll {
 			if(_Selection != NULL) {
 				_Selection->SetSelected(true);
 			}
+
+			if (_Selection == NULL) {
+				WARN("SELECTION: NONE");
+			}
+			else {
+				WARN("SELECTION: %s", _Selection->GetPath().ToCStr());
+			}
 		}
+	
 	}
 }

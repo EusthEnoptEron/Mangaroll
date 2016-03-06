@@ -35,7 +35,7 @@ namespace OvrMangaroll {
 		{
 			_Prog = *ShaderManager::Instance()->Get(PAGE_SHADER_NAME);
 			_ATexture = new AsyncTexture(_path, 3);
-			_ATexture->MaxHeight = 4000;
+			_ATexture->MaxHeight = 1024;
 		};
 
 		virtual ~Page(void);
