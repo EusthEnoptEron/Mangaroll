@@ -41,7 +41,7 @@ namespace OvrMangaroll {
 		glUniform1f(glGetUniformLocation(_Prog->program, "Brightness"), 0.0f);
 
 
-		const char * scenePath = "assets/stars.ovrscene";
+		const char * scenePath = "assets/dojo_scene.ovrscene";
 
 		MaterialParms materialParms;
 		materialParms.UseSrgbTextureFormats = false;
