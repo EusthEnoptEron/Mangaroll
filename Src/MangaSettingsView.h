@@ -135,6 +135,9 @@ namespace OvrMangaroll {
 
 		UITexture _ProgressBGTexture;
 		UITexture _ProgressFGTexture;
+		UITexture _CloseTexture;
+
+		UIButton *_CloseButton;
 
 	};
 }

@@ -117,6 +117,9 @@ namespace OvrMangaroll {
 	void MangaCarousel::SetManga(Manga *manga) {
 		// TODO: Change logic
 		CurrentManga = manga;
+		int progress = CurrentManga->GetProgress();
+		CurrentManga->Update(_Angle, true);
+		CurrentManga->SetProgress(progress);
 	}
 
 	void MangaCarousel::MoveOut(void) {

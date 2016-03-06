@@ -30,7 +30,7 @@ namespace OvrMangaroll {
 		Page *_Selection;
 		int _SelectionIndex;
 		float _Angle;
-
+		int _Progress;
 	};
 
 }

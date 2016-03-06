@@ -142,7 +142,6 @@ namespace OvrMangaroll {
 		_LeftContainer->AddToMenu(_Menu);
 		_LeftContainer->SetLocalPose(leftTilt, Vector3f(-.5f, 0, -.7f));
 
-
 		_TitleLabel = new UILabel(gui);
 		_TitleLabel->AddToMenu(_Menu, _CenterContainer);
 		// It's unknown what these parms actually do... but well, it works. "alpha" seems to control the thickness of the outline
@@ -150,6 +149,18 @@ namespace OvrMangaroll {
 		_TitleLabel->SetLocalPose(forward, Vector3f(0, 0.1f, 0));
 		_TitleLabel->SetFontScale(0.7f);
 		_TitleLabel->SetText("");
+		
+
+		OvrDefaultComponent *defaultComponent = new OvrDefaultComponent();
+
+		_CloseTexture.LoadTextureFromApplicationPackage("assets/close.png");
+		_CloseButton = new UIButton(gui);
+		_CloseButton->AddToMenu(_Menu, _CenterContainer);
+		_CloseButton->SetButtonImages(_CloseTexture, _CloseTexture, _CloseTexture);
+		_CloseButton->SetLocalPosition(Vector3f(0.3f, 0.3f, 0));
+		_CloseButton->SetDimensions(Vector2f(50, 50));
+		_CloseButton->SetButtonColors(Vector4f(0.8f, 0.8f, 0.8f, 1), Vector4f(1, 1, 1, 1), Vector4f(1, 1, 1, 1));
+		_CloseButton->AddComponent(defaultComponent);
 
 		_PageLabel = new UILabel(gui);
 		_PageLabel->AddToMenu(_Menu, _CenterContainer);
@@ -305,6 +316,10 @@ namespace OvrMangaroll {
 		_ProgressComponent.SetProgress(_Mangaroll->CurrentManga->GetProgress() / (_Mangaroll->CurrentManga->GetCount() - 1.0f));
 		_PageLabel->SetText(String::Format("Page %d", _Mangaroll->CurrentManga->GetProgress() + 1));
 		_TitleLabel->SetText(_Mangaroll->CurrentManga->Name);
+		_TitleLabel->CalculateTextDimensions();
+
+		_CloseButton->AlignTo(LEFT, _CloseButton, RIGHT);
+		_CloseButton->AlignTo(TOP, _CloseButton, TOP);
 
 
 		_Fader.StartFadeIn();

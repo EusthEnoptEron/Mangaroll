@@ -60,8 +60,8 @@ namespace OvrMangaroll {
 		if(_Positionable) {
 			int left = (_Offset + _Width);
 			bool initialIsVisible = (_Origin == PLACING_BOTTOM || textureLoaded)
-				? _Offset > pixelStart && _Offset < pixelEnd
-				: _HighOffset > pixelStart && _HighOffset < pixelEnd;
+				? _Offset > pixelStart && _Offset < pixelEnd // Right end within view
+				: _HighOffset > pixelStart && _HighOffset < pixelEnd; // left end within view
 			
 			// If user's view is inside the valid range...
 			if (initialIsVisible || (textureLoaded && left > pixelStart && left < pixelEnd)) {
@@ -162,10 +162,11 @@ namespace OvrMangaroll {
 		_Positionable = false;
 		_Origin = PLACING_NONE;
 
-		if (_ATexture->GetState() >= TEXTURE_LOADED) {
-			_ATexture->Unload();
+		if (_ATexture->GetState() > TEXTURE_LOADED) {
 			_Geometry.Free();
-		}		
+		}
+		_ATexture->Unload();
+
 		_DisplayState = DisplayState::INVISIBLE;
 	}
 

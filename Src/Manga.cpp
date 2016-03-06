@@ -10,6 +10,7 @@ namespace OvrMangaroll {
 			, _First(NULL)
 			, _Selection(NULL)
 			, _SelectionIndex(0)
+			, _Progress(0)
 	{
 			WARN("YAY 2");
 	}

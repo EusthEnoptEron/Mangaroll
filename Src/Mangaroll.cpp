@@ -112,6 +112,7 @@ void Mangaroll::ShowManga(Manga *manga) {
 	CurrentManga = manga;
 	Carousel.SetManga(manga);
 	ViewMgr.OpenView(MangaSettingsMenu);
+	
 }
 
 void Mangaroll::OneTimeShutdown()
