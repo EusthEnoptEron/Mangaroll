@@ -26,6 +26,10 @@ namespace OvrMangaroll {
 
 	void Page::SetPrev(Page *p) {
 		_Prev = p;
+
+		if (_ATexture->GetState() >= TEXTURE_LOADED) {
+			p->SetHighOffset(_Offset);
+		}
 	}
 
 	bool Page::IsLoaded() {
@@ -60,20 +64,25 @@ namespace OvrMangaroll {
 		if(_Positionable) {
 			int left = (_Offset + _Width);
 
-			// "On-Load" if unloaded
-			Load();
-
 			bool initialIsVisible = (_Origin == PLACING_BOTTOM || textureLoaded)
 				? _Offset > pixelStart && _Offset < pixelEnd // Right end within view
 				: _HighOffset > pixelStart && _HighOffset < pixelEnd; // left end within view
-			
+
+			// "On-Load" if unloaded
+			Load();
+
 			// If user's view is inside the valid range...
 			if (initialIsVisible || (textureLoaded && left > pixelStart && left < pixelEnd)) {
+
+			
 				_DisplayState = DisplayState::VISIBLE;
 
-				_ATexture->Load();
+				if (_ATexture->GetState() == TEXTURE_UNLOADED) {
+					_ATexture->Load();
+				} else if (_ATexture->GetState() == TEXTURE_LOADED) {
+					_ATexture->Display();
+				}
 
-	
 			} else {
 				// Otherwise - disappear!
 				_DisplayState = DisplayState::INVISIBLE;
@@ -85,6 +94,7 @@ namespace OvrMangaroll {
 					if (abs(angle - degreeStart) > 720) {
 						_ATexture->Unload();
 						_Geometry.Free();
+						_Loaded = false;
 					}
 				}
 				//LOG("DONT DRAW %s", _Path.ToCStr());
@@ -131,8 +141,8 @@ namespace OvrMangaroll {
 	}
 
 	void Page::Load() {
-		if (_ATexture->GetState() == TEXTURE_LOADED) {
-			_ATexture->Display();
+		if (!_Loaded && _ATexture->GetState() == TEXTURE_LOADED) {
+			_Loaded = true;
 
 			// Calculate real width
 			_Width = REFERENCE_HEIGHT / _ATexture->GetHeight() * _ATexture->GetWidth();
@@ -162,6 +172,10 @@ namespace OvrMangaroll {
 	void Page::Reset(void) {
 		_Positionable = false;
 		_Origin = PLACING_NONE;
+		_Offset = 0;
+		_AngularOffset = 0;
+		_HighOffset = 0;
+		_Loaded = false;
 
 		if (_ATexture->GetState() > TEXTURE_LOADED) {
 			_Geometry.Free();
@@ -207,6 +221,10 @@ namespace OvrMangaroll {
 
 	void Page::SetNext(Page *next) {
 		_Next = next;
+
+		if (_ATexture->GetState() >= TEXTURE_LOADED) {
+			next->SetOffset(_Offset + _Width);
+		}
 	}
 
 	
@@ -239,8 +257,8 @@ namespace OvrMangaroll {
 
 			attribs.position[i * 2] = Vector3f(x, y0, z);
 			attribs.position[i * 2 + 1] = Vector3f(x, y1, z);
-			LOG("V1: (%.2f, %.2f, %.2f)", x, y0, z);
-			LOG("V2: (%.2f, %.2f, %.2f)", x, y1, z);
+			//LOG("V1: (%.2f, %.2f, %.2f)", x, y0, z);
+			//LOG("V2: (%.2f, %.2f, %.2f)", x, y1, z);
 
 			attribs.uv0[i * 2] = Vector2f(1 - progress, 1);
 			attribs.uv0[i * 2 + 1] = Vector2f(1 - progress, 0);

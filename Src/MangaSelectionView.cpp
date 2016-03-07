@@ -17,6 +17,8 @@ namespace OvrMangaroll {
 		, _RemoteSrcLabel(NULL)
 		, _Selector(NULL)
 		, _AsyncTex(NULL)
+		, _LocalMangaProvider()
+		, _NProvider("http://192.168.1.39:3000/browse/%d", "http://192.168.1.39:3000/show/%d")
 	{
 
 	}
@@ -83,39 +85,8 @@ namespace OvrMangaroll {
 		_Selector->AddToMenu(_Menu, _SelectorContainer);
 		_SelectorContainer->SetLocalPosition(Vector3f(0, -0.3f, -1));
 		_Selector->SetOnSelectManga(OnSelectMangaLocal, this);
-
-
-		// SEARCH FOR MANGA
-		const OvrStoragePaths & paths = _Mangaroll.app->GetStoragePaths();
-
-		Array<String> SearchPaths;
-		paths.PushBackSearchPathIfValid(EST_SECONDARY_EXTERNAL_STORAGE, EFT_ROOT, "RetailMedia/", SearchPaths);
-		paths.PushBackSearchPathIfValid(EST_SECONDARY_EXTERNAL_STORAGE, EFT_ROOT, "", SearchPaths);
-		paths.PushBackSearchPathIfValid(EST_PRIMARY_EXTERNAL_STORAGE, EFT_ROOT, "RetailMedia/", SearchPaths);
-		paths.PushBackSearchPathIfValid(EST_PRIMARY_EXTERNAL_STORAGE, EFT_ROOT, "", SearchPaths);
-
-		StringHash<String> results = RelativeDirectoryFileList(SearchPaths, "Manga/");
-		String mangaPath;
-
-		// Load all mangas...
-		for (StringHash<String>::Iterator it = results.Begin(); it != results.End(); ++it) {
-			if (it->Second.GetCharAt(it->Second.GetLengthI() - 1) == '/') {
-				mangaPath = GetFullPath(SearchPaths, it->Second);
-				Manga *manga = new Manga();
-
-				Array<String> images = DirectoryFileList(mangaPath.ToCStr());
-
-				manga->Name = ExtractDirectory(mangaPath);
-				for (int i = 0; i < images.GetSizeI(); i++) {
-					//WARN("%s -> %s", images[i].ToCStr(), images[i].GetExtension().ToCStr());
-					if (images[i].GetExtension() == ".jpg") {
-						manga->AddPage(new LocalPage(images[i]));
-					}
-				}
-
-				_Selector->AddManga(*manga);
-			}
-		}
+		_Selector->SetProvider(_NProvider);
+		//_Selector->SetProvider(_LocalMangaProvider);
 	}
 
 	void MangaSelectionView::OnSelectManga(Manga *manga) {
@@ -286,7 +257,6 @@ namespace OvrMangaroll {
 	MangaSelectorComponent::MangaSelectorComponent(OvrGuiSys &guiSys)
 		: VRMenuComponent(
 		VRMenuEventFlags_t(VRMENU_EVENT_FRAME_UPDATE) | VRMENU_EVENT_TOUCH_DOWN | VRMENU_EVENT_TOUCH_UP | VRMENU_EVENT_TOUCH_RELATIVE)
-		, _Mangas()
 		, _Menu(NULL)
 		, _Parent(NULL)
 		, _Container(NULL)
@@ -298,6 +268,7 @@ namespace OvrMangaroll {
 		, _Index(0)
 		, _Speed(0)
 		, _Gravity(0.1f)
+		, _Provider(NULL)
 	{
 
 	}
@@ -352,12 +323,12 @@ namespace OvrMangaroll {
 		//LOG("I/DEBUG YEAH");
 		int y = 0;
 		for (int i = minIndex; i <= maxIndex; i++) {
-			if (i >= 0 && i < _Mangas.GetSizeI()) {
+			if (i >= 0 && i < _Provider->GetCurrentSize()) {
 				//LOG("I/DEBUG %d - %d (%d) PANELS: %d", minIndex, maxIndex, i, _Panels.GetSizeI());
 
 				if (i < startIndex || i > endIndex) {
 					MangaPanel *panel = _Panels.Pop();
-					panel->SetManga(_Mangas[i]);
+					panel->SetManga(_Provider->At(i));
 					panel->SetVisible(true);
 
 					panel->Index = i;
@@ -376,8 +347,12 @@ namespace OvrMangaroll {
 		}
 	}
 
-	void MangaSelectorComponent::AddManga(Manga &manga) {
-		_Mangas.PushBack(&manga);
+
+	void MangaSelectorComponent::SetProvider(MangaProvider &provider) {
+		_Provider = &provider;
+		_Index = 0;
+
+		// TODO: clean panels
 	}
 
 	void MangaSelectorComponent::UpdatePositions(void) {
@@ -405,7 +380,14 @@ namespace OvrMangaroll {
 			int anchor = round(_Index);
 			_Index = _Index + (anchor - _Index) * _Gravity * Time::Delta;// Alg::Lerp<float>(_Index, anchor, _Gravity * Time::Delta);
 
-			_Index = Alg::Clamp<float>(_Index, 0, _Mangas.GetSizeI() - 1);
+			_Index = Alg::Clamp<float>(_Index, 0, _Provider->GetCurrentSize() - 1);
+		}
+		if (_Provider != NULL) {
+			if (!_Provider->IsLoading() && _Provider->HasMore()) {
+				if (_Provider->GetCurrentSize() < _Index + 5) {
+					_Provider->LoadMore();
+				}
+			}
 		}
 		RearrangePanels();
 		UpdatePositions();
@@ -428,6 +410,8 @@ namespace OvrMangaroll {
 		_Index -= diff.y / 500;
 		_LastTouch = input.touch;
 	}
+
+	
 
 	eMsgStatus MangaSelectorComponent::OnEvent_Impl(OvrGuiSys & guiSys, VrFrame const & vrFrame,
 		VRMenuObject * self, VRMenuEvent const & event) {

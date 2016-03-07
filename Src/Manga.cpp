@@ -1,4 +1,6 @@
 #include "Manga.h"
+#include "Kernel\OVR_JSON.h"
+#include "Helpers.h"
 
 namespace OvrMangaroll {
 
@@ -6,11 +8,14 @@ namespace OvrMangaroll {
 		Manga::Manga(void) 
 			: GlObject()
 			, Name()
+			, _Initialized(false)
 			, _Count(0)
 			, _First(NULL)
 			, _Selection(NULL)
 			, _SelectionIndex(0)
 			, _Progress(0)
+			, _Cover(NULL)
+			, _AngleOffset(0)
 	{
 			WARN("YAY 2");
 	}
@@ -34,12 +39,15 @@ namespace OvrMangaroll {
 	}
 
 	void Manga::AddPage(Page *page) {
+		if (_Cover == NULL) {
+			_Cover = new AsyncTexture(page->GetPath());
+			_Cover->MaxHeight = 100;
+		}
+
 		if(_First == NULL) {
 			// First page
 			_First = page;
 			_Last  = page;
-			_Cover = new AsyncTexture(page->GetPath());
-			_Cover->MaxHeight = 100;
 			page->SetOffset(0);
 		} else {
 
@@ -56,7 +64,7 @@ namespace OvrMangaroll {
 	}
 
 	void Manga::SetProgress(int page) {
-		Page *activePage;
+		Page *activePage = NULL;
 		Page *p = _First;
 
 		for (int i = 0; i < _Count; i++) {
@@ -72,7 +80,14 @@ namespace OvrMangaroll {
 			activePage = _First;
 		}
 
-		activePage->SetOffset(_Angle * PIXELS_PER_DEGREE - PIXELS_PER_DEGREE * 10);
+		// Make the current angle to 0
+		_AngleOffset = -_Angle;
+		this->Rotation = Quatf(Vector3f(0, 1, 0), _Angle / 180.0f * Mathf::Pi);
+		this->Touch();
+
+		if (activePage != NULL) {
+			activePage->SetOffset(0);
+		}
 	}
 
 	Page &Manga::GetPage(int pageNo) {
@@ -101,6 +116,7 @@ namespace OvrMangaroll {
 
 	void Manga::Update(float angle, bool onlyVisual) {
 		_Angle = angle;
+		angle += _AngleOffset;
 		UpdateModel();
 
 		Page *ref = _First;
@@ -147,7 +163,66 @@ namespace OvrMangaroll {
 				WARN("SELECTION: %s", _Selection->GetPath().ToCStr());
 			}
 		}
-		
-	
+
+		// Internal update
+		_Update();
 	}
+
+	RemoteManga::RemoteManga()
+		: Manga()
+		, ID(0)
+		, FetchUrl("")
+		, _Payload()
+		, _Loading(false)
+	 {
+
+	}
+
+	void RemoteManga::SetThumb(String thumb) {
+		if (_Cover != NULL) {
+			delete _Cover;
+		}
+		_Cover = new AsyncTexture(thumb);
+	}
+
+
+	void RemoteManga::_Init() {
+		_Loading = true;
+		Web::Download(
+			String::Format(FetchUrl.ToCStr(), ID),
+			RemoteManga::OnDownload,
+			this
+		);
+	}
+	void RemoteManga::_Update() {
+		if (!_Loading && _Payload.GetSizeI() > 0) {
+			for (int i = 0; i < _Payload.GetSizeI(); i++) {
+				AddPage(_Payload[i]);
+			}
+			_Payload.Clear();
+		}
+	}
+
+	void RemoteManga::OnDownload(void *buffer, int length, void *p) {
+		
+		RemoteManga *self = (RemoteManga *)p;
+		
+		JSON *file = JSON::Parse((const char *)buffer);
+		if (file != NULL) {
+			JsonReader resReader(file);
+			if (resReader.IsValid() && resReader.IsObject() && resReader.GetChildBoolByName("success")) {
+				JsonReader pageReader(resReader.GetChildByName("images"));
+				if (pageReader.IsValid() && pageReader.IsArray()) {
+					while (!pageReader.IsEndOfArray()) {
+						Page *p = new Page(pageReader.GetNextArrayString());
+						self->_Payload.PushBack(p);
+					}
+				}
+			}
+		}
+
+		delete file;
+		self->_Loading = false;
+	}
+
 }

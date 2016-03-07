@@ -118,7 +118,9 @@ namespace OvrMangaroll {
 		if (CurrentManga != NULL) {
 			CurrentManga->Unload();
 		}
-		CurrentManga = manga;
+		CurrentManga = manga; 
+		manga->Init();
+
 		int progress = CurrentManga->GetProgress();
 		CurrentManga->Update(_Angle, true);
 		CurrentManga->SetProgress(progress);

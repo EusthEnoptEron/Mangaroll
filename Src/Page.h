@@ -31,6 +31,7 @@ namespace OvrMangaroll {
 			_HighOffset(0),
 			_Origin(PLACING_NONE),
 			_DisplayTime(0),
+			_Loaded(false),
 			_ATexture(NULL)
 		{
 			_Prog = *ShaderManager::Instance()->Get(PAGE_SHADER_NAME);
@@ -79,6 +80,7 @@ namespace OvrMangaroll {
 		void UpdateStates(float);
 		
 		GlProgram _Prog;
+		bool _Loaded;
 	protected:
 
 		void CreateMesh(void);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "App.h"
+#include "Kernel\OVR_Threads.h"
 
 using namespace OVR;
 namespace OvrMangaroll {
@@ -38,6 +39,21 @@ namespace OvrMangaroll {
 	class AppState {
 	public:
 		static GuideType Guide;
-
+		static App *Instance;
 	};
+
+	typedef void(*DownloadCallback)(void *buffer, int length, void *obj);
+	struct DownloadMeta {
+		String url;
+		void *target;
+		DownloadCallback callback;
+	};
+
+	class Web {
+	public:
+		static void *DownloadFn(Thread *thread, void *p);
+		static Thread *Download(String url, DownloadCallback cb, void *obj);
+	};
+
+
 }

@@ -9,6 +9,7 @@
 #include "UI\UIImage.h"
 #include "VRMenuComponent.h"
 #include "AsyncTexture.h"
+#include "MangaProvider.h"
 
 using namespace OVR;
 namespace OvrMangaroll {
@@ -64,7 +65,8 @@ namespace OvrMangaroll {
 	public:
 		MangaSelectorComponent(OvrGuiSys &guiSys);
 		virtual ~MangaSelectorComponent() { }
-		void AddManga(Manga &manga);
+
+		void SetProvider(MangaProvider &provider);
 		void AddToMenu(UIMenu *menu, UIObject *parent);
 
 		void SetOnSelectManga(void(*cb)(Manga*, void*), void* obj) {
@@ -87,7 +89,6 @@ namespace OvrMangaroll {
 		void OnTouchUp(VrInput input);
 		void OnTouchMove(VrInput input);
 
-		Array<Manga *> _Mangas;
 		UIMenu *_Menu;
 		UIObject *_Parent;
 		UIContainer *_Container;
@@ -104,6 +105,7 @@ namespace OvrMangaroll {
 		float _TouchStartTime;
 		bool _IsTouching;
 		float _PanelHeight;
+		MangaProvider *_Provider;
 	};
 
 	class MangaSelectionView : public View {
@@ -134,6 +136,9 @@ namespace OvrMangaroll {
 		MangaSelectorComponent *_Selector;
 		UIContainer *_SelectorContainer;
 		AsyncTexture *_AsyncTex;
+
+		LocalMangaProvider _LocalMangaProvider;
+		RemoteMangaProvider _NProvider;
 	};
 
 

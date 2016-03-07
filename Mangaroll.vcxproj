@@ -77,7 +77,9 @@
     <ClCompile Include="Src\ViewManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="assets\TransparentMangaPage.frag" />
     <ClInclude Include="Src\AsyncTexture.h" />
+    <ClInclude Include="Src\GazeUpdateComponent.h" />
     <ClInclude Include="Src\GlObject.h" />
     <ClInclude Include="Src\Helpers.h" />
     <ClInclude Include="Src\Manga.h" />

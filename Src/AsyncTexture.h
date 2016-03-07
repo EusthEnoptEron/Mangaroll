@@ -25,7 +25,7 @@ namespace OvrMangaroll {
 		TEXTURE_UPLOADED = 1 << 1
 	};
 
-	typedef void(*QueueCb)(void*);
+	typedef void(*QueueCb)(Thread*,void*);
 
 	class AsyncTexture {
 	public:
@@ -54,13 +54,14 @@ namespace OvrMangaroll {
 		// # THREADS
 
 		// Load file from the Internet
-		static void DownloadFile(void *v);
-
+		static void DownloadFile(Thread *, void *v);
+		static void DownloadFileCallback(void *buffer, int length, void *p);
 		// Load file from the file system
-		static void LoadFile(void *v);
+		static void LoadFile(Thread *, void *v);
 
 		// Upload file to the graphics card
-		static void UploadTexture(void *v);
+		static void UploadTexture(Thread *, void *v);
+
 
 		// Prepare a buffer for upload to the graphics card
 		void ConsumeBuffer(unsigned char *buffer, int length);

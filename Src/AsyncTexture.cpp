@@ -7,6 +7,7 @@
 #include <ctime>
 #include <OVR_Capture.h>
 #include "Kernel\OVR_String_Utils.h"
+#include "Helpers.h"
 
 using namespace OVR;
 
@@ -28,7 +29,7 @@ namespace OvrMangaroll {
 				void *obj;
 				sscanf(msg, "call %p %p", &cb, &obj);
 
-				cb(obj);
+				cb(thread, obj);
 			}
 		}
 		return NULL;
@@ -196,7 +197,15 @@ namespace OvrMangaroll {
 		_State = TEXTURE_LOADING;
 
 		// If local / remote...
-		S_Queue->PostPrintf("call %p %p", LoadFile, this);
+		
+		if (_Path.GetLengthI() > 7 && _Path.Substring(0, 7).CompareNoCase("http://") == 0) {
+			LOG("TEXTURE: %s is a URL", _Path.ToCStr());
+			S_Queue->PostPrintf("call %p %p", DownloadFile, this);
+		}
+		else {
+			LOG("TEXTURE: %s is a local resource", _Path.ToCStr());
+			S_Queue->PostPrintf("call %p %p", LoadFile, this);
+		}
 	}
 
 	void AsyncTexture::Loaded2Displayed() {
@@ -315,7 +324,7 @@ namespace OvrMangaroll {
 
 
 	// ------- THREAD FUNCTIONS --------
-	void AsyncTexture::LoadFile(void *v) {
+	void AsyncTexture::LoadFile(Thread *thread, void *v) {
 
 		AsyncTexture *tex = (AsyncTexture *)v;
 		WARN("%s LOAD FILE", tex->_Path.ToCStr());
@@ -332,38 +341,23 @@ namespace OvrMangaroll {
 		tex->_ThreadEvents |= BUFFER_FILLED;
 	}
 
-	void AsyncTexture::DownloadFile(void *v) {
+	void AsyncTexture::DownloadFile(Thread *thread, void *v) {
 		AsyncTexture *tex = (AsyncTexture *)v;
 
-		// JNIEnv *env;
-		// ovr_AttachCurrentThread(page->_Java->Vm, &env, NULL);
-
-		// page->_Clazz = env->GetObjectClass(page->_Java->ActivityObject);
-		// page->_LoadHttpUrl = env->GetStaticMethodID( page->_Clazz, "LoadHttpUrl", "(Ljava/lang/String;)[B");		
-
-
-		// // Download stuff
-		// jstring jstr = env->NewStringUTF( page->_Path.ToCStr() );
-
-		// jbyteArray arr = (jbyteArray) env->CallStaticObjectMethod(page->_Clazz, page->_LoadHttpUrl, jstr);
-
-		// int count = env->GetArrayLength(arr);
-
-		// // Copy array
-		// void *buffer = env->GetPrimitiveArrayCritical(arr, 0);
-		// page->ConsumeBuffer((unsigned char*)buffer, count);
-
-		// // Clean up
-		// env->ReleasePrimitiveArrayCritical(arr, buffer, 0);
-		// env->DeleteLocalRef(jstr);
-		// env->DeleteLocalRef(arr);
-
-		// ovr_DetachCurrentThread(page->_Java->Vm);
-
+		DownloadMeta *meta = new DownloadMeta();
+		meta->callback = DownloadFileCallback;
+		meta->target = v;
+		meta->url = tex->_Path;
+		Web::DownloadFn(thread, meta);
 		tex->_ThreadEvents |= BUFFER_FILLED;
 	}
 
-	void AsyncTexture::UploadTexture(void *v) {
+	void AsyncTexture::DownloadFileCallback(void *buffer, int length, void *p) {
+		AsyncTexture *tex = (AsyncTexture *)p;
+		tex->ConsumeBuffer((unsigned char *)buffer, length);
+	}
+
+	void AsyncTexture::UploadTexture(Thread *, void *v) {
 		OVR_CAPTURE_CPU_ZONE(UploadTexture);
 
 		AsyncTexture *tex = (AsyncTexture *)v;

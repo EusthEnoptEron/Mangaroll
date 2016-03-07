@@ -75,6 +75,7 @@ void Mangaroll::Configure( ovrSettings & settings )
 void Mangaroll::OneTimeInit( const char * fromPackage, const char * launchIntentJSON, const char * launchIntentURI )
 {
 	OVR::Capture::InitForRemoteCapture();
+	AppState::Instance = app;
 
 	OVR_UNUSED( fromPackage );
 	OVR_UNUSED( launchIntentJSON );
