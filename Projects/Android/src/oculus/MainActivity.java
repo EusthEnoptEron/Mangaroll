@@ -26,6 +26,11 @@ public class MainActivity extends VrActivity {
 	/** Load jni .so on initialization */
 	static {
 		Log.d(TAG, "LoadLibrary");
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		System.loadLibrary("mangaroll");
 	}
 

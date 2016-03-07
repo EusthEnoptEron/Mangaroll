@@ -1,8 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Mangaroll</string>
-    <string name="action_settings">Settings</string>
-    <string name="hello_world">Hello world!</string>
-
+ <string
+     name="app_name"
+     description="Mangaroll -- mmm!"
+     >Mangaroll</string>
+  <string
+      name="action_settings"
+      description="The name of the settings menu."
+      >Settings</string>
+  <string
+      name="media_not_found"
+      description="The message displayed when no media found on the phone."
+      >There are no videos on your phone. Please insert the SD card included with your Gear VR.</string>
+  <string
+      name="playback_failed"
+      description="The message displayed when an existing media file fails to play."
+      >
+    Failed to load media for playback.
+  </string>
 </resources>

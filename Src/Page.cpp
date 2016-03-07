@@ -14,22 +14,26 @@ namespace OvrMangaroll {
 
 	Page::~Page(void)
 	{
-		if(_LoadState == LoadState::LOADED) {
-			UnloadTexture();
-
-			//Buffer.FreeData();
-			free(Buffer);
+		if (_ATexture->GetState() >= TEXTURE_LOADED) {
 			_Geometry.Free();
 		}
-		
+		_ATexture->Unload();
 	}
 
 	Page *Page::GetNext() {
 		return _Next;
 	}
 
+	void Page::SetPrev(Page *p) {
+		_Prev = p;
+
+		if (_ATexture->GetState() >= TEXTURE_LOADED) {
+			p->SetHighOffset(_Offset);
+		}
+	}
+
 	bool Page::IsLoaded() {
-		return _LoadState == LoadState::LOADED;
+		return _ATexture->GetState() >= TEXTURE_LOADED;
 	}
 
 	bool Page::IsVisible() {
@@ -53,34 +57,44 @@ namespace OvrMangaroll {
 	void Page::UpdateStates(float angle) {
 		_DisplayState = DisplayState::INVISIBLE;
 
-		float pixelStart = angle * PIXELS_PER_DEGREE - 60 * PIXELS_PER_DEGREE;
-		float pixelEnd   = angle * PIXELS_PER_DEGREE + 60 * PIXELS_PER_DEGREE;
+		float pixelStart = angle * PIXELS_PER_DEGREE - 90 * PIXELS_PER_DEGREE;
+		float pixelEnd   = angle * PIXELS_PER_DEGREE + 90 * PIXELS_PER_DEGREE;
+		bool textureLoaded = _ATexture->GetState() >= TEXTURE_LOADED;
 
 		if(_Positionable) {
-			int right = (_Offset + _Width);
+			int left = (_Offset + _Width);
+
+			bool initialIsVisible = (_Origin == PLACING_BOTTOM || textureLoaded)
+				? _Offset > pixelStart && _Offset < pixelEnd // Right end within view
+				: _HighOffset > pixelStart && _HighOffset < pixelEnd; // left end within view
+
+			// "On-Load" if unloaded
+			Load();
 
 			// If user's view is inside the valid range...
-			if((_Offset > pixelStart && _Offset < pixelEnd) || (_LoadState == LoadState::LOADED && right > pixelStart && right < pixelEnd)) {
+			if (initialIsVisible || (textureLoaded && left > pixelStart && left < pixelEnd)) {
+
+			
 				_DisplayState = DisplayState::VISIBLE;
 
-				if(_LoadState == LoadState::LOADED) {
-					LoadTexture();
+				if (_ATexture->GetState() == TEXTURE_UNLOADED) {
+					_ATexture->Load();
+				} else if (_ATexture->GetState() == TEXTURE_LOADED) {
+					_ATexture->Display();
 				}
 
-				// Load if unloaded
-				Load();
 			} else {
 				// Otherwise - disappear!
 				_DisplayState = DisplayState::INVISIBLE;
 
-				if(_LoadState == LoadState::LOADED) {
-					UnloadTexture();
+				_ATexture->Hide();
 
+				if (_ATexture->GetFutureState() != TEXTURE_UNLOADED) {
 					float degreeStart = _Offset / PIXELS_PER_DEGREE;
-					if(abs(angle - degreeStart) > 720) {
-						free(Buffer);
+					if (abs(angle - degreeStart) > 720) {
+						_ATexture->Unload();
 						_Geometry.Free();
-						_LoadState = LoadState::UNLOADED;
+						_Loaded = false;
 					}
 				}
 				//LOG("DONT DRAW %s", _Path.ToCStr());
@@ -90,8 +104,10 @@ namespace OvrMangaroll {
 		}
 	}
 
-	void Page::Update(float angle) {
-		UpdateStates(angle);
+	void Page::Update(float angle, bool onlyVisual) {
+		if (!onlyVisual) {
+			UpdateStates(angle);
+		}
 
 		if(_DisplayState == DisplayState::VISIBLE) {
 			if(_Selected && AppState::Guide >= GuideType::ENLARGE) {
@@ -104,9 +120,6 @@ namespace OvrMangaroll {
 				float distance = AppState::Guide == GuideType::ENLARGE ? 0.2f : 0.4f;
 
 				Vector3f targetPos = Vector3f(-x, 0.0f, -z) * distance;
-
-				Position = Position.Lerp(targetPos, Time::Delta * 10);
-				
 				if(AppState::Guide == GuideType::FOLLOW) {
 					float maxAngle = atan( (HEIGHT / 2) / RADIUS );
 					float verticalAngle = Acos(HMD::Direction.ProjectToPlane(Vector3f(0.0f, 1.0f, 0.0f)).Length());
@@ -114,9 +127,11 @@ namespace OvrMangaroll {
 					if(HMD::Direction.y < 0) verticalAngle *= -1;
 
 					float verticalShift = fmax(-1, fmin(1, verticalAngle / maxAngle));
-					Position += (-verticalShift * (HEIGHT / 24) * Vector3f(0, 1, 0));
 
+					targetPos += (-verticalShift * (HEIGHT / 3) * Vector3f(0, 1, 0));
 				}
+				Position = Position.Lerp(targetPos, Time::Delta * 10);
+
 				Touch();
 			} else {
 				Position = Position.Lerp(Vector3f::ZERO, Time::Delta * 10);
@@ -125,138 +140,91 @@ namespace OvrMangaroll {
 		}
 	}
 
-	void Page::UnloadTexture() {
-		if(_TextureLoaded) {
-			glDeleteTextures(1, &_Texture.texture);
-			_TextureLoaded = false;
-		}
-	}
-
-	void Page::LoadTexture() {
-		if(!_TextureLoaded) {
-			_Texture = LoadRGBATextureFromMemory(Buffer, _BufferWidth, _BufferHeight, true);
-			//_Texture = LoadTextureFromBuffer( _Path.ToCStr(), Buffer, 
-			//				TextureFlags_t( /*TEXTUREFLAG_NO_MIPMAPS */TEXTUREFLAG_NO_DEFAULT ), _RealWidth, _RealHeight );
-
-			glBindTexture( _Texture.target, _Texture.texture );
-			glGenerateMipmap( _Texture.target );
-			glTexParameteri( _Texture.target, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-
-			_TextureLoaded = true;
-		}
-	}
-
-
-	void *LocalPage::LoadFile(Thread *thread, void *v) {
-		LocalPage *page = (LocalPage *)v;
-
-		MemBufferFile bufferFile = MemBufferFile( page->GetPath().ToCStr() );
-		MemBuffer fileBuffer = bufferFile.ToMemBuffer();
-		
-		page->ConsumeBuffer((unsigned char*)(fileBuffer.Buffer), fileBuffer.Length);
-
-		fileBuffer.FreeData();
-		bufferFile.FreeData();
-
-		return NULL;
-	}
-
-	void Page::ConsumeBuffer(unsigned char* buffer, int length) {
-		int comp;
-		Buffer = stbi_load_from_memory(buffer, length, &(_RealWidth), &(_RealHeight), &comp, 4);
-		
-		if(Buffer != NULL) {
-			WARN("BUFFER COULD BE LOADED: %d/%d", _RealWidth, _RealHeight);
-			if(_RealWidth > 1500) {
-				unsigned char *oldBuffer = Buffer;
-				//Buffer = ScaleImageRGBA(Buffer, _RealWidth, _RealHeight, 1024, 1024, ImageFilter::IMAGE_FILTER_CUBIC, true);
-				Buffer = QuarterImageSize(Buffer, _RealWidth, _RealHeight, false);
-
-				_BufferWidth = OVR::Alg::Max( 1, _RealWidth >> 1 );
-				_BufferHeight = OVR::Alg::Max( 1, _RealHeight >> 1 );
-			/*	_BufferWidth = 1024;
-				_BufferHeight = 1024;*/
-
-				free(oldBuffer);
-			} else {
-				_BufferWidth = _RealWidth;
-				_BufferHeight = _RealHeight;
-			}
-		} else {
-		}
-	}
-
 	void Page::Load() {
-		if(this->_LoadState == LoadState::UNLOADED) {
-			LOG("LOADING %s", _Path.ToCStr());
-			// Only if needed...
-			this->_LoadState = LoadState::LOADING;
+		if (!_Loaded && _ATexture->GetState() == TEXTURE_LOADED) {
+			_Loaded = true;
 
-			_LoadThread = Thread( Thread::CreateParams( GetWorker(), this ) );
-			_LoadThread.Start();
-		}
+			// Calculate real width
+			_Width = REFERENCE_HEIGHT / _ATexture->GetHeight() * _ATexture->GetWidth();
+			_AngularWidth  = _Width / PIXELS_PER_DEGREE;
 
-		if(this->_LoadState == LoadState::LOADING) {
-			if(_LoadThread.IsFinished()) {
-				WARN("FINISHED!!! %s", _Path.ToCStr());
-
-				LoadTexture();
-
-				// Calculate real width
-				_Width = REFERENCE_HEIGHT / _RealHeight * _RealWidth;
-				_AngularWidth  = _Width / PIXELS_PER_DEGREE;
-
-				if(_Next != NULL) {
-					_Next->SetOffset(_Offset + _Width);
-				}
-
-				LOG("LOADED %s", _Path.ToCStr());
-				CreateMesh();
-
-				this->_LoadState = LoadState::LOADED;
+			if (_Origin == PLACING_TOP) {
+				// Coming from the top!
+				_Offset = _HighOffset - _Width;
+				_AngularOffset = _Offset / PIXELS_PER_DEGREE;
 			}
+
+			if(_Next != NULL) {
+				_Next->SetOffset(_Offset + _Width);
+			}
+
+			if (_Prev != NULL) {
+				_Prev->SetHighOffset(_Offset);
+			}
+
+			LOG("LOADED %s", _Path.ToCStr());
+			CreateMesh();
+
+			_DisplayTime = Time::Elapsed;
 		}
 	}
 
+	void Page::Reset(void) {
+		_Positionable = false;
+		_Origin = PLACING_NONE;
+		_Offset = 0;
+		_AngularOffset = 0;
+		_HighOffset = 0;
+		_Loaded = false;
 
-	Thread::ThreadFn Page::GetWorker() {
-		_Texture = LoadTextureFromApplicationPackage(_Path.ToCStr(), TextureFlags_t( TEXTUREFLAG_NO_DEFAULT ), _RealWidth, _RealHeight);
-		_TextureLoaded = true;
-		return NULL;
+		if (_ATexture->GetState() > TEXTURE_LOADED) {
+			_Geometry.Free();
+		}
+		_ATexture->Unload();
+
+		_DisplayState = DisplayState::INVISIBLE;
 	}
-
-	Thread::ThreadFn LocalPage::GetWorker() {
-		return &LocalPage::LoadFile;
-	}
-
-
 
 	void Page::SetOffset(int offset) {
-		_Offset = offset;
-		_AngularOffset = _Offset / PIXELS_PER_DEGREE;
-		_Positionable = true;
+		if (_Origin == PLACING_NONE) {
+			_Offset = offset;
+			_AngularOffset = _Offset / PIXELS_PER_DEGREE;
+			_Positionable = true;
+			_Origin = PLACING_BOTTOM;
+		}
+	}
+
+	void Page::SetHighOffset(int offset) {
+		if (_Origin == PLACING_NONE) {
+			_HighOffset = offset;
+			_Positionable = true;
+			_Origin = PLACING_TOP;
+		}
+		
 	}
 
 	void Page::Draw(const Matrix4f &m) {
-		if(this->_DisplayState == DisplayState::VISIBLE && this->_LoadState == LoadState::LOADED) {
+		if(this->_DisplayState == DisplayState::VISIBLE && _ATexture->GetState() == TEXTURE_APPLIED) {
 			this->UpdateModel();
 
-			//LOG("DRAW %s", _Path.ToCStr());
-
 			// Draw
-			//glUniform1i(glGetUniformLocation( prog.program, "IsSelected" ), this->_Selected);
+			glUniform1f(glGetUniformLocation( _Prog.program, "DisplayTime" ), Time::Elapsed - this->_DisplayTime);
 			glUniformMatrix4fv( _Prog.uModel, 1, GL_TRUE, (m * Mat).M[0]);
 
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(_Texture.target, _Texture.texture);
+			glBindTexture(_ATexture->GetTarget(), _ATexture->Display());
 			_Geometry.Draw();
 			glBindVertexArray( 0 );
-			glBindTexture(_Texture.target, 0);
+			glBindTexture(_ATexture->GetTarget(), 0);
 		}
 	}
 
 	void Page::SetNext(Page *next) {
 		_Next = next;
+
+		if (_ATexture->GetState() >= TEXTURE_LOADED) {
+			next->SetOffset(_Offset + _Width);
+		}
 	}
 
 	
@@ -274,9 +242,9 @@ namespace OvrMangaroll {
 		attribs.uv0.Resize( Page::SEGMENTS * 2 );
 		indices.Resize( (Page::SEGMENTS - 1) * 2 * 3 ); // Number of faces * triangles per face * vertices per triangle
 
-		float widthInRadians = DegreeToRad(_Width / PIXELS_PER_DEGREE);
+		float widthInRadians = DegreeToRad(_AngularWidth);
 		float radianOffset = Mathf::Pi / 2;// - widthInRadians / 2; // Makes sure this thing is centered
-		radianOffset += DegreeToRad(_Offset / PIXELS_PER_DEGREE);
+		radianOffset += DegreeToRad(_AngularOffset);
 
 		float y0 = -Page::HEIGHT / 2.0f;
 		float y1 = +Page::HEIGHT / 2.0f;
@@ -289,8 +257,8 @@ namespace OvrMangaroll {
 
 			attribs.position[i * 2] = Vector3f(x, y0, z);
 			attribs.position[i * 2 + 1] = Vector3f(x, y1, z);
-			LOG("V1: (%.2f, %.2f, %.2f)", x, y0, z);
-			LOG("V2: (%.2f, %.2f, %.2f)", x, y1, z);
+			//LOG("V1: (%.2f, %.2f, %.2f)", x, y0, z);
+			//LOG("V2: (%.2f, %.2f, %.2f)", x, y1, z);
 
 			attribs.uv0[i * 2] = Vector2f(1 - progress, 1);
 			attribs.uv0[i * 2 + 1] = Vector2f(1 - progress, 0);
@@ -311,7 +279,5 @@ namespace OvrMangaroll {
 
 
 		_Geometry.Create(attribs, indices);
-
-		LOG("CREATED MESH %s (w=%d)", _Path.ToCStr(), _RealWidth);
 	}
 }
