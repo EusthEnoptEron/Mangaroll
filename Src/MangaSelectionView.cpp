@@ -47,7 +47,7 @@ namespace OvrMangaroll {
 		_MainContainer->AddToMenu(_Menu);
 		_MainContainer->SetLocalPosition(Vector3f(0, 0, -1));
 		_MainContainer->AddComponent(gazeComponent);
-
+		
 		_SelectorContainer = new UIContainer(gui);
 		_SelectorContainer->AddToMenu(_Menu);
 		_SelectorContainer->SetLocalPosition(Vector3f(0, 0, -1));
@@ -80,17 +80,26 @@ namespace OvrMangaroll {
 		_RemoteCategoryComponent.SetCallback(OnRemoteCategory, this);
 
 
-
 		_Selector = new MangaSelectorComponent(gui);
 		_Selector->AddToMenu(_Menu, _SelectorContainer);
 		_SelectorContainer->SetLocalPosition(Vector3f(0, -0.3f, -1));
 		_Selector->SetOnSelectManga(OnSelectMangaLocal, this);
-		_Selector->SetProvider(_NProvider);
+		//_Selector->SetProvider(_NProvider);
 		//_Selector->SetProvider(_LocalMangaProvider);
 	}
 
 	void MangaSelectionView::OnLocalCategory(void *p) {
 		MangaSelectionView *self = (MangaSelectionView *)p;
+
+		if (self->_LocalCategoryComponent.Selected == self->_RemoteCategoryComponent.Selected) {
+			WARN("ANIMATE");
+			self->_Mangaroll.Animator.AddTask(
+				new AnimatePosition(
+				self->_MainContainer->GetMenuObject(),
+				self->_MainContainer->GetLocalPosition() + Vector3f(0, 0.2f, 0),
+				0.2f
+			));
+		}
 
 		if (!self->_LocalCategoryComponent.Selected) {
 			self->_LocalCategoryComponent.Selected = true;
@@ -102,6 +111,16 @@ namespace OvrMangaroll {
 	}
 	void MangaSelectionView::OnRemoteCategory(void *p) {
 		MangaSelectionView *self = (MangaSelectionView *)p;
+		
+		if (self->_LocalCategoryComponent.Selected == self->_RemoteCategoryComponent.Selected) {
+			WARN("ANIMATE");
+			self->_Mangaroll.Animator.AddTask(
+				new AnimatePosition(
+				self->_MainContainer->GetMenuObject(),
+				self->_MainContainer->GetLocalPosition() + Vector3f(0, 0.2f, 0),
+				0.2f
+			));
+		}
 
 		if (!self->_RemoteCategoryComponent.Selected) {
 			self->_RemoteCategoryComponent.Selected = true;
@@ -434,7 +453,7 @@ namespace OvrMangaroll {
 
 	eMsgStatus MangaSelectorComponent::OnEvent_Impl(OvrGuiSys & guiSys, VrFrame const & vrFrame,
 		VRMenuObject * self, VRMenuEvent const & event) {
-		if (_Provider == NULL) return;
+		if (_Provider == NULL) return MSG_STATUS_ALIVE;
 
 		Vector2f diff();
 		switch (event.EventType) {

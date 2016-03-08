@@ -49,6 +49,7 @@ Mangaroll::Mangaroll()
 	, Carousel(this)
 	, MangaSettingsMenu(this)
 	, MangaSelectionMenu(*this)
+	, Animator()
 	, SoundEffectContext( NULL )
 	, SoundEffectPlayer( NULL )
 	, Locale( NULL )
@@ -157,6 +158,7 @@ Matrix4f Mangaroll::Frame( const VrFrame & vrFrame )
 
 	
 	AsyncTextureManager::Instance().Update();
+	Animator.Progress(Time::Delta);
 
 	// FRAME STEPS
 	CenterEyeViewMatrix = ViewMgr.Frame(vrFrame);

@@ -160,7 +160,6 @@ namespace OvrMangaroll {
 
 		static void OnLocalCategory(void *p);
 		static void OnRemoteCategory(void *p);
-
 	};
 
 

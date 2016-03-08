@@ -56,6 +56,7 @@ public:
 	MangaCarousel Carousel;
 	MangaSettingsView MangaSettingsMenu;
 	MangaSelectionView MangaSelectionMenu;
+	AnimationManager Animator;
 private:
 	ovrSoundEffectContext * SoundEffectContext;
 	OvrGuiSys::SoundEffectPlayer * SoundEffectPlayer;
