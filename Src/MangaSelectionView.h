@@ -10,7 +10,7 @@
 #include "VRMenuComponent.h"
 #include "AsyncTexture.h"
 #include "MangaProvider.h"
-
+#include "GazeUpdateComponent.h"
 using namespace OVR;
 namespace OvrMangaroll {
 
@@ -19,6 +19,20 @@ namespace OvrMangaroll {
 	class Manga;
 	class MangaSelectorComponent;
 
+	class CategoryComponent : public ClickableComponent {
+	public:
+		CategoryComponent();
+		virtual ~CategoryComponent() { }
+		bool Selected;
+		Vector4f ColNormal;
+		Vector4f ColFocused;
+		Vector4f ColHighlight;
+	protected:
+		virtual eMsgStatus _OnEvent(OvrGuiSys & guiSys, VrFrame const & vrFrame,
+			VRMenuObject * self, VRMenuEvent const & event);
+	private:
+		bool _Focused;
+	};
 
 	class MangaPanelComponent : public VRMenuComponent {
 	public:
@@ -133,12 +147,20 @@ namespace OvrMangaroll {
 		UIContainer *_MainContainer;
 		UILabel *_LocalSrcLabel;
 		UILabel *_RemoteSrcLabel;
+
 		MangaSelectorComponent *_Selector;
 		UIContainer *_SelectorContainer;
-		AsyncTexture *_AsyncTex;
+		UITexture _FillTexture;
 
 		LocalMangaProvider _LocalMangaProvider;
 		RemoteMangaProvider _NProvider;
+
+		CategoryComponent _LocalCategoryComponent;
+		CategoryComponent _RemoteCategoryComponent;
+
+		static void OnLocalCategory(void *p);
+		static void OnRemoteCategory(void *p);
+
 	};
 
 

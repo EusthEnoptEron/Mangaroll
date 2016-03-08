@@ -66,6 +66,7 @@
     <ClCompile Include="Src\Helpers.cpp" />
     <ClCompile Include="Src\Manga.cpp" />
     <ClCompile Include="Src\MangaCarousel.cpp" />
+    <ClCompile Include="Src\MangaProvider.cpp" />
     <ClCompile Include="src\Mangaroll.cpp" />
     <ClCompile Include="Src\MangaSelectionView.cpp" />
     <ClCompile Include="Src\MangaSettingsView.cpp" />
@@ -84,6 +85,7 @@
     <ClInclude Include="Src\Helpers.h" />
     <ClInclude Include="Src\Manga.h" />
     <ClInclude Include="Src\MangaCarousel.h" />
+    <ClInclude Include="Src\MangaProvider.h" />
     <ClInclude Include="src\Mangaroll.h" />
     <ClInclude Include="Src\MangaSelectionView.h" />
     <ClInclude Include="Src\MangaSettingsView.h" />

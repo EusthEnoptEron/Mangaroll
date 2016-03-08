@@ -44,13 +44,13 @@ namespace OvrMangaroll
 {
 
 Mangaroll::Mangaroll()
-	: CurrentManga()
+	: GuiSys( OvrGuiSys::Create() )
+	, CurrentManga(NULL)
 	, Carousel(this)
 	, MangaSettingsMenu(this)
 	, MangaSelectionMenu(*this)
 	, SoundEffectContext( NULL )
 	, SoundEffectPlayer( NULL )
-	, GuiSys( OvrGuiSys::Create() )
 	, Locale( NULL )
 	, ViewMgr()
 	, _MenuOpen(false)

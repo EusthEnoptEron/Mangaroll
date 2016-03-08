@@ -45,6 +45,9 @@ public:
 	virtual OVR::Matrix4f Frame( const OVR::VrFrame & vrFrame );
 	virtual OVR::Matrix4f DrawEyeView( const int eye, const float fovDegreesX, const float fovDegreesY, ovrFrameParms & frameParms );
 
+private:
+	OvrGuiSys *		GuiSys;
+public:
 	void SelectManga();
 	void ShowManga(Manga *manga);
 	class ovrLocale &	GetLocale() { return *Locale; }
@@ -56,7 +59,6 @@ public:
 private:
 	ovrSoundEffectContext * SoundEffectContext;
 	OvrGuiSys::SoundEffectPlayer * SoundEffectPlayer;
-	OvrGuiSys *		GuiSys;
 	class OVR::ovrLocale *	Locale;
 	ovrMatrix4f			CenterEyeViewMatrix;
 	ViewManager ViewMgr;

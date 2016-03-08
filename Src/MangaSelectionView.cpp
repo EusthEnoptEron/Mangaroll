@@ -16,9 +16,11 @@ namespace OvrMangaroll {
 		, _LocalSrcLabel(NULL)
 		, _RemoteSrcLabel(NULL)
 		, _Selector(NULL)
-		, _AsyncTex(NULL)
+		, _FillTexture()
 		, _LocalMangaProvider()
 		, _NProvider("http://192.168.1.39:3000/browse/%d", "http://192.168.1.39:3000/show/%d")
+		, _LocalCategoryComponent()
+		, _RemoteCategoryComponent()
 	{
 
 	}
@@ -51,35 +53,33 @@ namespace OvrMangaroll {
 		_SelectorContainer->SetLocalPosition(Vector3f(0, 0, -1));
 		_SelectorContainer->AddComponent(gazeComponent);
 
-		UITexture *fill = new UITexture();
-		fill->LoadTextureFromApplicationPackage("assets/fill.png");
+		_FillTexture.LoadTextureFromApplicationPackage("assets/fill.png");
+
 
 		_LocalSrcLabel = new UILabel(gui);
 		_LocalSrcLabel->AddToMenu(_Menu, _MainContainer);
-		_LocalSrcLabel->SetLocalPosition(Vector3f(0.1f, 0, 0));
+		_LocalSrcLabel->SetLocalPosition(Vector3f(-0.12f, 0, 0));
 		_LocalSrcLabel->SetText("Local");
 		_LocalSrcLabel->SetFontScale(0.5f);
 		_LocalSrcLabel->CalculateTextDimensions();
+		_LocalSrcLabel->SetImage(0, SURFACE_TEXTURE_DIFFUSE, _FillTexture, 100, 50);
+		_LocalSrcLabel->SetColor(Vector4f(0, 0, 0, 1));
+		_LocalSrcLabel->AddComponent(&_LocalCategoryComponent);
+		//_LocalCategoryComponent.Selected = true;
+		_LocalCategoryComponent.SetCallback(OnLocalCategory, this);
 
 		_RemoteSrcLabel = new UILabel(gui);
 		_RemoteSrcLabel->AddToMenu(_Menu, _MainContainer);
-		_RemoteSrcLabel->SetLocalPosition(Vector3f(0, 0, 0));
+		_RemoteSrcLabel->SetLocalPosition(Vector3f(0.12f, 0, 0));
 		_RemoteSrcLabel->SetText("Online");
 		_RemoteSrcLabel->SetFontScale(0.5f);
 		_RemoteSrcLabel->CalculateTextDimensions();
+		_RemoteSrcLabel->SetImage(0, SURFACE_TEXTURE_DIFFUSE, _FillTexture, 100, 50);
+		_RemoteSrcLabel->SetColor(Vector4f(0, 0, 0, 1));
+		_RemoteSrcLabel->AddComponent(&_RemoteCategoryComponent);
+		_RemoteCategoryComponent.SetCallback(OnRemoteCategory, this);
 
-		UIRectf r = _LocalSrcLabel->GetPaddedRect();
-		WARN("[%.2f, %.2f, %.2f, %.2f]", r.Left, r.Top, r.Right, r.Bottom);
 
-		_RemoteSrcLabel->AlignTo(RectPosition::LEFT, _LocalSrcLabel, RectPosition::RIGHT);
-	
-		//UIImage *testImage = new UIImage(gui);
-		//testImage->AddToMenu(_Menu, _MainContainer);
-		//testImage->SetLocalPosition(Vector3f(0.5f, 0, 0));
-		//
-		//// Load image d00d
-		//_AsyncTex = new AsyncTexture("sdcard/Manga/Nagasarete_Airantou_v02[Raw]/na02_000.jpg", 1);
-		//testImage->SetImage(0, SURFACE_TEXTURE_DIFFUSE, _AsyncTex->Display(), 100, 300);
 
 		_Selector = new MangaSelectorComponent(gui);
 		_Selector->AddToMenu(_Menu, _SelectorContainer);
@@ -87,6 +87,28 @@ namespace OvrMangaroll {
 		_Selector->SetOnSelectManga(OnSelectMangaLocal, this);
 		_Selector->SetProvider(_NProvider);
 		//_Selector->SetProvider(_LocalMangaProvider);
+	}
+
+	void MangaSelectionView::OnLocalCategory(void *p) {
+		MangaSelectionView *self = (MangaSelectionView *)p;
+
+		if (!self->_LocalCategoryComponent.Selected) {
+			self->_LocalCategoryComponent.Selected = true;
+			self->_RemoteCategoryComponent.Selected = false;
+
+			self->_Selector->SetProvider(self->_LocalMangaProvider);
+		}
+
+	}
+	void MangaSelectionView::OnRemoteCategory(void *p) {
+		MangaSelectionView *self = (MangaSelectionView *)p;
+
+		if (!self->_RemoteCategoryComponent.Selected) {
+			self->_RemoteCategoryComponent.Selected = true;
+			self->_LocalCategoryComponent.Selected = false;
+
+			self->_Selector->SetProvider(self->_NProvider);
+		}
 	}
 
 	void MangaSelectionView::OnSelectManga(Manga *manga) {
@@ -111,10 +133,6 @@ namespace OvrMangaroll {
 		return false;
 	}
 	Matrix4f MangaSelectionView::Frame(const VrFrame & vrFrame) {
-		if (_AsyncTex != NULL) {
-			_AsyncTex->Update();
-		}
-		 
 		return _Mangaroll.Carousel.Frame(vrFrame);
 	}
 	Matrix4f MangaSelectionView::GetEyeViewMatrix(const int eye) const {
@@ -238,7 +256,6 @@ namespace OvrMangaroll {
 					return MSG_STATUS_CONSUMED;
 				}
 				break;
-
 			default:
 				break;
 			}
@@ -352,7 +369,9 @@ namespace OvrMangaroll {
 		_Provider = &provider;
 		_Index = 0;
 
-		// TODO: clean panels
+		while (_UsedPanels.GetSizeI() > 0) {
+			_Panels.PushBack(_UsedPanels.Pop());
+		}
 	}
 
 	void MangaSelectorComponent::UpdatePositions(void) {
@@ -415,6 +434,8 @@ namespace OvrMangaroll {
 
 	eMsgStatus MangaSelectorComponent::OnEvent_Impl(OvrGuiSys & guiSys, VrFrame const & vrFrame,
 		VRMenuObject * self, VRMenuEvent const & event) {
+		if (_Provider == NULL) return;
+
 		Vector2f diff();
 		switch (event.EventType) {
 		case VRMENU_EVENT_FRAME_UPDATE:
@@ -437,6 +458,41 @@ namespace OvrMangaroll {
 		}
 
 		return eMsgStatus::MSG_STATUS_ALIVE;
+	}
+
+
+	// ########### CATEGORY COMPONENT ###########
+
+	CategoryComponent::CategoryComponent() 
+		: ClickableComponent(VRMenuEventFlags_t(VRMENU_EVENT_FRAME_UPDATE) | VRMENU_EVENT_FOCUS_GAINED | VRMENU_EVENT_FOCUS_LOST)
+		, Selected(false)
+		, ColNormal(0,0,0,1)
+		, ColFocused(.2, .2f, .4f, 1)
+		, ColHighlight(.4f, .4f, .8f, 1)
+		, _Focused(false)
+	{
+	}
+
+	eMsgStatus CategoryComponent::_OnEvent(OvrGuiSys & guiSys, VrFrame const & vrFrame,
+		VRMenuObject * self, VRMenuEvent const & event) {
+
+		switch (event.EventType) {
+		case VRMENU_EVENT_FOCUS_GAINED:
+			_Focused = true;
+			break;
+		case VRMENU_EVENT_FOCUS_LOST:
+			_Focused = false;
+			break;
+		case VRMENU_EVENT_FRAME_UPDATE:
+			self->SetColor(
+				Alg::Lerp(self->GetColor(), Selected ? ColHighlight : ( _Focused ? ColFocused : ColNormal ), Vector4f(vrFrame.DeltaSeconds * 10))
+			);
+			break;
+		default:
+			break;
+		}
+
+		return MSG_STATUS_ALIVE;
 	}
 
 
