@@ -9,7 +9,8 @@ namespace OvrMangaroll {
 	class GazeUpdaterComponent : public VRMenuComponent {
 	public:
 
-		GazeUpdaterComponent() : VRMenuComponent(VRMenuEventFlags_t(VRMENU_EVENT_FOCUS_GAINED) | VRMENU_EVENT_FOCUS_LOST | VRMENU_EVENT_FRAME_UPDATE) {
+		GazeUpdaterComponent() : VRMenuComponent(
+			VRMenuEventFlags_t(VRMENU_EVENT_FOCUS_GAINED) | VRMENU_EVENT_FOCUS_LOST | VRMENU_EVENT_FRAME_UPDATE) {
 
 		}
 	private:
@@ -18,10 +19,15 @@ namespace OvrMangaroll {
 			VRMenuObject * self, VRMenuEvent const & event) {
 			switch (event.EventType) {
 			case VRMENU_EVENT_FOCUS_GAINED:
-				guiSys.GetGazeCursor().ForceDistance(event.HitResult.t, eGazeCursorStateType::CURSOR_STATE_HILIGHT);
+				self->SetHilighted(true);
+			case VRMENU_EVENT_FRAME_UPDATE:
+				if (self->IsHilighted()) {
+					guiSys.GetGazeCursor().ForceDistance(event.HitResult.t, eGazeCursorStateType::CURSOR_STATE_HILIGHT);
+				}
+			case VRMENU_EVENT_FOCUS_LOST:
+				self->SetHilighted(false);
 			default:
 				return eMsgStatus::MSG_STATUS_ALIVE;
-
 				break;
 			}
 		}
@@ -29,6 +35,11 @@ namespace OvrMangaroll {
 
 	class ClickableComponent : public VRMenuComponent {
 	public:
+		ClickableComponent()
+			: ClickableComponent(VRMenuEventFlags_t())
+		{
+		}
+
 		ClickableComponent(VRMenuEventFlags_t flags)
 			: VRMenuComponent(VRMenuEventFlags_t(VRMENU_EVENT_FOCUS_GAINED) | VRMENU_EVENT_FOCUS_LOST | VRMENU_EVENT_TOUCH_DOWN | VRMENU_EVENT_TOUCH_UP | flags)
 			, _IsFocused(false)

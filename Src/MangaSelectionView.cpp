@@ -168,6 +168,9 @@ namespace OvrMangaroll {
 
 	MangaPanel::MangaPanel(OvrGuiSys &guiSys) 
 		: UIObject(guiSys)
+	, Width(100)
+	, Height(150)
+	, Border(10)
 	, _Cover(NULL) 
 	, _CoverTexture(NULL)
 	{
@@ -185,12 +188,11 @@ namespace OvrMangaroll {
 		VRMenuObjectParms parms(VRMENU_CONTAINER, Array< VRMenuComponent* >(), VRMenuSurfaceParms(),
 			"", pose, defaultScale, fontParms, menu->AllocId(),
 			VRMenuObjectFlags_t(), VRMenuObjectInitFlags_t(VRMENUOBJECT_INIT_FORCE_POSITION));
-
 		AddToMenuWithParms(menu, parent, parms);
 		Init();
 	}
 	void MangaPanel::SetSelector(MangaSelectorComponent *selector) {
-		_Component->Selector = selector;
+		_Selector = selector;
 	}
 
 	Manga *MangaPanel::GetManga() {
@@ -199,94 +201,58 @@ namespace OvrMangaroll {
 	void MangaPanel::SetManga(Manga *manga) {
 		_Manga = manga;
 		_Title->SetText(manga->Name);
-		_Component->_Manga = _Manga;
-		_Title->CalculateTextDimensions();
+		//_Title->CalculateTextDimensions();
 
-		_Cover->SetImage(0, SURFACE_TEXTURE_DIFFUSE, manga->GetCover()->Display(), 40, 60);
-		WARN("%.2f, %f", _Cover->GetWorldPosition().z, _Title->GetDimensions().x);
-		_Cover->AlignTo(RIGHT, _Title, LEFT);
-		_Cover->SetLocalPosition(_Cover->GetLocalPosition() + Vector3f(0, 0, 0.05f));
+		_Cover->SetImage(0, SURFACE_TEXTURE_DIFFUSE, manga->GetCover()->Display(), Width-Border, Height - (float(Border) / Width * Height));
+		/*VRMenuSurface & surf = _Cover->GetMenuObject()->GetSurface(0);
+		surf.SetClipUVs();*/
+		//_Cover->SetLocalPosition( Vector3f(25,-25,0) );
 
+		//_Cover->SetBorder(UIRectf(10.0f));
+		//_Cover->SetLocalPosition(_Cover->GetLocalPosition() + Vector3f(0, 0, 0.05f));
+
+	}
+
+	void MangaPanel::OnClick(void *p) {
+		MangaPanel *self = (MangaPanel *)p;
+
+		self->_Selector->SelectManga(self->_Manga);
 	}
 
 	void MangaPanel::Init(void) {
 		UITexture *_BGTexture = new UITexture();
 		_BGTexture->LoadTextureFromApplicationPackage("assets/fill.png");
+		this->AddFlags(VRMENUOBJECT_RENDER_HIERARCHY_ORDER);
 
 		_Background = new UIImage(GuiSys);
 		_Background->AddToMenu(Menu, this);
-		_Background->SetImage(0, eSurfaceTextureType::SURFACE_TEXTURE_DIFFUSE, *_BGTexture, 300, 50);
+		_Background->SetImage(0, eSurfaceTextureType::SURFACE_TEXTURE_DIFFUSE, *_BGTexture, Width, Height);
+		//_Background->GetMenuObject()->BuildDrawSurface
 		_Background->SetMargin(UIRectf(60.0f));
-		_Background->SetColor(Vector4f(0, 0, 0, 0.5f));
-		_Background->SetPadding(UIRectf(10));
+		_Background->SetColor(Vector4f(0, 0, 0, 1));
+		_Background->SetLocalPosition(Vector3f(0,0,-0.001f));
 
 		_Title = new UILabel(GuiSys);
-		_Title->AddToMenu(Menu, _Background);
+		_Title->AddToMenu(Menu, this);
 		_Title->SetText("");
-		_Title->SetTextOffset(Vector3f(0, 0, 0.04f));
-		_Title->SetFontParms(VRMenuFontParms(true, true, false, false, true, 0.5f, 0.4f, 0.5));
-		_Title->AddFlags(VRMENUOBJECT_DONT_HIT_ALL);
-		_Title->SetMargin(UIRectf(50, 0, 0, 0));
-		_Title->CalculateTextDimensions();
+		_Title->SetVisible(false);
+		//_Title->SetTextOffset(Vector3f(0, 0, 0.04f));
+		//_Title->SetFontParms(VRMenuFontParms(true, true, false, false, true, 0.5f, 0.4f, 0.5));
+		//_Title->AddFlags(VRMENUOBJECT_DONT_HIT_ALL);
+		//_Title->SetMargin(UIRectf(50, 0, 0, 0));
+		//_Title->CalculateTextDimensions();
 		
 		_Cover = new UIImage(GuiSys);
 		_Cover->AddToMenu(Menu, this);
 		_Cover->AddFlags(VRMENUOBJECT_DONT_HIT_ALL);
 		
-		_Component = new MangaPanelComponent(GuiSys);
+		_Component = new ClickableComponent();
+		_Component->SetCallback(OnClick, this);
 		AddComponent(new OvrDefaultComponent());
 		AddComponent(_Component);
 
 	}
 
-	//###########################################
-
-	MangaPanelComponent::MangaPanelComponent(OvrGuiSys &guiSys)
-		: VRMenuComponent(
-		VRMenuEventFlags_t(VRMENU_EVENT_TOUCH_DOWN) | VRMENU_EVENT_FOCUS_GAINED | VRMENU_EVENT_FOCUS_LOST | VRMENU_EVENT_TOUCH_UP)
-		, Selector(NULL)
-		, _Manga(NULL)
-		, _Gui(guiSys)
-		
-	{
-		
-	}
-
-	eMsgStatus MangaPanelComponent::OnEvent_Impl(OvrGuiSys & guiSys, VrFrame const & vrFrame,
-		VRMenuObject * self, VRMenuEvent const & event) {
-
-		if (Selector != NULL && _Manga != NULL)  {
-			switch (event.EventType) {
-			case VRMENU_EVENT_TOUCH_DOWN:
-				_Touched = _Focused;
-				break;
-			case VRMENU_EVENT_FOCUS_GAINED:
-				_Focused = true;
-				break;
-
-			case VRMENU_EVENT_FOCUS_LOST:
-				_Focused = false;
-				_Touched = false;
-				break;
-			case VRMENU_EVENT_TOUCH_UP:
-				if (_Touched) {
-					Selector->SelectManga(_Manga);
-					_Touched = false;
-					return MSG_STATUS_CONSUMED;
-				}
-				break;
-			default:
-				break;
-			}
-
-		}
-
-		return eMsgStatus::MSG_STATUS_ALIVE;
-	}
-
-	void MangaPanelComponent::AddToMenu(UIMenu *menu, UIObject *parent) {
-		
-	}
 	//############################################
 
 
@@ -322,7 +288,6 @@ namespace OvrMangaroll {
 		WARN("I/DEBUG NUM PANELS: %d", NUM_PANELS);
 		// Create panels
 		_Panels.Resize(NUM_PANELS);
-		_PanelComponents.Resize(NUM_PANELS);
 		for (int i = 0; i < NUM_PANELS; i++) {
 			_Panels[i] = new MangaPanel(_Gui);
 			_Panels[i]->AddToMenu(_Menu, _Container);

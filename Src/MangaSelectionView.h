@@ -34,23 +34,6 @@ namespace OvrMangaroll {
 		bool _Focused;
 	};
 
-	class MangaPanelComponent : public VRMenuComponent {
-	public:
-		MangaPanelComponent(OvrGuiSys &guiSys);
-		virtual ~MangaPanelComponent() { }
-		void AddToMenu(UIMenu *menu, UIObject *parent = NULL);
-		MangaSelectorComponent *Selector;
-		Manga *_Manga;
-	private:
-		virtual eMsgStatus OnEvent_Impl(OvrGuiSys & guiSys, VrFrame const & vrFrame,
-			VRMenuObject * self, VRMenuEvent const & event);
-		UIMenu *_Menu;
-		UIObject *_Parent;
-		OvrGuiSys &_Gui;
-		bool _Focused;
-		bool _Touched;
-
-	};
 
 	class MangaPanel : public UIObject {
 	public:
@@ -63,6 +46,9 @@ namespace OvrMangaroll {
 		Manga *GetManga();
 		float Position;
 		int Index;
+		int Width;
+		int Height;
+		int Border;
 	private:
 		MangaSelectorComponent *_Selector;
 		Manga *_Manga;
@@ -71,7 +57,9 @@ namespace OvrMangaroll {
 		UILabel *_Title;
 		UIImage *_Cover;
 		UITexture *_CoverTexture;
-		MangaPanelComponent *_Component;
+		ClickableComponent *_Component;
+
+		static void OnClick(void *);
 	};
 
 
@@ -111,7 +99,6 @@ namespace OvrMangaroll {
 		void *_CallbackObject;
 		Array<MangaPanel*> _Panels;
 		Array<MangaPanel*> _UsedPanels;
-		Array<MangaPanelComponent*> _PanelComponents;
 		float _Index;
 		float _Speed;
 		float _Gravity;

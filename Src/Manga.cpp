@@ -40,8 +40,8 @@ namespace OvrMangaroll {
 
 	void Manga::AddPage(Page *page) {
 		if (_Cover == NULL) {
-			_Cover = new AsyncTexture(page->GetPath());
-			_Cover->MaxHeight = 100;
+			_Cover = new AsyncTexture(page->GetPath(), 3);
+			_Cover->MaxHeight = 400;
 		}
 
 		if(_First == NULL) {
@@ -182,7 +182,7 @@ namespace OvrMangaroll {
 		if (_Cover != NULL) {
 			delete _Cover;
 		}
-		_Cover = new AsyncTexture(thumb);
+		_Cover = new AsyncTexture(thumb, 3);
 	}
 
 
