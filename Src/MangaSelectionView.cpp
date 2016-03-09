@@ -5,6 +5,7 @@
 #include "Kernel\OVR_MemBuffer.h"
 #include "AsyncTexture.h"
 #include "GazeUpdateComponent.h"
+#include "AnimationManager.h"
 
 namespace OvrMangaroll {
 
@@ -271,8 +272,31 @@ namespace OvrMangaroll {
 		, _Speed(0)
 		, _Gravity(0.1f)
 		, _Provider(NULL)
+		, _Arrow()
+		, _ArrowLeftTexture()
 	{
 
+	}
+
+
+	void MangaSelectorComponent::OnGoBackward(UIButton *, void *p) {
+		MangaSelectorComponent *self = (MangaSelectorComponent *)p;
+		self->_Index -= self->_PanelCount;
+		self->CleanPanels();
+	}
+
+	void MangaSelectorComponent::OnGoForward(UIButton *, void *p) {
+		MangaSelectorComponent *self = (MangaSelectorComponent *)p;
+		self->_Index += self->_PanelCount;
+		self->CleanPanels();
+	}
+
+	bool MangaSelectorComponent::CanSeek() {
+		return _Index + _PanelCount < _Provider->GetCurrentSize();
+	}
+
+	bool MangaSelectorComponent::CanSeekBack() {
+		return _Index > 0;
 	}
 
 
@@ -285,67 +309,86 @@ namespace OvrMangaroll {
 		_Container = new UIContainer(_Gui);
 		_Container->AddToMenu(_Menu, _Parent);
 
-		WARN("I/DEBUG NUM PANELS: %d", NUM_PANELS);
+		_Arrow.LoadTextureFromApplicationPackage("assets/arrow.png");
+		_ArrowLeftTexture.LoadTextureFromApplicationPackage("assets/arrow_left.png");
+
+		_ArrowLeft = new UIButton(_Gui);
+		_ArrowLeft->AddToMenu(_Menu, _Parent);
+		_ArrowLeft->SetButtonImages(_Arrow, _Arrow, _ArrowLeftTexture);
+		_ArrowLeft->SetButtonColors(Vector4f(0.8f), Vector4f(1), Vector4f(1));
+		_ArrowLeft->SetOnClick(OnGoBackward, this);
+		_ArrowLeft->SetLocalScale(Vector3f(-0.2f, 0.2f, 0.2f));
+		_ArrowLeft->SetLocalPosition(Vector3f(-0.3f, 0.45f, 0.1f));
+		_ArrowLeft->SetVisible(false);
+
+		_ArrowRight = new UIButton(_Gui);
+		_ArrowRight->AddToMenu(_Menu, _Parent);
+		_ArrowRight->SetButtonImages(_Arrow, _Arrow, _Arrow);
+		_ArrowRight->SetButtonColors(Vector4f(0.8f), Vector4f(1), Vector4f(1));
+		_ArrowRight->SetOnClick(OnGoForward, this);
+		_ArrowRight->SetLocalScale(Vector3f(0.2f, 0.2f, 0.2f));
+		_ArrowRight->SetLocalPosition(Vector3f(0.3f, 0.45f, 0.1f));
+		_ArrowRight->SetVisible(false);
+		//_ArrowRight->GetMenuObject()->SetHilightScale(1.1f);
+
 		// Create panels
-		_Panels.Resize(NUM_PANELS);
-		for (int i = 0; i < NUM_PANELS; i++) {
-			_Panels[i] = new MangaPanel(_Gui);
-			_Panels[i]->AddToMenu(_Menu, _Container);
-			_Panels[i]->SetSelector(this);
-			_Panels[i]->SetVisible(false);
-			if (i == 0) {
-				_PanelHeight = _Panels[i]->GetMarginRect().GetHeight() * VRMenuObject::DEFAULT_TEXEL_SCALE;
-			}
+		_PanelCount = COLS * ROWS;
+		for (int y = 0; y < ROWS; y++)
+		for (int x = 0; x < COLS; x++)
+		{
+			MangaPanel *panel = new MangaPanel(_Gui);
+			float xProgress = x / (COLS - 1.0f);
+			float rad = (-xProgress * ANGLE + 90 + ANGLE / 2.0f) * Mathf::DegreeToRadFactor;
+
+			panel->AddToMenu(_Menu, _Container);
+			panel->SetSelector(this);
+			panel->SetVisible(false);
+			panel->SetLocalPosition(Vector3f(
+				cos(rad),
+				(-y * (panel->Height + MARGIN) + (panel->Height / 2.0f)) * VRMenuObject::DEFAULT_TEXEL_SCALE,
+				-sin(rad) + 1
+			));
+
+			Vector3f dir = Vector3f(0, 0, 1) - panel->GetLocalPosition();
+			dir.y = 0;
+			panel->SetLocalRotation(
+				Quatf(Vector3f(0, 0, 1), dir.Normalized())
+			);
+
+			_Panels.PushBack(panel);
 		}
 
 		_PanelHeight = 0.2f;
 	}
 
-	// Populates the list of elements correctly
-	void MangaSelectorComponent::RearrangePanels(void) {
-		int minIndex = ceil(_Index - NUM_VISIBLE_PANELS);
-		int maxIndex = floor(_Index + NUM_VISIBLE_PANELS);
-		int startIndex = 1000;
-		int endIndex = -1000;
+	// Re-Populates panels
+	void MangaSelectorComponent::CleanPanels() {
+		
 		// Clean up
-		for (int i = _UsedPanels.GetSizeI() - 1; i >= 0; i--) {
-			if (_UsedPanels[i]->Index > maxIndex || _UsedPanels[i]->Index < minIndex) {
-				_UsedPanels[i]->SetVisible(false);
-				_UsedPanels[i]->GetManga()->GetCover()->Hide();
-				_Panels.PushBack(_UsedPanels[i]);
-				_UsedPanels.RemoveAt(i);
-			}
-			else {
-				_UsedPanels[i]->GetManga()->GetCover()->Display();
-				startIndex = Alg::Min(startIndex, _UsedPanels[i]->Index);
-				endIndex = Alg::Max(endIndex, _UsedPanels[i]->Index);
-			}
+		while (_UsedPanels.GetSizeI() > 0) {
+			MangaPanel *panel = _UsedPanels.Pop();
+			panel->SetVisible(false);
+			panel->GetManga()->GetCover()->Hide();
+			_Panels.InsertAt(0, panel);
 		}
-		//LOG("I/DEBUG YEAH");
-		int y = 0;
-		for (int i = minIndex; i <= maxIndex; i++) {
-			if (i >= 0 && i < _Provider->GetCurrentSize()) {
-				//LOG("I/DEBUG %d - %d (%d) PANELS: %d", minIndex, maxIndex, i, _Panels.GetSizeI());
+		
+	}
+	
+	void MangaSelectorComponent::UpdatePanels() {
+		int count = Alg::Min(_Index + _PanelCount, _Provider->GetCurrentSize());
+		for (int i = _Index + _UsedPanels.GetSizeI(); i < count; i++) {
+			MangaPanel *panel = _Panels.Front();
+			_Panels.RemoveAt(0);
+			_UsedPanels.PushBack(panel);
 
-				if (i < startIndex || i > endIndex) {
-					MangaPanel *panel = _Panels.Pop();
-					panel->SetManga(_Provider->At(i));
-					panel->SetVisible(true);
 
-					panel->Index = i;
-					_UsedPanels.PushBack(panel);
-				}
-
-				float diff = _UsedPanels[y]->Index - _Index;
-				float distance = Alg::Abs(diff);
-
-				_UsedPanels[y]->SetLocalPosition(Vector3f(0, 
-					_PanelHeight * -(diff), -distance / 5));
-				_UsedPanels[y]->SetColor(Vector4f(1, 1, 1, 1 - (distance / NUM_VISIBLE_PANELS)));
-
-				y++;
-			}
+			panel->SetManga(_Provider->At(i));
+			panel->SetVisible(true);
 		}
+
+		_ArrowLeft->SetVisible(CanSeekBack());
+		_ArrowRight->SetVisible(CanSeek());
+
 	}
 
 
@@ -353,16 +396,7 @@ namespace OvrMangaroll {
 		_Provider = &provider;
 		_Index = 0;
 
-		while (_UsedPanels.GetSizeI() > 0) {
-			_Panels.PushBack(_UsedPanels.Pop());
-		}
-	}
-
-	void MangaSelectorComponent::UpdatePositions(void) {
-		// All right, now let's actually position those panels...
-		//int baseIndex = ceil(_Index);
-		//float progress = _Index - baseIndex;
-		//_Container->SetLocalPosition(Vector3f(0, progress * _PanelHeight, 0));
+		CleanPanels();
 	}
 
 	void MangaSelectorComponent::SelectManga(Manga *manga) {
@@ -373,69 +407,23 @@ namespace OvrMangaroll {
 
 	void MangaSelectorComponent::Update(void) {
 		// Update index
-
-		if (!_IsTouching) {
-			_Index += _Speed * Time::Delta;
-
-			// Reduce speed
-			_Speed = Alg::Lerp<float>(_Speed, 0, Time::Delta);
-
-			int anchor = round(_Index);
-			_Index = _Index + (anchor - _Index) * _Gravity * Time::Delta;// Alg::Lerp<float>(_Index, anchor, _Gravity * Time::Delta);
-
-			_Index = Alg::Clamp<float>(_Index, 0, _Provider->GetCurrentSize() - 1);
-		}
 		if (_Provider != NULL) {
 			if (!_Provider->IsLoading() && _Provider->HasMore()) {
-				if (_Provider->GetCurrentSize() < _Index + 5) {
+				if (_Provider->GetCurrentSize() <= _Index + _PanelCount) {
 					_Provider->LoadMore();
 				}
 			}
 		}
-		RearrangePanels();
-		UpdatePositions();
+		UpdatePanels();
 	}
-
-	void MangaSelectorComponent::OnTouchDown(VrInput input) {
-		_Speed = 0;
-		_LastTouch = input.touch;
-		_TouchStartTime = Time::Elapsed;
-		_IsTouching = true;
-	}
-	void MangaSelectorComponent::OnTouchUp(VrInput input) {
-
-		float elapsed = (Time::Elapsed - _TouchStartTime) * 500;
-		_Speed = (input.touchRelative.y / -elapsed);
-		_IsTouching = false;
-	}
-	void MangaSelectorComponent::OnTouchMove(VrInput input) {
-		Vector2f diff = input.touch - _LastTouch;
-		_Index -= diff.y / 500;
-		_LastTouch = input.touch;
-	}
-
 	
-
 	eMsgStatus MangaSelectorComponent::OnEvent_Impl(OvrGuiSys & guiSys, VrFrame const & vrFrame,
 		VRMenuObject * self, VRMenuEvent const & event) {
 		if (_Provider == NULL) return MSG_STATUS_ALIVE;
 
-		Vector2f diff();
 		switch (event.EventType) {
 		case VRMENU_EVENT_FRAME_UPDATE:
 			Update();
-
-			// Gotta do it ourselves...
-			if (vrFrame.Input.buttonPressed & BUTTON_TOUCH) {
-				OnTouchDown(vrFrame.Input);
-			} 
-			else if (vrFrame.Input.buttonState & BUTTON_TOUCH) {
-				OnTouchMove(vrFrame.Input);
-			}
-			else if (vrFrame.Input.buttonReleased & BUTTON_TOUCH) {
-				OnTouchUp(vrFrame.Input);
-			}
-
 			break;
 		default:
 			break;

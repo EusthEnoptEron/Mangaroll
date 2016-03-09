@@ -8,6 +8,7 @@
 #include <OVR_Capture.h>
 #include "Kernel\OVR_String_Utils.h"
 #include "Helpers.h"
+#include "Web.h"
 
 using namespace OVR;
 
@@ -233,7 +234,7 @@ namespace OvrMangaroll {
 		int mipmapWidth = _InternalWidth;
 		int mipmapHeight = _InternalHeight;
 
-		for (int i = 0; i < _MipmapCount; i++) {
+		for (int i = 0; i < _Buffers.GetSizeI(); i++) {
 			glTexImage2D(GL_TEXTURE_2D, i, GL_RGBA, mipmapWidth, mipmapHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, (void *)_Buffers[i]);
 			mipmapWidth = Alg::Max(1, mipmapWidth >> 1);
 			mipmapHeight = Alg::Max(1, mipmapHeight >> 1);
@@ -363,7 +364,7 @@ namespace OvrMangaroll {
 		AsyncTexture *tex = (AsyncTexture *)v;
 		WARN("%s UPLOAD FILE", tex->_Path.ToCStr());
 
-		for (int i = 0; i < tex->_MipmapCount; i++) {
+		for (int i = 0; i < tex->_Buffers.GetSizeI(); i++) {
 			memcpy(
 				(void *)((unsigned char *)(tex->_GPUBuffer) + tex->_BufferOffsets[i]),
 				(const void *)tex->_Buffers[i],
@@ -390,7 +391,6 @@ namespace OvrMangaroll {
 				/*Buffer = ScaleImageRGBA(Buffer, _Width, _Height, MaxHeight, MaxHeight, ImageFilter::IMAGE_FILTER_LINEAR, true);
 				_InternalWidth = MaxHeight;
 				_InternalHeight = MaxHeight;*/
-
 				Buffer = QuarterImageSize(Buffer, _InternalWidth, _InternalHeight, false);
 				_InternalWidth = OVR::Alg::Max(1, _InternalWidth >> 1);
 				_InternalHeight = OVR::Alg::Max(1, _InternalHeight >> 1);
@@ -405,7 +405,7 @@ namespace OvrMangaroll {
 		_BufferLengths.PushBack(_BufferLength);
 
 		// Create mipmaps
-		if (_MipmapCount > 1) {
+		if (_MipmapCount > 1 && Buffer != NULL && length > 0) {
 			int mipmapWidth = _InternalWidth;
 			int mipmapHeight = _InternalHeight;
 

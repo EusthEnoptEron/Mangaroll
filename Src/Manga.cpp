@@ -1,6 +1,7 @@
 #include "Manga.h"
 #include "Kernel\OVR_JSON.h"
 #include "Helpers.h"
+#include "Web.h"
 
 namespace OvrMangaroll {
 

@@ -3,6 +3,7 @@
 #include "Helpers.h"
 #include "jni.h"
 #include "Android\JniUtils.h"
+#include "Web.h"
 
 namespace OvrMangaroll {
 
@@ -60,16 +61,15 @@ namespace OvrMangaroll {
 		, _Page(0)
 		, _BrowseUrl(browseUrl)
 		, _ShowUrl(showUrl)
-		, _Thread(NULL)
 		, _Mangas()
 	{
 	}
 
 	// Acts as update function
 	bool RemoteMangaProvider::IsLoading() {
-		if (_Loading && _Thread->IsFinished()) {
+		if (_Loading && _DoneReading) {//_Thread->IsFinished()) {
 			_Loading = false;
-
+			_DoneReading = false;
 			// Transfer mangas
 			for (int i = 0; i < _MangasBuffer.GetSizeI(); i++) {
 				_Mangas.PushBack(_MangasBuffer[i]);
@@ -81,11 +81,11 @@ namespace OvrMangaroll {
 
 
 	void RemoteMangaProvider::LoadMore() {
-		_Thread = Web::Download(String::Format(_BrowseUrl.ToCStr(), _Page),
+		Web::Download(String::Format(_BrowseUrl.ToCStr(), _Page),
 			RemoteMangaProvider::FetchFn
 			, this);
 		_Loading = true;
-
+		_DoneReading = false;
 		// In case thread fails. Isn't used while loading.
 		_HasMore = false;
 	}
@@ -129,6 +129,8 @@ namespace OvrMangaroll {
 		}
 
 		delete jsonFile;
+
+		provider->_DoneReading = true;
 	}
 	
 }

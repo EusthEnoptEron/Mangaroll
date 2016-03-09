@@ -58,8 +58,7 @@ namespace OvrMangaroll {
 		int _Page;
 		String _BrowseUrl;
 		String _ShowUrl;
-
-		Thread *_Thread;
+		bool _DoneReading;
 		Array<Manga *> _Mangas;
 		Array<Manga *> _MangasBuffer;
 

@@ -26,7 +26,9 @@ LOCAL_SRC_FILES			:= ../../../Src/Mangaroll.cpp \
                            ../../../Src/MangaSelectionView.cpp \
                            ../../../Src/AsyncTexture.cpp \
                            ../../../Src/OVR_TurboJpeg.cpp \
-                           ../../../Src/MangaProvider.cpp
+                           ../../../Src/MangaProvider.cpp \
+                           ../../../Src/AnimationManager.cpp \
+                           ../../../Src/Web.cpp
 
 LOCAL_STATIC_LIBRARIES	:= vrsound vrmodel vrlocale vrgui vrappframework systemutils libovrkernel jpeg stbs
 LOCAL_SHARED_LIBRARIES	:= vrapi
