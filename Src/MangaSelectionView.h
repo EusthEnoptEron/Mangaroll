@@ -64,7 +64,6 @@ namespace OvrMangaroll {
 		static void OnClick(void *);
 	};
 
-
 	class MangaSelectorComponent : public VRMenuComponent {
 	public:
 		MangaSelectorComponent(OvrGuiSys &guiSys);
@@ -161,6 +160,7 @@ namespace OvrMangaroll {
 
 		LocalMangaProvider _LocalMangaProvider;
 		RemoteMangaProvider _NProvider;
+		Array<RemoteMangaProvider*> _RemoteProviders;
 
 		CategoryComponent _LocalCategoryComponent;
 		CategoryComponent _RemoteCategoryComponent;

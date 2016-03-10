@@ -52,6 +52,7 @@ namespace OvrMangaroll {
 
 		virtual bool IsLoading();
 		virtual void LoadMore();
+		String Name;
 	private:
 		bool _Loading;
 		bool _HasMore;

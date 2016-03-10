@@ -7,6 +7,7 @@
 #include "GazeUpdateComponent.h"
 #include "AnimationManager.h"
 #include "VRMenuMgr.h"
+#include "Kernel\OVR_JSON.h"
 
 namespace OvrMangaroll {
 
@@ -21,6 +22,7 @@ namespace OvrMangaroll {
 		, _FillTexture()
 		, _LocalMangaProvider()
 		, _NProvider("http://192.168.1.39:3000/browse/%d", "http://192.168.1.39:3000/show/%d")
+		, _RemoteProviders()
 		, _LocalCategoryComponent()
 		, _RemoteCategoryComponent()
 	{
@@ -86,6 +88,40 @@ namespace OvrMangaroll {
 		_Selector->AddToMenu(_Menu, _SelectorContainer);
 		_SelectorContainer->SetLocalPosition(Vector3f(0, -0.3f, -1));
 		_Selector->SetOnSelectManga(OnSelectMangaLocal, this);
+
+		// LOAD CONFIGURED REMOTE SITES
+		const OvrStoragePaths & paths = AppState::Instance->GetStoragePaths();
+
+		Array<String> SearchPaths;
+		paths.PushBackSearchPathIfValid(EST_SECONDARY_EXTERNAL_STORAGE, EFT_ROOT, "RetailMedia/", SearchPaths);
+		paths.PushBackSearchPathIfValid(EST_SECONDARY_EXTERNAL_STORAGE, EFT_ROOT, "", SearchPaths);
+		paths.PushBackSearchPathIfValid(EST_PRIMARY_EXTERNAL_STORAGE, EFT_ROOT, "RetailMedia/", SearchPaths);
+		paths.PushBackSearchPathIfValid(EST_PRIMARY_EXTERNAL_STORAGE, EFT_ROOT, "", SearchPaths);
+
+		for (int i = 0; i < SearchPaths.GetSizeI(); i++) {
+			const char *path = (SearchPaths[i] + "Manga/services.json").ToCStr();
+			if (FileExists(path)) {
+				JSON *jsonFile = JSON::Load(path);
+				if (jsonFile != NULL) {
+					JsonReader serviceReader(jsonFile);
+					if (serviceReader.IsValid() && serviceReader.IsArray()) {
+						while (!serviceReader.IsEndOfArray()) {
+							JsonReader elementReader(serviceReader.GetNextArrayElement());
+							if (elementReader.IsValid() && elementReader.IsObject()) {
+								RemoteMangaProvider *provider = new RemoteMangaProvider(
+									elementReader.GetChildStringByName("browseUrl"),
+									elementReader.GetChildStringByName("showUrl")
+								);
+								provider->Name = elementReader.GetChildStringByName("name");
+							}
+						}
+					}
+					delete jsonFile;
+				}
+				break;
+			}
+		}
+
 		//_Selector->SetProvider(_NProvider);
 		//_Selector->SetProvider(_LocalMangaProvider);
 	}
