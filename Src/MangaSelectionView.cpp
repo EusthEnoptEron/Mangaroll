@@ -6,6 +6,7 @@
 #include "AsyncTexture.h"
 #include "GazeUpdateComponent.h"
 #include "AnimationManager.h"
+#include "VRMenuMgr.h"
 
 namespace OvrMangaroll {
 
@@ -201,7 +202,8 @@ namespace OvrMangaroll {
 	}
 	void MangaPanel::SetManga(Manga *manga) {
 		_Manga = manga;
-		_Title->SetText(manga->Name);
+		this->GetMenuObject()->SetText(manga->Name.ToCStr());
+
 		//_Title->CalculateTextDimensions();
 
 		_Cover->SetImage(0, SURFACE_TEXTURE_DIFFUSE, manga->GetCover()->Display(), Width-Border, Height - (float(Border) / Width * Height));
@@ -231,17 +233,7 @@ namespace OvrMangaroll {
 		//_Background->GetMenuObject()->BuildDrawSurface
 		_Background->SetMargin(UIRectf(60.0f));
 		_Background->SetColor(Vector4f(0, 0, 0, 1));
-		_Background->SetLocalPosition(Vector3f(0,0,-0.001f));
-
-		_Title = new UILabel(GuiSys);
-		_Title->AddToMenu(Menu, this);
-		_Title->SetText("");
-		_Title->SetVisible(false);
-		//_Title->SetTextOffset(Vector3f(0, 0, 0.04f));
-		//_Title->SetFontParms(VRMenuFontParms(true, true, false, false, true, 0.5f, 0.4f, 0.5));
-		//_Title->AddFlags(VRMENUOBJECT_DONT_HIT_ALL);
-		//_Title->SetMargin(UIRectf(50, 0, 0, 0));
-		//_Title->CalculateTextDimensions();
+		_Background->SetLocalPosition(Vector3f(0, 0, -0.001f));
 		
 		_Cover = new UIImage(GuiSys);
 		_Cover->AddToMenu(Menu, this);
@@ -249,7 +241,9 @@ namespace OvrMangaroll {
 		
 		_Component = new ClickableComponent();
 		_Component->SetCallback(OnClick, this);
-		AddComponent(new OvrDefaultComponent());
+		AddComponent(new OvrDefaultComponent(
+			Vector3f(0, 0, .05f), 1.4f, 0.25f, 0
+		));
 		AddComponent(_Component);
 
 	}
@@ -259,7 +253,7 @@ namespace OvrMangaroll {
 
 	MangaSelectorComponent::MangaSelectorComponent(OvrGuiSys &guiSys)
 		: VRMenuComponent(
-		VRMenuEventFlags_t(VRMENU_EVENT_FRAME_UPDATE) | VRMENU_EVENT_TOUCH_DOWN | VRMENU_EVENT_TOUCH_UP | VRMENU_EVENT_TOUCH_RELATIVE)
+		VRMenuEventFlags_t(VRMENU_EVENT_FRAME_UPDATE) | VRMENU_EVENT_SWIPE_FORWARD | VRMENU_EVENT_SWIPE_BACK | VRMENU_EVENT_FOCUS_GAINED | VRMENU_EVENT_FOCUS_LOST)
 		, _Menu(NULL)
 		, _Parent(NULL)
 		, _Container(NULL)
@@ -274,6 +268,8 @@ namespace OvrMangaroll {
 		, _Provider(NULL)
 		, _Arrow()
 		, _ArrowLeftTexture()
+		, _Fill()
+		, _ActivePanel(NULL)
 	{
 
 	}
@@ -301,7 +297,7 @@ namespace OvrMangaroll {
 
 
 	void MangaSelectorComponent::AddToMenu(UIMenu *menu, UIObject *parent) {
-		WARN("I/DEBUG INITINITINIT");
+		LOG("[MangaSelectorComponent] Init");
 
 		_Menu = menu;
 		_Parent = parent;
@@ -309,15 +305,27 @@ namespace OvrMangaroll {
 		_Container = new UIContainer(_Gui);
 		_Container->AddToMenu(_Menu, _Parent);
 
+		_Fill.LoadTextureFromApplicationPackage("assets/fill.png");
+		_Title = new UILabel(_Gui);
+		_Title->AddToMenu(menu, parent);
+		_Title->SetText("");
+		_Title->SetTextOffset(Vector3f(0, 0, 0.1f));
+		_Title->SetFontParms(VRMenuFontParms(true, true, false, false, true, 0.5f, 0.4f, 0.5));
+		_Title->AddFlags(VRMENUOBJECT_DONT_HIT_ALL);
+		_Title->SetVisible(false);
+		//_Title->SetImage(0, eSurfaceTextureType::SURFACE_TEXTURE_DIFFUSE, _Fill);
+		//_Title->SetColor(Vector4f(0, 0, 0, 1));
+		
+
 		_Arrow.LoadTextureFromApplicationPackage("assets/arrow.png");
 		_ArrowLeftTexture.LoadTextureFromApplicationPackage("assets/arrow_left.png");
 
 		_ArrowLeft = new UIButton(_Gui);
 		_ArrowLeft->AddToMenu(_Menu, _Parent);
-		_ArrowLeft->SetButtonImages(_Arrow, _Arrow, _ArrowLeftTexture);
+		_ArrowLeft->SetButtonImages(_ArrowLeftTexture, _ArrowLeftTexture, _ArrowLeftTexture);
 		_ArrowLeft->SetButtonColors(Vector4f(0.8f), Vector4f(1), Vector4f(1));
 		_ArrowLeft->SetOnClick(OnGoBackward, this);
-		_ArrowLeft->SetLocalScale(Vector3f(-0.2f, 0.2f, 0.2f));
+		_ArrowLeft->SetLocalScale(Vector3f(0.2f, 0.2f, 0.2f));
 		_ArrowLeft->SetLocalPosition(Vector3f(-0.3f, 0.45f, 0.1f));
 		_ArrowLeft->SetVisible(false);
 
@@ -355,10 +363,10 @@ namespace OvrMangaroll {
 				Quatf(Vector3f(0, 0, 1), dir.Normalized())
 			);
 
+			_PanelHeight = panel->Height * VRMenuObject::DEFAULT_TEXEL_SCALE;
+			
 			_Panels.PushBack(panel);
 		}
-
-		_PanelHeight = 0.2f;
 	}
 
 	// Re-Populates panels
@@ -372,6 +380,7 @@ namespace OvrMangaroll {
 			_Panels.InsertAt(0, panel);
 		}
 		
+		_Title->SetVisible(false);
 	}
 	
 	void MangaSelectorComponent::UpdatePanels() {
@@ -380,7 +389,6 @@ namespace OvrMangaroll {
 			MangaPanel *panel = _Panels.Front();
 			_Panels.RemoveAt(0);
 			_UsedPanels.PushBack(panel);
-
 
 			panel->SetManga(_Provider->At(i));
 			panel->SetVisible(true);
@@ -405,7 +413,7 @@ namespace OvrMangaroll {
 		}
 	}
 
-	void MangaSelectorComponent::Update(void) {
+	void MangaSelectorComponent::Update(VRMenuEvent const & evt) {
 		// Update index
 		if (_Provider != NULL) {
 			if (!_Provider->IsLoading() && _Provider->HasMore()) {
@@ -415,6 +423,31 @@ namespace OvrMangaroll {
 			}
 		}
 		UpdatePanels();
+
+
+		if (_ActivePanel != NULL) {
+			Vector3f pos = _ActivePanel->GetLocalPosition();
+			pos.y = _ActivePanel->GetLocalPosition().y - _PanelHeight / 2;
+
+			float t = Time::Delta * 10;
+			_Title->SetLocalPose(
+				_Title->GetLocalRotation().Nlerp(_ActivePanel->GetLocalRotation(), 1 - t),
+				_Title->GetLocalPosition().Lerp(pos, t)
+			);
+		}
+		else {
+			if (_Title->GetVisible() && Time::Elapsed - _FocusLostTime > 1.0f) {
+				float alpha = 1 - (Time::Elapsed - _FocusLostTime - 1);
+				if (alpha <= 0) {
+					_Title->SetVisible(false);
+				}
+				else {
+					_Title->SetTextColor(Vector4f(alpha));
+				}
+
+			}
+		}
+
 	}
 	
 	eMsgStatus MangaSelectorComponent::OnEvent_Impl(OvrGuiSys & guiSys, VrFrame const & vrFrame,
@@ -423,12 +456,44 @@ namespace OvrMangaroll {
 
 		switch (event.EventType) {
 		case VRMENU_EVENT_FRAME_UPDATE:
-			Update();
+			Update(event);
+			break;
+		case VRMENU_EVENT_FOCUS_GAINED:
+			_ActivePanel = _Gui.GetVRMenuMgr().ToObject(_Gui.GetVRMenuMgr().ToObject(event.TargetHandle)->GetParentHandle());
+			if (_ActivePanel->GetText() != "Container") {
+				_Title->SetVisible(true);
+				_Title->SetTextColor(Vector4f(1));
+				_Title->SetTextWordWrapped(_ActivePanel->GetText().ToCStr(), _Gui.GetDefaultFont(), 0.8f);
+
+				_Title->CalculateTextDimensions();
+			}
+			else {
+				_ActivePanel = NULL;
+			}
+
+			//LOG("TEXT SIZE:_ %.2f / %.2f", _Title->GetRect().GetWidth(), _Title->GetRect().GetHeight());
+			break;
+		case VRMENU_EVENT_SWIPE_FORWARD:
+			if (CanSeek()) {
+				OnGoForward(NULL, this);
+			}
+			return MSG_STATUS_CONSUMED;
+			break;
+		case VRMENU_EVENT_SWIPE_BACK:
+			if (CanSeekBack()) {
+				OnGoBackward(NULL, this);
+			}
+			return MSG_STATUS_CONSUMED;
+			break;
+		case VRMENU_EVENT_FOCUS_LOST:
+			//_Title->SetVisible(false);
+			_FocusLostTime = Time::Elapsed;
+			_ActivePanel = NULL;
 			break;
 		default:
 			break;
+		
 		}
-
 		return eMsgStatus::MSG_STATUS_ALIVE;
 	}
 

@@ -21,9 +21,11 @@ namespace OvrMangaroll {
 			case VRMENU_EVENT_FOCUS_GAINED:
 				self->SetHilighted(true);
 			case VRMENU_EVENT_FRAME_UPDATE:
-				if (self->IsHilighted()) {
+				//if (self->IsHilighted()) {
+				if (event.HitResult.t < 10) {
 					guiSys.GetGazeCursor().ForceDistance(event.HitResult.t, eGazeCursorStateType::CURSOR_STATE_HILIGHT);
 				}
+				//}
 			case VRMENU_EVENT_FOCUS_LOST:
 				self->SetHilighted(false);
 			default:

@@ -94,7 +94,7 @@ namespace OvrMangaroll {
 		virtual eMsgStatus OnEvent_Impl(OvrGuiSys & guiSys, VrFrame const & vrFrame,
 			VRMenuObject * self, VRMenuEvent const & event);
 
-		void Update(void);
+		void Update(VRMenuEvent const & evt);
 		void CleanPanels();
 		void UpdatePanels();
 		static void OnGoBackward(UIButton *, void *);
@@ -119,8 +119,14 @@ namespace OvrMangaroll {
 		int _PanelCount;
 		UITexture _Arrow;
 		UITexture _ArrowLeftTexture;
+		UITexture _Fill;
+
+		UILabel *_Title;
 		UIButton *_ArrowRight;
 		UIButton *_ArrowLeft;
+
+		VRMenuObject *_ActivePanel;
+		double _FocusLostTime;
 	};
 
 	class MangaSelectionView : public View {

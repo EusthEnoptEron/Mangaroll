@@ -62,6 +62,7 @@
   <ItemDefinitionGroup>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Src\AnimationManager.cpp" />
     <ClCompile Include="Src\AsyncTexture.cpp" />
     <ClCompile Include="Src\Helpers.cpp" />
     <ClCompile Include="Src\Manga.cpp" />
@@ -76,9 +77,11 @@
     <ClCompile Include="Src\ShaderManager.cpp" />
     <ClCompile Include="Src\View.cpp" />
     <ClCompile Include="Src\ViewManager.cpp" />
+    <ClCompile Include="Src\Web.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="assets\TransparentMangaPage.frag" />
+    <ClInclude Include="Src\AnimationManager.h" />
     <ClInclude Include="Src\AsyncTexture.h" />
     <ClInclude Include="Src\GazeUpdateComponent.h" />
     <ClInclude Include="Src\GlObject.h" />
@@ -96,6 +99,7 @@
     <ClInclude Include="Src\turbojpeg.h" />
     <ClInclude Include="Src\View.h" />
     <ClInclude Include="Src\ViewManager.h" />
+    <ClInclude Include="Src\Web.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\MangaPage.frag" />
