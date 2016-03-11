@@ -12,6 +12,7 @@
 #include "MangaProvider.h"
 #include "GazeUpdateComponent.h"
 #include "UI\UIButton.h"
+#include "Fader.h"
 
 using namespace OVR;
 namespace OvrMangaroll {
@@ -95,18 +96,24 @@ namespace OvrMangaroll {
 
 		void Update(VRMenuEvent const & evt);
 		void CleanPanels();
+		void Seek(int dir);
 		void UpdatePanels();
+		MangaPanel *CreatePanel(int x, int y, UIObject *container);
 		static void OnGoBackward(UIButton *, void *);
 		static void OnGoForward(UIButton *, void *);
 
 		UIMenu *_Menu;
 		UIObject *_Parent;
-		UIContainer *_Container;
 		OvrGuiSys &_Gui;
 		void(*_Callback)(Manga*, void*);
 		void *_CallbackObject;
-		Array<MangaPanel*> _Panels;
-		Array<MangaPanel*> _UsedPanels;
+		UIContainer *_Containers[2];
+		Array<MangaPanel *> _PanelSets[2];
+		int _Front;
+		int _Back;
+		SineFader _Transition;
+		int _FadeDir;
+		int _FillCount;
 		int _Index;
 		float _Speed;
 		float _Gravity;

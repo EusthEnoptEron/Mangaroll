@@ -296,12 +296,13 @@ namespace OvrMangaroll {
 		VRMenuEventFlags_t(VRMENU_EVENT_FRAME_UPDATE) | VRMENU_EVENT_SWIPE_FORWARD | VRMENU_EVENT_SWIPE_BACK | VRMENU_EVENT_FOCUS_GAINED | VRMENU_EVENT_FOCUS_LOST)
 		, _Menu(NULL)
 		, _Parent(NULL)
-		, _Container(NULL)
 		, _Gui(guiSys)
 		, _Callback(NULL)
 		, _CallbackObject(NULL)
-		, _Panels()
-		, _UsedPanels()
+		, _PanelSets()
+		, _Front(0)
+		, _Back(1)
+		, _Transition(0)
 		, _Index(0)
 		, _Speed(0)
 		, _Gravity(0.1f)
@@ -317,14 +318,12 @@ namespace OvrMangaroll {
 
 	void MangaSelectorComponent::OnGoBackward(UIButton *, void *p) {
 		MangaSelectorComponent *self = (MangaSelectorComponent *)p;
-		self->_Index -= self->_PanelCount;
-		self->CleanPanels();
+		self->Seek(-1);
 	}
 
 	void MangaSelectorComponent::OnGoForward(UIButton *, void *p) {
 		MangaSelectorComponent *self = (MangaSelectorComponent *)p;
-		self->_Index += self->_PanelCount;
-		self->CleanPanels();
+		self->Seek(1);
 	}
 
 	bool MangaSelectorComponent::CanSeek() {
@@ -342,15 +341,21 @@ namespace OvrMangaroll {
 		_Menu = menu;
 		_Parent = parent;
 		_Parent->AddComponent(this);
-		_Container = new UIContainer(_Gui);
-		_Container->AddToMenu(_Menu, _Parent);
+
+		_Containers[0] = new UIContainer(_Gui);
+		_Containers[1] = new UIContainer(_Gui);
+		_Containers[0]->AddToMenu(_Menu, _Parent);
+		_Containers[1]->AddToMenu(_Menu, _Parent);
+
+		_Containers[0]->SetLocalPosition(Vector3f(0, 0, 1));
+		_Containers[1]->SetLocalPosition(Vector3f(0, 0, 1));
 
 		_Fill.LoadTextureFromApplicationPackage("assets/fill.png");
 		_Title = new UILabel(_Gui);
 		_Title->AddToMenu(menu, parent);
 		_Title->SetText("");
 		_Title->SetTextOffset(Vector3f(0, 0, 0.1f));
-		_Title->SetFontParms(VRMenuFontParms(true, true, false, false, true, 0.5f, 0.4f, 0.5));
+		_Title->SetFontParms(VRMenuFontParms(true, true, false, false, true, 0.5f, 0.4f, 0.3));
 		_Title->AddFlags(VRMENUOBJECT_DONT_HIT_ALL);
 		_Title->SetVisible(false);
 		//_Title->SetImage(0, eSurfaceTextureType::SURFACE_TEXTURE_DIFFUSE, _Fill);
@@ -384,66 +389,79 @@ namespace OvrMangaroll {
 		for (int y = 0; y < ROWS; y++)
 		for (int x = 0; x < COLS; x++)
 		{
-			MangaPanel *panel = new MangaPanel(_Gui);
-			float xProgress = x / (COLS - 1.0f);
-			float rad = (-xProgress * ANGLE + 90 + ANGLE / 2.0f) * Mathf::DegreeToRadFactor;
+			_PanelSets[0].PushBack(CreatePanel(x, y, _Containers[0]));
+			_PanelSets[1].PushBack(CreatePanel(x, y, _Containers[1]));
+		}
 
-			panel->AddToMenu(_Menu, _Container);
-			panel->SetSelector(this);
-			panel->SetVisible(false);
-			panel->SetLocalPosition(Vector3f(
-				cos(rad),
-				(-y * (panel->Height + MARGIN) + (panel->Height / 2.0f)) * VRMenuObject::DEFAULT_TEXEL_SCALE,
-				-sin(rad) + 1
+		_PanelHeight = _PanelSets[0].Front()->Height * VRMenuObject::DEFAULT_TEXEL_SCALE;
+	}
+
+	MangaPanel *MangaSelectorComponent::CreatePanel(int x, int y, UIObject *container) {
+		MangaPanel *panel = new MangaPanel(_Gui);
+		float xProgress = x / (COLS - 1.0f);
+		float rad = (-xProgress * ANGLE + 90 + ANGLE / 2.0f) * Mathf::DegreeToRadFactor;
+
+		panel->AddToMenu(_Menu, container);
+		panel->SetSelector(this);
+		panel->SetVisible(false);
+		panel->SetLocalPosition(Vector3f(
+			cos(rad),
+			(-y * (panel->Height + MARGIN) + (panel->Height / 2.0f)) * VRMenuObject::DEFAULT_TEXEL_SCALE,
+			-sin(rad)
 			));
 
-			Vector3f dir = Vector3f(0, 0, 1) - panel->GetLocalPosition();
-			dir.y = 0;
-			panel->SetLocalRotation(
-				Quatf(Vector3f(0, 0, 1), dir.Normalized())
+		Vector3f dir = Vector3f(0, 0, 0) - panel->GetLocalPosition();
+		dir.y = 0;
+		panel->SetLocalRotation(
+			Quatf(Vector3f(0, 0, 1), dir.Normalized())
 			);
-
-			_PanelHeight = panel->Height * VRMenuObject::DEFAULT_TEXEL_SCALE;
-			
-			_Panels.PushBack(panel);
-		}
+		return panel;
 	}
 
 	// Re-Populates panels
 	void MangaSelectorComponent::CleanPanels() {
 		
 		// Clean up
-		while (_UsedPanels.GetSizeI() > 0) {
-			MangaPanel *panel = _UsedPanels.Pop();
-			panel->SetVisible(false);
-			panel->GetManga()->GetCover()->Hide();
-			_Panels.InsertAt(0, panel);
+		for (int i = 0; i < _PanelSets[_Back].GetSizeI(); i++) {
+			if (_PanelSets[_Back].At(i)->GetVisible()) {
+				_PanelSets[_Back].At(i)->SetVisible(false);
+				_PanelSets[_Back].At(i)->GetManga()->GetCover()->Hide();
+			}
 		}
-		
 		_Title->SetVisible(false);
+	}
+
+	// dir = -1, 0, 1
+	void MangaSelectorComponent::Seek(int dir) {
+		_Index += dir * _PanelCount;
+		_FillCount = 0;
+		_Front = (_Front + 1) % 2;
+		_Back = (_Back + 1) % 2;
+		_FadeDir = dir;
+		_Transition.SetFadeAlpha(0);
+		_Transition.StartFadeIn();
 	}
 	
 	void MangaSelectorComponent::UpdatePanels() {
 		int count = Alg::Min(_Index + _PanelCount, _Provider->GetCurrentSize());
-		for (int i = _Index + _UsedPanels.GetSizeI(); i < count; i++) {
-			MangaPanel *panel = _Panels.Front();
-			_Panels.RemoveAt(0);
-			_UsedPanels.PushBack(panel);
+		for (int i = _Index + _FillCount; i < count; i++) {
+			MangaPanel *panel = _PanelSets[_Front].At(i - _Index);
 
 			panel->SetManga(_Provider->At(i));
 			panel->SetVisible(true);
+			_FillCount++;
 		}
 
 		_ArrowLeft->SetVisible(CanSeekBack());
 		_ArrowRight->SetVisible(CanSeek());
-
 	}
 
 
 	void MangaSelectorComponent::SetProvider(MangaProvider &provider) {
 		_Provider = &provider;
 		_Index = 0;
-
+		
+		Seek(0);
 		CleanPanels();
 	}
 
@@ -464,9 +482,9 @@ namespace OvrMangaroll {
 		}
 		UpdatePanels();
 
-
-		if (_ActivePanel != NULL) {
+		if (_ActivePanel != NULL && _Transition.GetFadeState() != Fader::FADE_IN) {
 			Vector3f pos = _ActivePanel->GetLocalPosition();
+			pos.z += 1; // Parent container is positioned a little more toward the player
 			pos.y = _ActivePanel->GetLocalPosition().y - _PanelHeight / 2;
 
 			float t = Time::Delta * 10;
@@ -484,7 +502,23 @@ namespace OvrMangaroll {
 				else {
 					_Title->SetTextColor(Vector4f(alpha));
 				}
+			}
+		}
 
+		if (_Transition.GetFadeState() == Fader::FADE_IN) {
+			_Transition.Update(1.0f, Time::Delta);
+
+			// Apply values
+			_Containers[_Front]->SetColor(Vector4f(_Transition.GetFadeAlpha()));
+			_Containers[_Back]->SetColor(Vector4f(1 - _Transition.GetFadeAlpha()));
+
+			float angle = (ANGLE + (float(ANGLE) / COLS)) / 180.0f * Mathf::Pi;
+
+			_Containers[_Front]->SetLocalRotation(Quatf(Vector3f(0, 1, 0), (1 - _Transition.GetFadeAlpha()) * angle * -_FadeDir));
+			_Containers[_Back]->SetLocalRotation(Quatf(Vector3f(0, 1, 0), _Transition.GetFadeAlpha() * angle * _FadeDir));
+
+			if (_Transition.GetFadeState() == Fader::FADE_NONE) {
+				CleanPanels();
 			}
 		}
 
@@ -494,16 +528,23 @@ namespace OvrMangaroll {
 		VRMenuObject * self, VRMenuEvent const & event) {
 		if (_Provider == NULL) return MSG_STATUS_ALIVE;
 
-		switch (event.EventType) {
-		case VRMENU_EVENT_FRAME_UPDATE:
+		if (event.EventType == VRMENU_EVENT_FRAME_UPDATE) {
 			Update(event);
-			break;
+			return MSG_STATUS_ALIVE;
+		}
+		
+		// No input in this case
+		if (_Transition.GetFadeState() == Fader::FADE_IN) {
+			return MSG_STATUS_ALIVE;
+		}
+
+		switch (event.EventType) {
 		case VRMENU_EVENT_FOCUS_GAINED:
 			_ActivePanel = _Gui.GetVRMenuMgr().ToObject(_Gui.GetVRMenuMgr().ToObject(event.TargetHandle)->GetParentHandle());
 			if (_ActivePanel->GetText() != "Container") {
 				_Title->SetVisible(true);
 				_Title->SetTextColor(Vector4f(1));
-				_Title->SetTextWordWrapped(_ActivePanel->GetText().ToCStr(), _Gui.GetDefaultFont(), 0.8f);
+				_Title->SetTextWordWrapped(_ActivePanel->GetText().ToCStr(), _Gui.GetDefaultFont(), 0.6f);
 
 				_Title->CalculateTextDimensions();
 			}
