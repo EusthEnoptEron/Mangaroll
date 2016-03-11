@@ -113,14 +113,18 @@ namespace OvrMangaroll {
 									elementReader.GetChildStringByName("showUrl")
 								);
 								provider->Name = elementReader.GetChildStringByName("name");
+
+								_RemoteProviders.PushBack(provider);
 							}
 						}
 					}
 					delete jsonFile;
 				}
-				break;
+				//break;
 			}
 		}
+
+		LOG("Services found: %d", _RemoteProviders.GetSizeI());
 
 		//_Selector->SetProvider(_NProvider);
 		//_Selector->SetProvider(_LocalMangaProvider);
