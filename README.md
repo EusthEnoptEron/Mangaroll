@@ -10,9 +10,9 @@ It's possible to integrate simple online services that will serve manga. To get 
 
 ### Browse view
 
-**Parameters for URL string**:
-  - `%d` = page
-  - `%d` = id (for containers)
+**Required parameters in URL string**:
+  - `{page}`
+  - `{id}`
 
 
 ```json
@@ -39,8 +39,8 @@ It's possible to integrate simple online services that will serve manga. To get 
 
 ### Read view
 
-**Parameters for URL string**:
-  - `%d` = id
+**Required parameters in URL string**:
+  - `{id}`
 
 ```json
 {
