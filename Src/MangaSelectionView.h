@@ -70,7 +70,7 @@ namespace OvrMangaroll {
 		MangaSelectorComponent(OvrGuiSys &guiSys);
 		virtual ~MangaSelectorComponent() { }
 
-		void SetProvider(MangaProvider &provider);
+		void SetProvider(MangaProvider &provider, bool stack=false);
 		void AddToMenu(UIMenu *menu, UIObject *parent);
 
 		void SetOnSelectManga(void(*cb)(Manga*, void*), void* obj) {

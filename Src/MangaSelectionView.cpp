@@ -457,12 +457,11 @@ namespace OvrMangaroll {
 	}
 
 
-	void MangaSelectorComponent::SetProvider(MangaProvider &provider) {
+	void MangaSelectorComponent::SetProvider(MangaProvider &provider, bool stack) {
 		_Provider = &provider;
+		Seek(1);
+		// Lil hack
 		_Index = 0;
-		
-		Seek(0);
-		CleanPanels();
 	}
 
 	void MangaSelectorComponent::SelectManga(Manga *manga) {
