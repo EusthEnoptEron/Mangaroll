@@ -61,6 +61,7 @@ namespace OvrMangaroll {
 		UIImage *_Cover;
 		UITexture *_CoverTexture;
 		ClickableComponent *_Component;
+		OvrGuiSys *_Gui;
 
 		static void OnClick(void *);
 	};
@@ -81,6 +82,13 @@ namespace OvrMangaroll {
 		void SelectManga(Manga *manga);
 		bool CanSeek();
 		bool CanSeekBack();
+		bool CanGoBack() {
+			return _Providers.GetSizeI() > 1;
+		}
+		void GoBack() {
+			delete _Providers.Pop();
+			SetProvider(*(_Providers.Pop()), true);
+		}
 
 		// Constants because I'm lazy
 		static int const COLS = 10;

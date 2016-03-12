@@ -42,6 +42,7 @@ namespace OvrMangaroll {
 		int GetHeight() { return _Height; }
 		GLenum GetTarget() { return GL_TEXTURE_2D; }
 		int MaxHeight;
+		bool IsValid() { return _Valid; }
 	private:
 		void GenerateTexture();
 		void DeleteTexture();
@@ -87,10 +88,12 @@ namespace OvrMangaroll {
 		void *_GPUBuffer;
 		bool _TextureGenerated;
 		int _ThreadEvents;
+		bool _Valid;
 		static ovrMessageQueue *S_Queue;
 		static Thread *S_WorkerThread;
 		static Thread *S_WorkerThread2;
 		static void *S_WorkerFn(Thread *, void *);
+
 	};
 
 	class BufferManager {

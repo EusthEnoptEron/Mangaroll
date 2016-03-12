@@ -46,7 +46,7 @@ namespace OvrMangaroll {
 
 		_Menu = new UIMenu(gui);
 		_Menu->Create("MangaSelectionMenu");
-		_Menu->SetFlags(VRMenuFlags_t(VRMENU_FLAG_PLACE_ON_HORIZON) | VRMENU_FLAG_BACK_KEY_EXITS_APP);
+		_Menu->SetFlags(VRMenuFlags_t(VRMENU_FLAG_PLACE_ON_HORIZON) | VRMENU_FLAG_SHORT_PRESS_HANDLED_BY_APP /*| VRMENU_FLAG_BACK_KEY_EXITS_APP*/);
 
 		_MainContainer = new UIContainer(gui);
 		_MainContainer->AddToMenu(_Menu);
@@ -192,6 +192,16 @@ namespace OvrMangaroll {
 	}
 
 	bool MangaSelectionView::OnKeyEvent(const int keyCode, const int repeatCount, const KeyEventType eventType) {
+		if (eventType == KeyEventType::KEY_EVENT_SHORT_PRESS && keyCode == OVR_KEY_ESCAPE) {
+			if (_Selector->CanGoBack()) {
+				_Selector->GoBack();
+				return true;
+			}
+			else {
+				_Mangaroll.app->StartSystemActivity(PUI_CONFIRM_QUIT);
+				return true;
+			}
+		}
 		return false;
 	}
 	Matrix4f MangaSelectionView::Frame(const VrFrame & vrFrame) {
@@ -216,6 +226,7 @@ namespace OvrMangaroll {
 	, Border(10)
 	, _Cover(NULL) 
 	, _CoverTexture(NULL)
+	, _Gui(&guiSys)
 	{
 
 	}
@@ -246,8 +257,17 @@ namespace OvrMangaroll {
 		this->GetMenuObject()->SetText(manga->Name.ToCStr());
 
 		//_Title->CalculateTextDimensions();
-
-		_Cover->SetImage(0, SURFACE_TEXTURE_DIFFUSE, manga->GetCover()->Display(), Width-Border, Height - (float(Border) / Width * Height));
+		if (manga->GetCover()->IsValid()) {
+			_Title->SetVisible(false);
+			_Cover->SetVisible(true);
+			_Cover->SetImage(0, SURFACE_TEXTURE_DIFFUSE, manga->GetCover()->Display(), Width - Border, Height - (float(Border) / Width * Height));
+			_Title->SetText("");
+		}
+		else {
+			_Title->SetVisible(true);
+			_Cover->SetVisible(false);
+			_Title->SetTextWordWrapped(manga->Name.ToCStr(), _Gui->GetDefaultFont(), VRMenuObject::DEFAULT_TEXEL_SCALE * Width);
+		}
 		/*VRMenuSurface & surf = _Cover->GetMenuObject()->GetSurface(0);
 		surf.SetClipUVs();*/
 		//_Cover->SetLocalPosition( Vector3f(25,-25,0) );
@@ -281,6 +301,15 @@ namespace OvrMangaroll {
 		_Background->SetColor(Vector4f(0, 0, 0, 1));
 		_Background->SetLocalPosition(Vector3f(0, 0, -0.001f));
 		
+		_Title = new UILabel(GuiSys);
+		_Title->AddToMenu(Menu, this);
+		_Title->SetText("");
+		_Title->SetTextOffset(Vector3f(0, 0, 0.1f));
+		_Title->SetFontParms(VRMenuFontParms(true, true, false, false, true, 0.5f, 0.4f, 0.3));
+		_Title->AddFlags(VRMENUOBJECT_DONT_HIT_ALL);
+		_Title->SetVisible(false);
+
+
 		_Cover = new UIImage(GuiSys);
 		_Cover->AddToMenu(Menu, this);
 		_Cover->AddFlags(VRMENUOBJECT_DONT_HIT_ALL);
@@ -299,7 +328,11 @@ namespace OvrMangaroll {
 
 	MangaSelectorComponent::MangaSelectorComponent(OvrGuiSys &guiSys)
 		: VRMenuComponent(
-		VRMenuEventFlags_t(VRMENU_EVENT_FRAME_UPDATE) | VRMENU_EVENT_SWIPE_FORWARD | VRMENU_EVENT_SWIPE_BACK | VRMENU_EVENT_FOCUS_GAINED | VRMENU_EVENT_FOCUS_LOST)
+		VRMenuEventFlags_t(VRMENU_EVENT_FRAME_UPDATE) 
+		| VRMENU_EVENT_SWIPE_FORWARD 
+		| VRMENU_EVENT_SWIPE_BACK 
+		| VRMENU_EVENT_FOCUS_GAINED 
+		| VRMENU_EVENT_FOCUS_LOST)
 		, _Menu(NULL)
 		, _Parent(NULL)
 		, _Gui(guiSys)

@@ -115,7 +115,11 @@ namespace OvrMangaroll {
 		, _GPUBuffer(NULL)
 		, _TextureGenerated(false)
 		, _ThreadEvents(0)
+		, _Valid(true)
 	{
+		if (path.IsEmpty()) {
+			_Valid = false;
+		}
 	}
 
 	AsyncTexture::~AsyncTexture() {
