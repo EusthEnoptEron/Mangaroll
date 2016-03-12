@@ -21,7 +21,7 @@ namespace OvrMangaroll {
 		, _Selector(NULL)
 		, _FillTexture()
 		, _LocalMangaProvider()
-		, _NProvider("http://192.168.1.39:3000/browse/%d", "http://192.168.1.39:3000/show/%d")
+		, _NProvider("http://192.168.1.39:3000/browse/%1$d", "http://192.168.1.39:3000/show/%1$d")
 		, _RemoteProviders()
 		, _LocalCategoryComponent()
 		, _RemoteCategoryComponent()
@@ -521,7 +521,6 @@ namespace OvrMangaroll {
 				CleanPanels();
 			}
 		}
-
 	}
 	
 	eMsgStatus MangaSelectorComponent::OnEvent_Impl(OvrGuiSys & guiSys, VrFrame const & vrFrame,

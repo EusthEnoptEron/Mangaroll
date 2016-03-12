@@ -11,6 +11,7 @@ Copyright   :   Copyright 2014 Oculus VR, LLC. All Rights reserved.
 *************************************************************************************/
 package oculus;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.content.Intent;
@@ -19,6 +20,7 @@ import com.oculus.vrappframework.VrActivity;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.regex.Pattern;
 
 public class MainActivity extends VrActivity {
 	public static final String TAG = "Mangaroll";
@@ -47,6 +49,10 @@ public class MainActivity extends VrActivity {
 
 		setAppPtr( nativeSetAppInterface( this, fromPackageNameString, commandString, uriString ) );
     }
+
+	public static String InsertParam( String source, String paramName, String value) {
+        return source.replaceAll(Pattern.quote(paramName), Uri.encode(value));
+	}
 
 	public static byte[] LoadHttpUrl( String str ) {
 		int totalLen = 0;

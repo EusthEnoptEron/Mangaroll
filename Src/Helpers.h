@@ -1,10 +1,18 @@
 #pragma once
+#ifndef ANDROID
+#define ANDROID
+#endif
 
 #include "App.h"
 #include "Kernel\OVR_Threads.h"
 #include "VRMenuObject.h"
 #include "Kernel\OVR_Array.h"
 #include "Kernel\OVR_Alg.h"
+#include "Kernel\OVR_String_Utils.h"
+#include "PathUtils.h"
+#include "jni.h"
+#include "Android\JniUtils.h"
+
 
 using namespace OVR;
 namespace OvrMangaroll {
@@ -44,4 +52,31 @@ namespace OvrMangaroll {
 		static GuideType Guide;
 		static App *Instance;
 	};
+
+	//class ParamString {
+	//public:
+	//	static String InsertParam(char *source, char *paramName, char *value) {
+	//		const ovrJava  *java = AppState::Instance->GetJava();
+	//		JNIEnv *env = java->Env;
+	//		jclass clazz = env->GetObjectClass(java->ActivityObject);
+	//		jmethodID _InsertParam = env->GetStaticMethodID(clazz, "InsertParam", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
+
+	//		// Prepare params
+	//		jstring src = env->NewStringUTF(source);
+	//		jstring param = env->NewStringUTF(paramName);
+	//		jstring value = env->NewStringUTF(value);
+
+	//		jstring result = (jstring)env->CallStaticObjectMethod(clazz, _InsertParam, src, param, value);
+	//		const char *resultString = env->GetStringUTFChars(result, JNI_TRUE);
+
+	//		// Clean up
+	//		
+
+	//		return resultString;
+	//	}
+
+	//	static void InsertParam(String source, String paramName, int value) {
+	//		
+	//	}
+	//};
 }
