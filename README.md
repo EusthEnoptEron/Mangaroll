@@ -10,8 +10,9 @@ It's possible to integrate simple online services that will serve manga. To get 
 
 ### Browse view
 
-**Parameters for URL string**:
-  - `%d` = page
+**Required parameters in URL string**:
+  - `{page}`
+  - `{id}`
 
 
 ```json
@@ -20,9 +21,16 @@ It's possible to integrate simple online services that will serve manga. To get 
   "hasMore": true,
   "mangaList": [
     {
-      "name": "Name",
+      "name": "Some manga magazine",
       "id"  : 1,
-      "thumb": "http://thumbnail.jpg"
+      "thumb": "http://thumbnail.jpg",
+      "container": false
+    },
+    {
+      "name": "Some manga that will have chapters",
+      "id"  : 1,
+      "thumb": "http://thumbnail.jpg",
+      "container": true
     }
   ]
 }
@@ -31,8 +39,8 @@ It's possible to integrate simple online services that will serve manga. To get 
 
 ### Read view
 
-**Parameters for URL string**:
-  - `%d` = id
+**Required parameters in URL string**:
+  - `{id}`
 
 ```json
 {
