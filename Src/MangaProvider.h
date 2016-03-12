@@ -11,14 +11,16 @@ namespace OvrMangaroll {
 	// Interface for providers of manga
 	class MangaProvider {
 	public:
+		virtual ~MangaProvider() {}
+
 		virtual int GetCurrentSize() = 0;
 		virtual bool HasMore() = 0;
 		virtual void LoadMore() = 0;
 		virtual bool IsLoading() = 0;
-		virtual Manga *At(int i) = 0;
+		virtual MangaWrapper *At(int i) = 0;
 	protected:
-		MangaProvider() {}
-		virtual ~MangaProvider() {}
+		MangaProvider() : Id("") {}
+		String Id;
 	};
 
 
@@ -31,13 +33,13 @@ namespace OvrMangaroll {
 		// Implement
 		virtual bool HasMore() { return !_Initialized; }
 		virtual bool IsLoading() { return false; }
-		virtual Manga *At(int i) { return _Mangas.At(i); }
+		virtual MangaWrapper *At(int i) { return _Mangas.At(i); }
 		virtual int GetCurrentSize() { return _Mangas.GetSizeI(); }
 
 		virtual void LoadMore();
 	private:
 		bool _Initialized;
-		Array<Manga *> _Mangas;
+		Array<MangaWrapper *> _Mangas;
 	};
 
 	class RemoteMangaProvider : public MangaProvider {
@@ -47,7 +49,7 @@ namespace OvrMangaroll {
 
 		// Implement
 		virtual bool HasMore() { return _HasMore; }
-		virtual Manga *At(int i) { return _Mangas.At(i); }
+		virtual MangaWrapper *At(int i) { return _Mangas.At(i); }
 		virtual int GetCurrentSize() { return _Mangas.GetSizeI(); }
 
 		virtual bool IsLoading();
@@ -60,8 +62,8 @@ namespace OvrMangaroll {
 		String _BrowseUrl;
 		String _ShowUrl;
 		bool _DoneReading;
-		Array<Manga *> _Mangas;
-		Array<Manga *> _MangasBuffer;
+		Array<MangaWrapper *> _Mangas;
+		Array<MangaWrapper *> _MangasBuffer;
 
 		
 		static void FetchFn(void *buffer, int length, void *target);

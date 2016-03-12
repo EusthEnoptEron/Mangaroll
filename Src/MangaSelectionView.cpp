@@ -21,7 +21,8 @@ namespace OvrMangaroll {
 		, _Selector(NULL)
 		, _FillTexture()
 		, _LocalMangaProvider()
-		, _NProvider("http://192.168.1.39:3000/browse/%1$d", "http://192.168.1.39:3000/show/%1$d")
+		//, _NProvider("http://192.168.1.39:3000/nh/browse/%1$d", "http://192.168.1.39:3000/nh/show/%1$d")
+		, _NProvider("http://192.168.1.39:3000/mr/browse/%1$d?id=%2$s", "http://192.168.1.39:3000/mr/show/%1$d")
 		, _RemoteProviders()
 		, _LocalCategoryComponent()
 		, _RemoteCategoryComponent()
@@ -237,10 +238,10 @@ namespace OvrMangaroll {
 		_Selector = selector;
 	}
 
-	Manga *MangaPanel::GetManga() {
+	MangaWrapper *MangaPanel::GetManga() {
 		return _Manga;
 	}
-	void MangaPanel::SetManga(Manga *manga) {
+	void MangaPanel::SetManga(MangaWrapper *manga) {
 		_Manga = manga;
 		this->GetMenuObject()->SetText(manga->Name.ToCStr());
 
@@ -259,7 +260,12 @@ namespace OvrMangaroll {
 	void MangaPanel::OnClick(void *p) {
 		MangaPanel *self = (MangaPanel *)p;
 
-		self->_Selector->SelectManga(self->_Manga);
+		if (self->_Manga->IsManga()) {
+			self->_Selector->SelectManga(self->_Manga->GetManga());
+		}
+		else {
+			self->_Selector->SetProvider(*(self->_Manga->GetContainer()), true);
+		}
 	}
 
 	void MangaPanel::Init(void) {
@@ -306,7 +312,7 @@ namespace OvrMangaroll {
 		, _Index(0)
 		, _Speed(0)
 		, _Gravity(0.1f)
-		, _Provider(NULL)
+		, _Providers()
 		, _Arrow()
 		, _ArrowLeftTexture()
 		, _Fill()
@@ -327,7 +333,7 @@ namespace OvrMangaroll {
 	}
 
 	bool MangaSelectorComponent::CanSeek() {
-		return _Index + _PanelCount < _Provider->GetCurrentSize();
+		return _Index + _PanelCount < _Providers.Back()->GetCurrentSize();
 	}
 
 	bool MangaSelectorComponent::CanSeekBack() {
@@ -443,11 +449,11 @@ namespace OvrMangaroll {
 	}
 	
 	void MangaSelectorComponent::UpdatePanels() {
-		int count = Alg::Min(_Index + _PanelCount, _Provider->GetCurrentSize());
+		int count = Alg::Min(_Index + _PanelCount, _Providers.Back()->GetCurrentSize());
 		for (int i = _Index + _FillCount; i < count; i++) {
 			MangaPanel *panel = _PanelSets[_Front].At(i - _Index);
 
-			panel->SetManga(_Provider->At(i));
+			panel->SetManga(_Providers.Back()->At(i));
 			panel->SetVisible(true);
 			_FillCount++;
 		}
@@ -458,7 +464,16 @@ namespace OvrMangaroll {
 
 
 	void MangaSelectorComponent::SetProvider(MangaProvider &provider, bool stack) {
-		_Provider = &provider;
+		if (!stack) {
+			// Clean up
+			while (_Providers.GetSizeI() > 1) {
+				// Delete all save for the entry provider
+				delete _Providers.Pop();
+			}
+			_Providers.Clear();
+			
+		}
+		_Providers.PushBack(&provider);
 		Seek(1);
 		// Lil hack
 		_Index = 0;
@@ -472,13 +487,12 @@ namespace OvrMangaroll {
 
 	void MangaSelectorComponent::Update(VRMenuEvent const & evt) {
 		// Update index
-		if (_Provider != NULL) {
-			if (!_Provider->IsLoading() && _Provider->HasMore()) {
-				if (_Provider->GetCurrentSize() <= _Index + _PanelCount) {
-					_Provider->LoadMore();
-				}
+		if (!_Providers.Back()->IsLoading() && _Providers.Back()->HasMore()) {
+			if (_Providers.Back()->GetCurrentSize() <= _Index + _PanelCount) {
+				_Providers.Back()->LoadMore();
 			}
 		}
+
 		UpdatePanels();
 
 		if (_ActivePanel != NULL && _Transition.GetFadeState() != Fader::FADE_IN) {
@@ -524,7 +538,7 @@ namespace OvrMangaroll {
 	
 	eMsgStatus MangaSelectorComponent::OnEvent_Impl(OvrGuiSys & guiSys, VrFrame const & vrFrame,
 		VRMenuObject * self, VRMenuEvent const & event) {
-		if (_Provider == NULL) return MSG_STATUS_ALIVE;
+		if (_Providers.GetSizeI() == 0) return MSG_STATUS_ALIVE;
 
 		if (event.EventType == VRMENU_EVENT_FRAME_UPDATE) {
 			Update(event);

@@ -39,14 +39,22 @@ namespace OvrMangaroll {
 				Array<String> images = DirectoryFileList(mangaPath.ToCStr());
 
 				manga->Name = ExtractDirectory(mangaPath);
+				String cover("");
 				for (int i = 0; i < images.GetSizeI(); i++) {
 					//WARN("%s -> %s", images[i].ToCStr(), images[i].GetExtension().ToCStr());
 					if (images[i].GetExtension() == ".jpg") {
 						manga->AddPage(new LocalPage(images[i]));
+
+						if (cover.IsEmpty()) {
+							cover = images[i];
+						}
 					}
 				}
 
-				_Mangas.PushBack(manga);
+				MangaWrapper *wrapper = new MangaWrapper(manga);
+				wrapper->SetThumb(cover);
+				wrapper->Name = manga->Name;
+				_Mangas.PushBack(wrapper);
 			}
 		}
 	}
@@ -81,7 +89,7 @@ namespace OvrMangaroll {
 
 
 	void RemoteMangaProvider::LoadMore() {
-		Web::Download(String::Format(_BrowseUrl.ToCStr(), _Page),
+		Web::Download(String::Format(_BrowseUrl.ToCStr(), _Page, Id.ToCStr()),
 			RemoteMangaProvider::FetchFn
 			, this);
 		_Loading = true;
@@ -111,13 +119,26 @@ namespace OvrMangaroll {
 					while (!listReader.IsEndOfArray()) {
 						JsonReader mangaReader(listReader.GetNextArrayElement());
 						if (mangaReader.IsValid() && mangaReader.IsObject()) {
-							RemoteManga *manga = new RemoteManga();
-							manga->Name = mangaReader.GetChildStringByName("name");
-							manga->ID = mangaReader.GetChildInt32ByName("id");
-							manga->SetThumb(mangaReader.GetChildStringByName("thumb"));
-							manga->FetchUrl = provider->_ShowUrl;
+							if (mangaReader.GetChildBoolByName("container")) {
+								RemoteMangaProvider *container = new RemoteMangaProvider(provider->_BrowseUrl, provider->_ShowUrl);
+								MangaWrapper *wrapper = new MangaWrapper(container);
+								container->Id = String::Format("%d", mangaReader.GetChildInt32ByName("id"));
+								wrapper->Name = mangaReader.GetChildStringByName("name");
+								container->Name = mangaReader.GetChildStringByName("name");
+								wrapper->SetThumb(mangaReader.GetChildStringByName("thumb"));
+								provider->_MangasBuffer.PushBack(wrapper);
+							} else {
+								RemoteManga *manga = new RemoteManga();
+								MangaWrapper *wrapper = new MangaWrapper(manga);
 
-							provider->_MangasBuffer.PushBack(manga);
+								manga->Name = mangaReader.GetChildStringByName("name");
+								manga->ID = mangaReader.GetChildInt32ByName("id");
+								manga->FetchUrl = provider->_ShowUrl;
+								wrapper->SetThumb(mangaReader.GetChildStringByName("thumb"));
+								wrapper->Name = manga->Name;
+								provider->_MangasBuffer.PushBack(wrapper);
+							}
+							
 						}
 					}
 				}

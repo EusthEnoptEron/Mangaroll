@@ -15,7 +15,6 @@ namespace OvrMangaroll {
 			, _Selection(NULL)
 			, _SelectionIndex(0)
 			, _Progress(0)
-			, _Cover(NULL)
 			, _AngleOffset(0)
 	{
 			WARN("YAY 2");
@@ -35,16 +34,8 @@ namespace OvrMangaroll {
 		}
 	}
 
-	AsyncTexture *Manga::GetCover() {
-		return _Cover;
-	}
 
 	void Manga::AddPage(Page *page) {
-		if (_Cover == NULL) {
-			_Cover = new AsyncTexture(page->GetPath(), 3);
-			_Cover->MaxHeight = 400;
-		}
-
 		if(_First == NULL) {
 			// First page
 			_First = page;
@@ -179,14 +170,6 @@ namespace OvrMangaroll {
 
 	}
 
-	void RemoteManga::SetThumb(String thumb) {
-		if (_Cover != NULL) {
-			delete _Cover;
-		}
-		_Cover = new AsyncTexture(thumb, 3);
-	}
-
-
 	void RemoteManga::_Init() {
 		_Loading = true;
 		Web::Download(
@@ -224,6 +207,29 @@ namespace OvrMangaroll {
 
 		delete file;
 		self->_Loading = false;
+	}
+
+
+	MangaWrapper::MangaWrapper(MangaProvider *provider)
+		: _Manga(NULL)
+		, _Category(provider)
+		, _Cover(NULL)
+	{
+	}
+
+	MangaWrapper::MangaWrapper(Manga *manga)
+		: _Manga(manga)
+		, _Category(NULL)
+		, _Cover(NULL)
+	{
+	}
+
+	void MangaWrapper::SetThumb(String thumb) {
+		if (_Cover != NULL) {
+			delete _Cover;
+		}
+		_Cover = new AsyncTexture(thumb, 3);
+		_Cover->MaxHeight = 400;
 	}
 
 }

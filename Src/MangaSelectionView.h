@@ -45,8 +45,8 @@ namespace OvrMangaroll {
 		void SetSelector(MangaSelectorComponent *selector);
 
 		void AddToMenu(UIMenu *menu, UIObject *parent = NULL);
-		void SetManga(Manga *manga);
-		Manga *GetManga();
+		void SetManga(MangaWrapper *manga);
+		MangaWrapper *GetManga();
 		float Position;
 		int Index;
 		int Width;
@@ -54,7 +54,7 @@ namespace OvrMangaroll {
 		int Border;
 	private:
 		MangaSelectorComponent *_Selector;
-		Manga *_Manga;
+		MangaWrapper *_Manga;
 		void Init(void);
 		UIImage *_Background;
 		UILabel *_Title;
@@ -121,7 +121,7 @@ namespace OvrMangaroll {
 		float _TouchStartTime;
 		bool _IsTouching;
 		float _PanelHeight;
-		MangaProvider *_Provider;
+		Array<MangaProvider *> _Providers;
 		int _PanelCount;
 		UITexture _Arrow;
 		UITexture _ArrowLeftTexture;

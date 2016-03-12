@@ -9,6 +9,8 @@ using namespace OVR;
 
 namespace OvrMangaroll {
 
+	class MangaProvider;
+
 	class Manga : public GlObject
 	{
 	public:
@@ -29,7 +31,6 @@ namespace OvrMangaroll {
 		Page &GetPage(int);
 		String Name;
 		bool Selectionable;
-		AsyncTexture *GetCover();
 		void Unload();
 	protected:
 		virtual void _Init() { }
@@ -43,7 +44,6 @@ namespace OvrMangaroll {
 		int _SelectionIndex;
 		float _Angle;
 		int _Progress;
-		AsyncTexture *_Cover;
 		int _AngleOffset;
 	};
 
@@ -52,7 +52,6 @@ namespace OvrMangaroll {
 		RemoteManga();
 		virtual ~RemoteManga() {}
 		int ID;
-		void SetThumb(String url);
 		String FetchUrl;
 	protected:
 		virtual void _Init();
@@ -62,6 +61,26 @@ namespace OvrMangaroll {
 		static void OnDownload(void *buffer, int length, void *p);
 		Array<Page *> _Payload;
 		bool _Loading;
+	};
+
+
+	class MangaWrapper {
+	public:
+		MangaWrapper(MangaProvider *wrapper);
+		MangaWrapper(Manga *manga);
+		virtual ~MangaWrapper() {}
+
+		void SetThumb(String path);
+		AsyncTexture *GetCover() { return _Cover; }
+		MangaProvider *GetContainer() { return _Category; }
+		Manga *GetManga() { return _Manga; }
+		bool IsContainer() { return _Category != NULL; }
+		bool IsManga() { return _Manga != NULL; }
+		String Name;
+	private:
+		Manga *_Manga;
+		MangaProvider *_Category;
+		AsyncTexture *_Cover;
 	};
 
 }
