@@ -12,6 +12,7 @@ It's possible to integrate simple online services that will serve manga. To get 
 
 **Parameters for URL string**:
   - `%d` = page
+  - `%d` = id (for containers)
 
 
 ```json
@@ -20,9 +21,16 @@ It's possible to integrate simple online services that will serve manga. To get 
   "hasMore": true,
   "mangaList": [
     {
-      "name": "Name",
+      "name": "Some manga magazine",
       "id"  : 1,
-      "thumb": "http://thumbnail.jpg"
+      "thumb": "http://thumbnail.jpg",
+      "container": false
+    },
+    {
+      "name": "Some manga that will have chapters",
+      "id"  : 1,
+      "thumb": "http://thumbnail.jpg",
+      "container": true
     }
   ]
 }
