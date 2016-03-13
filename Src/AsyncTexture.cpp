@@ -203,7 +203,7 @@ namespace OvrMangaroll {
 
 		// If local / remote...
 		
-		if (_Path.GetLengthI() > 7 && _Path.Substring(0, 7).CompareNoCase("http://") == 0) {
+		if (_Path.GetLengthI() > 7 && (_Path.Substring(0, 7).CompareNoCase("http://") == 0 || _Path.Substring(0, 8).CompareNoCase("https://") == 0)) {
 			LOG("TEXTURE: %s is a URL", _Path.ToCStr());
 			S_Queue->PostPrintf("call %p %p", DownloadFile, this);
 		}

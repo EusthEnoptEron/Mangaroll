@@ -20,7 +20,17 @@ import com.oculus.vrappframework.VrActivity;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.security.SecureRandom;
 import java.util.regex.Pattern;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import java.security.cert.X509Certificate;
 
 public class MainActivity extends VrActivity {
 	public static final String TAG = "Mangaroll";
@@ -33,10 +43,36 @@ public class MainActivity extends VrActivity {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+//        disableCertificateValidation();
 		System.loadLibrary("mangaroll");
 	}
 
     public static native long nativeSetAppInterface( VrActivity act, String fromPackageNameString, String commandString, String uriString );
+//
+//    public static void disableCertificateValidation() {
+//        // Create a trust manager that does not validate certificate chains
+//        TrustManager[] trustAllCerts = new TrustManager[] {
+//                new X509TrustManager() {
+//                    public X509Certificate[] getAcceptedIssuers() {
+//                        return new X509Certificate[0];
+//                    }
+//                    public void checkClientTrusted(X509Certificate[] certs, String authType) {}
+//                    public void checkServerTrusted(X509Certificate[] certs, String authType) {}
+//                }};
+//
+//        // Ignore differences between given hostname and certificate hostname
+//        HostnameVerifier hv = new HostnameVerifier() {
+//            public boolean verify(String hostname, SSLSession session) { return true; }
+//        };
+//
+//        // Install the all-trusting trust manager
+//        try {
+//            SSLContext sc = SSLContext.getInstance("SSL");
+//            sc.init(null, trustAllCerts, new SecureRandom());
+//            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+//            HttpsURLConnection.setDefaultHostnameVerifier(hv);
+//        } catch (Exception e) {}
+//    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +83,7 @@ public class MainActivity extends VrActivity {
 		String fromPackageNameString = VrActivity.getPackageStringFromIntent( intent );
 		String uriString = VrActivity.getUriStringFromIntent( intent );
 
-		setAppPtr( nativeSetAppInterface( this, fromPackageNameString, commandString, uriString ) );
+		setAppPtr(nativeSetAppInterface(this, fromPackageNameString, commandString, uriString));
     }
 
 	public static String InsertParam( String source, String paramName, String value) {
@@ -60,9 +96,11 @@ public class MainActivity extends VrActivity {
 
 		Log.d(TAG, "LoadHttpUrl " + str );
 		try {
-			URL aURL = new URL( str );
-			HttpURLConnection conn = (HttpURLConnection)aURL.openConnection();
-			conn.connect();
+            URL aURL = new URL( str );
+            HttpURLConnection conn = (HttpURLConnection)aURL.openConnection();
+			conn.setRequestProperty("User-Agent", "Mangaroll/1.0");
+            conn.connect();
+
 			InputStream is = conn.getInputStream();
 
 			byte[]	readbuffer = new byte[0x100000];
@@ -80,8 +118,10 @@ public class MainActivity extends VrActivity {
 			}
 
 			is.close();
-		} catch (Exception e) {
-			Log.v(TAG, "LoadHttpUrl", e);
+            Log.w(TAG, "LoadHttpUrl success!");
+
+        } catch (Exception e) {
+			Log.w(TAG, "LoadHttpUrl", e);
 		}
 
 		Log.d(TAG, "totalLen " + totalLen);
