@@ -12,7 +12,7 @@
 
 namespace OvrMangaroll {
 
-	ovrMessageQueue Web::S_Queue = ovrMessageQueue(50);
+	ovrMessageQueue Web::S_Queue = ovrMessageQueue(100);
 	Thread *Web::S_DownloadThread = new Thread(Thread::CreateParams(Web::S_ConsumerFn, NULL, 128 * 1024, -1, Thread::ThreadState::Running, Thread::BelowNormalPriority));
 
 	void *Web::S_ConsumerFn(Thread *thread, void *p) {
@@ -20,7 +20,6 @@ namespace OvrMangaroll {
 		while (!thread->GetExitFlag()) {
 			S_Queue.SleepUntilMessage();
 			const char *msg = S_Queue.GetNextMessage();
-
 			if (msg != NULL) {
 				QueueCb cb;
 				void *obj;

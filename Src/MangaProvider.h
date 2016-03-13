@@ -20,6 +20,7 @@ namespace OvrMangaroll {
 		virtual MangaWrapper *At(int i) = 0;
 	protected:
 		MangaProvider() : Id("") {}
+		MangaProvider(const MangaProvider &);
 		String Id;
 	};
 
@@ -38,8 +39,30 @@ namespace OvrMangaroll {
 
 		virtual void LoadMore();
 	private:
+		LocalMangaProvider(const LocalMangaProvider &);
+
 		bool _Initialized;
 		Array<MangaWrapper *> _Mangas;
+	};
+
+
+	class MangaServiceProvider : public MangaProvider {
+	public:
+		MangaServiceProvider();
+		virtual ~MangaServiceProvider() {}
+
+		// Implement
+		virtual bool HasMore() { return !_Initialized; }
+		virtual bool IsLoading() { return false; }
+		virtual MangaWrapper *At(int i) { return _Services.At(i); }
+		virtual int GetCurrentSize() { return _Services.GetSizeI(); }
+
+		virtual void LoadMore();
+	private:
+		MangaServiceProvider(const MangaServiceProvider &);
+
+		bool _Initialized;
+		Array<MangaWrapper *> _Services;
 	};
 
 	class RemoteMangaProvider : public MangaProvider {
@@ -56,6 +79,9 @@ namespace OvrMangaroll {
 		virtual void LoadMore();
 		String Name;
 	private:
+		RemoteMangaProvider(const RemoteMangaProvider &);
+
+
 		bool _Loading;
 		bool _HasMore;
 		int _Page;

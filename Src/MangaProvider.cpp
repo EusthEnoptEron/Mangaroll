@@ -59,6 +59,55 @@ namespace OvrMangaroll {
 		}
 	}
 
+	// ############### SERVICE PROVIDER IMPLEMENTATION #############
+	MangaServiceProvider::MangaServiceProvider()
+		: MangaProvider()
+		, _Initialized(false)
+		, _Services()
+	{
+	}
+
+	void MangaServiceProvider::LoadMore() {
+		_Initialized = true;
+
+		// LOAD CONFIGURED REMOTE SITES
+		const OvrStoragePaths & paths = AppState::Instance->GetStoragePaths();
+
+		Array<String> SearchPaths;
+		paths.PushBackSearchPathIfValid(EST_SECONDARY_EXTERNAL_STORAGE, EFT_ROOT, "RetailMedia/", SearchPaths);
+		paths.PushBackSearchPathIfValid(EST_SECONDARY_EXTERNAL_STORAGE, EFT_ROOT, "", SearchPaths);
+		paths.PushBackSearchPathIfValid(EST_PRIMARY_EXTERNAL_STORAGE, EFT_ROOT, "RetailMedia/", SearchPaths);
+		paths.PushBackSearchPathIfValid(EST_PRIMARY_EXTERNAL_STORAGE, EFT_ROOT, "", SearchPaths);
+
+		for (int i = 0; i < SearchPaths.GetSizeI(); i++) {
+			const char *path = (SearchPaths[i] + "Manga/services.json").ToCStr();
+			if (FileExists(path)) {
+				JSON *jsonFile = JSON::Load(path);
+				if (jsonFile != NULL) {
+					JsonReader serviceReader(jsonFile);
+					if (serviceReader.IsValid() && serviceReader.IsArray()) {
+						while (!serviceReader.IsEndOfArray()) {
+							JsonReader elementReader(serviceReader.GetNextArrayElement());
+							if (elementReader.IsValid() && elementReader.IsObject()) {
+								RemoteMangaProvider *provider = new RemoteMangaProvider(
+									elementReader.GetChildStringByName("browseUrl"),
+									elementReader.GetChildStringByName("showUrl")
+									);
+								provider->Name = elementReader.GetChildStringByName("name");
+								MangaWrapper *wrapper = new MangaWrapper(provider);
+								wrapper->Name = provider->Name;
+								wrapper->SetThumb("");
+								// TODO: icon
+								_Services.PushBack(wrapper);
+							}
+						}
+					}
+					delete jsonFile;
+				}
+				//break;
+			}
+		}
+	}
 
 	// ############## REMOTE PROVIDER IMPLEMENTATION ###########
 

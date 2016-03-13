@@ -24,8 +24,7 @@ namespace OvrMangaroll {
 		//, _NProvider("http://192.168.1.39:3000/nh/browse/%1$d", "http://192.168.1.39:3000/nh/show/%1$d")
 		//, _NProvider("http://192.168.1.39:3000/mr/browse/%1$d?id=%2$s", "http://192.168.1.39:3000/mr/show/%1$d")
 		//, _NProvider("http://192.168.1.39:3000/ya/browse/%1$d", "http://192.168.1.39:3000/ya/show/%1$d")
-		, _NProvider("http://192.168.1.39:3000/r34/browse/%1$d", "http://192.168.1.39:3000/r34/show/%1$d?page=%2$d")
-		, _RemoteProviders()
+		, _NProvider()
 		, _LocalCategoryComponent()
 		, _RemoteCategoryComponent()
 	{
@@ -92,42 +91,6 @@ namespace OvrMangaroll {
 		_SelectorContainer->SetLocalPosition(Vector3f(0, -0.3f, -1));
 		_Selector->SetOnSelectManga(OnSelectMangaLocal, this);
 
-		// LOAD CONFIGURED REMOTE SITES
-		const OvrStoragePaths & paths = AppState::Instance->GetStoragePaths();
-
-		Array<String> SearchPaths;
-		paths.PushBackSearchPathIfValid(EST_SECONDARY_EXTERNAL_STORAGE, EFT_ROOT, "RetailMedia/", SearchPaths);
-		paths.PushBackSearchPathIfValid(EST_SECONDARY_EXTERNAL_STORAGE, EFT_ROOT, "", SearchPaths);
-		paths.PushBackSearchPathIfValid(EST_PRIMARY_EXTERNAL_STORAGE, EFT_ROOT, "RetailMedia/", SearchPaths);
-		paths.PushBackSearchPathIfValid(EST_PRIMARY_EXTERNAL_STORAGE, EFT_ROOT, "", SearchPaths);
-
-		for (int i = 0; i < SearchPaths.GetSizeI(); i++) {
-			const char *path = (SearchPaths[i] + "Manga/services.json").ToCStr();
-			if (FileExists(path)) {
-				JSON *jsonFile = JSON::Load(path);
-				if (jsonFile != NULL) {
-					JsonReader serviceReader(jsonFile);
-					if (serviceReader.IsValid() && serviceReader.IsArray()) {
-						while (!serviceReader.IsEndOfArray()) {
-							JsonReader elementReader(serviceReader.GetNextArrayElement());
-							if (elementReader.IsValid() && elementReader.IsObject()) {
-								RemoteMangaProvider *provider = new RemoteMangaProvider(
-									elementReader.GetChildStringByName("browseUrl"),
-									elementReader.GetChildStringByName("showUrl")
-								);
-								provider->Name = elementReader.GetChildStringByName("name");
-
-								_RemoteProviders.PushBack(provider);
-							}
-						}
-					}
-					delete jsonFile;
-				}
-				//break;
-			}
-		}
-
-		LOG("Services found: %d", _RemoteProviders.GetSizeI());
 
 		//_Selector->SetProvider(_NProvider);
 		//_Selector->SetProvider(_LocalMangaProvider);
@@ -501,10 +464,7 @@ namespace OvrMangaroll {
 	void MangaSelectorComponent::SetProvider(MangaProvider &provider, bool stack) {
 		if (!stack) {
 			// Clean up
-			while (_Providers.GetSizeI() > 1) {
-				// Delete all save for the entry provider
-				delete _Providers.Pop();
-			}
+			// TODO: Clear memory somehow (be careful when deleting stuff...)
 			_Providers.Clear();
 			
 		}

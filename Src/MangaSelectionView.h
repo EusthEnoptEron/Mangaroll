@@ -86,8 +86,9 @@ namespace OvrMangaroll {
 			return _Providers.GetSizeI() > 1;
 		}
 		void GoBack() {
-			delete _Providers.Pop();
+			_Providers.Pop(); // TODO: Garbage
 			SetProvider(*(_Providers.Pop()), true);
+			_FadeDir = -1;
 		}
 
 		// Constants because I'm lazy
@@ -174,8 +175,7 @@ namespace OvrMangaroll {
 		UITexture _FillTexture;
 
 		LocalMangaProvider _LocalMangaProvider;
-		RemoteMangaProvider _NProvider;
-		Array<RemoteMangaProvider*> _RemoteProviders;
+		MangaServiceProvider _NProvider;
 
 		CategoryComponent _LocalCategoryComponent;
 		CategoryComponent _RemoteCategoryComponent;
