@@ -163,10 +163,13 @@ namespace OvrMangaroll {
 		void OnSelectManga(Manga *);
  
 	private:
+
+		void UpdateGUI();
 		Mangaroll &_Mangaroll;
 		UIMenu *_Menu;
 
 		UIContainer *_MainContainer;
+		UIContainer *_LabelContainer;
 		UILabel *_LocalSrcLabel;
 		UILabel *_RemoteSrcLabel;
 
@@ -180,6 +183,8 @@ namespace OvrMangaroll {
 		CategoryComponent _LocalCategoryComponent;
 		CategoryComponent _RemoteCategoryComponent;
 
+		SineFader _Fader;
+		bool _CloseRequested;
 		static void OnLocalCategory(void *p);
 		static void OnRemoteCategory(void *p);
 	};

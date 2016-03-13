@@ -27,6 +27,8 @@ namespace OvrMangaroll {
 		, _NProvider()
 		, _LocalCategoryComponent()
 		, _RemoteCategoryComponent()
+		, _Fader(0)
+		, _CloseRequested(false)
 	{
 
 	}
@@ -54,16 +56,19 @@ namespace OvrMangaroll {
 		_MainContainer->SetLocalPosition(Vector3f(0, 0, -1));
 		_MainContainer->AddComponent(gazeComponent);
 		
+		_LabelContainer = new UIContainer(gui);
+		_LabelContainer->AddToMenu(_Menu, _MainContainer);
+
 		_SelectorContainer = new UIContainer(gui);
-		_SelectorContainer->AddToMenu(_Menu);
-		_SelectorContainer->SetLocalPosition(Vector3f(0, 0, -1));
+		_SelectorContainer->AddToMenu(_Menu, _MainContainer);
+		//_SelectorContainer->SetLocalPosition(Vector3f(0, 0, -1));
 		_SelectorContainer->AddComponent(gazeComponent);
 
 		_FillTexture.LoadTextureFromApplicationPackage("assets/fill.png");
 
 
 		_LocalSrcLabel = new UILabel(gui);
-		_LocalSrcLabel->AddToMenu(_Menu, _MainContainer);
+		_LocalSrcLabel->AddToMenu(_Menu, _LabelContainer);
 		_LocalSrcLabel->SetLocalPosition(Vector3f(-0.12f, 0, 0));
 		_LocalSrcLabel->SetText("Local");
 		_LocalSrcLabel->SetFontScale(0.5f);
@@ -75,7 +80,7 @@ namespace OvrMangaroll {
 		_LocalCategoryComponent.SetCallback(OnLocalCategory, this);
 
 		_RemoteSrcLabel = new UILabel(gui);
-		_RemoteSrcLabel->AddToMenu(_Menu, _MainContainer);
+		_RemoteSrcLabel->AddToMenu(_Menu, _LabelContainer);
 		_RemoteSrcLabel->SetLocalPosition(Vector3f(0.12f, 0, 0));
 		_RemoteSrcLabel->SetText("Online");
 		_RemoteSrcLabel->SetFontScale(0.5f);
@@ -88,7 +93,7 @@ namespace OvrMangaroll {
 
 		_Selector = new MangaSelectorComponent(gui);
 		_Selector->AddToMenu(_Menu, _SelectorContainer);
-		_SelectorContainer->SetLocalPosition(Vector3f(0, -0.3f, -1));
+		_SelectorContainer->SetLocalPosition(Vector3f(0, -0.3f, 0));
 		_Selector->SetOnSelectManga(OnSelectMangaLocal, this);
 
 
@@ -100,11 +105,10 @@ namespace OvrMangaroll {
 		MangaSelectionView *self = (MangaSelectionView *)p;
 
 		if (self->_LocalCategoryComponent.Selected == self->_RemoteCategoryComponent.Selected) {
-			WARN("ANIMATE");
 			self->_Mangaroll.Animator.AddTask(
 				new AnimatePosition(
-				self->_MainContainer->GetMenuObject(),
-				self->_MainContainer->GetLocalPosition() + Vector3f(0, 0.2f, 0),
+				self->_LabelContainer->GetMenuObject(),
+				self->_LabelContainer->GetLocalPosition() + Vector3f(0, 0.2f, 0),
 				0.2f
 			));
 		}
@@ -124,8 +128,8 @@ namespace OvrMangaroll {
 			WARN("ANIMATE");
 			self->_Mangaroll.Animator.AddTask(
 				new AnimatePosition(
-				self->_MainContainer->GetMenuObject(),
-				self->_MainContainer->GetLocalPosition() + Vector3f(0, 0.2f, 0),
+				self->_LabelContainer->GetMenuObject(),
+				self->_LabelContainer->GetLocalPosition() + Vector3f(0, 0.2f, 0),
 				0.2f
 			));
 		}
@@ -145,15 +149,46 @@ namespace OvrMangaroll {
 	void MangaSelectionView::OneTimeShutdown() {
 
 	}
+	void MangaSelectionView::UpdateGUI() {
+		if (_Fader.GetFadeState() != Fader::FADE_NONE) {
+			Fader::eFadeState prevState = _Fader.GetFadeState();
+
+			if (_Fader.GetFadeState() == Fader::FADE_IN && !_Menu->IsOpen()) {
+				// We're fading in - show menu
+				_Menu->Open();
+			}
+
+			_Fader.Update(3, Time::Delta);
+
+			if (_Fader.GetFadeState() == Fader::FADE_NONE && prevState == Fader::FADE_OUT) {
+				// We're done - close menu
+				_Menu->Close();
+
+				if (_CloseRequested) {
+					CurViewState = eViewState::VIEWSTATE_CLOSED;
+				}
+			}
+
+			// Update visual representation
+			_MainContainer->SetColor(Vector4f(_Fader.GetFadeAlpha()));
+
+			Vector3f pos = _MainContainer->GetLocalPosition();
+			_MainContainer->SetLocalPosition(Vector3f(pos.x, (1 - _Fader.GetFadeAlpha()) * -0.05f, pos.z));
+
+		}
+	}
 
 	void MangaSelectionView::OnOpen() {
-		this->CurViewState = eViewState::VIEWSTATE_OPEN;
-		_Menu->Open();
+		_CloseRequested = false;
+		CurViewState = eViewState::VIEWSTATE_OPEN;
+
+		_Fader.StartFadeIn();
 	}
 
 	void MangaSelectionView::OnClose() {
-		this->CurViewState = eViewState::VIEWSTATE_CLOSED;
-		_Menu->Close();
+		_CloseRequested = true;
+
+		_Fader.StartFadeOut();
 	}
 
 	bool MangaSelectionView::OnKeyEvent(const int keyCode, const int repeatCount, const KeyEventType eventType) {
@@ -170,6 +205,8 @@ namespace OvrMangaroll {
 		return false;
 	}
 	Matrix4f MangaSelectionView::Frame(const VrFrame & vrFrame) {
+		UpdateGUI();
+
 		return _Mangaroll.Carousel.Frame(vrFrame);
 	}
 	Matrix4f MangaSelectionView::GetEyeViewMatrix(const int eye) const {
