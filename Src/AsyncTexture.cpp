@@ -402,6 +402,9 @@ namespace OvrMangaroll {
 				free(oldBuffer);
 			}
 		}
+		else {
+			_Valid = false;
+		}
 
 		_Buffers.PushBack(Buffer);
 		_BufferLength = _InternalWidth * _InternalHeight * 4; // RGBA

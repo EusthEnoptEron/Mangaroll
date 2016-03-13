@@ -58,9 +58,12 @@ namespace OvrMangaroll {
 		virtual void _Update();
 
 	private:
+		void Fetch();
 		static void OnDownload(void *buffer, int length, void *p);
 		Array<Page *> _Payload;
 		bool _Loading;
+		bool _HasMore;
+		int _Page;
 	};
 
 

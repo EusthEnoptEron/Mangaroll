@@ -59,6 +59,7 @@ namespace OvrMangaroll {
 		bool IsTarget(float angle);
 		void SetSelected(bool state);
 		void Reset(void);
+		bool IsValid() { return _ATexture->IsValid(); }
 	protected:
 		String _Path;
 		int _Offset;

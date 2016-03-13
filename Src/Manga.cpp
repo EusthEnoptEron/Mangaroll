@@ -115,16 +115,24 @@ namespace OvrMangaroll {
 		bool electionFinished = false;
 		Page *selectionCandidate = NULL;
 		int selectionIndex = 0;
+		bool weakSelection = true;
 
 		int i = 0;
 		if(_First != NULL) {
 			do {
 				ref->Update(angle, onlyVisual);
-				if (Selectionable && !electionFinished && ref->IsTarget(angle)) {
-					selectionCandidate = ref;
-					selectionIndex = i;
-					if(_Selection == ref) {
-						electionFinished = true; // Prioritize
+				if (Selectionable && !electionFinished) {
+					if (ref->IsTarget(angle) || (weakSelection && !ref->IsValid())) {
+						selectionCandidate = ref;
+						selectionIndex = i;
+
+						if (ref->IsValid()) {
+							weakSelection = false;
+						}
+						if (_Selection == ref && !weakSelection) {
+							electionFinished = true; // Prioritize
+						}
+						
 					}
 				}
 
@@ -166,35 +174,48 @@ namespace OvrMangaroll {
 		, FetchUrl("")
 		, _Payload()
 		, _Loading(false)
-	 {
+		, _HasMore(true)
+		, _Page(0)
+	{
 
 	}
 
 	void RemoteManga::_Init() {
+		Fetch();
+	}
+	void RemoteManga::Fetch() {
 		_Loading = true;
+		_HasMore = false;
 		Web::Download(
-			String::Format(FetchUrl.ToCStr(), ID),
+			String::Format(FetchUrl.ToCStr(), ID, _Page),
 			RemoteManga::OnDownload,
 			this
 		);
 	}
+
 	void RemoteManga::_Update() {
+		// Clear payload
 		if (!_Loading && _Payload.GetSizeI() > 0) {
 			for (int i = 0; i < _Payload.GetSizeI(); i++) {
 				AddPage(_Payload[i]);
 			}
 			_Payload.Clear();
 		}
+
+		if (!_Loading && _HasMore && _SelectionIndex > _Count - 3) {
+			Fetch();
+		}
 	}
 
 	void RemoteManga::OnDownload(void *buffer, int length, void *p) {
 		
 		RemoteManga *self = (RemoteManga *)p;
-		
+
 		JSON *file = JSON::Parse((const char *)buffer);
 		if (file != NULL) {
 			JsonReader resReader(file);
 			if (resReader.IsValid() && resReader.IsObject() && resReader.GetChildBoolByName("success")) {
+				self->_HasMore = resReader.GetChildBoolByName("hasMore");
 				JsonReader pageReader(resReader.GetChildByName("images"));
 				if (pageReader.IsValid() && pageReader.IsArray()) {
 					while (!pageReader.IsEndOfArray()) {
@@ -205,6 +226,7 @@ namespace OvrMangaroll {
 			}
 		}
 
+		self->_Page++;
 		delete file;
 		self->_Loading = false;
 	}
