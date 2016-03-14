@@ -42,8 +42,13 @@ namespace OvrMangaroll {
 	
 	bool Page::IsTarget(float angle) {
 		if(IsVisible()) {
-			float angleEnd = _AngularOffset + _AngularWidth;
-			return angle > _AngularOffset && angle < angleEnd;
+			Vector3f pos = Position;
+			pos.y = 0;
+			float distance = RADIUS - pos.Length(); // 0/0/0 is default. Moves toward the camera when selected
+			float angularWidth = acosf(1 - (_ChordLength * _ChordLength) / (2 * distance * distance)) * Mathf::RadToDegreeFactor;
+			float angularOffset = _AngularOffset - (angularWidth - _AngularWidth) / 2;
+			float angleEnd = angularOffset + angularWidth;
+			return angle > angularOffset && angle < angleEnd;
 		}
 		return false;
 	}
@@ -147,6 +152,7 @@ namespace OvrMangaroll {
 			// Calculate real width
 			_Width = REFERENCE_HEIGHT / _ATexture->GetHeight() * _ATexture->GetWidth();
 			_AngularWidth  = _Width / PIXELS_PER_DEGREE;
+			_ChordLength = 2 * RADIUS * sinf(_AngularWidth * Mathf::DegreeToRadFactor / 2);
 
 			if (_Origin == PLACING_TOP) {
 				// Coming from the top!

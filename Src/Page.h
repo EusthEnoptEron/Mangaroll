@@ -74,6 +74,7 @@ namespace OvrMangaroll {
 		Matrix4f _Model;
 		float _AngularOffset;
 		float _AngularWidth;
+		float _ChordLength;
 		int _HighOffset;
 		PlacingOrigin _Origin;
 		float _DisplayTime;
