@@ -143,7 +143,7 @@ namespace OvrMangaroll {
 	}
 
 	void MangaSelectionView::OnSelectManga(Manga *manga) {
-		_Mangaroll.ShowManga(manga, _AngleOnOpen);
+		_Mangaroll.ShowManga(manga);
 		
 	}
 

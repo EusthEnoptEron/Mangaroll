@@ -24,7 +24,7 @@ namespace OvrMangaroll {
 		Matrix4f GetEyeViewMatrix(const int eye) const;
 		Matrix4f GetEyeProjectionMatrix(const int eye, const float fovDegreesX, const float fovDegreesY) const;
 		Matrix4f DrawEyeView(const int eye, const float fovDegreesX, const float fovDegreesY, ovrFrameParms & frameParms);
-		void SetManga(Manga *manga, float angle = FLT_MAX);
+		void SetManga(Manga *manga);
 		OvrSceneView Scene;
 		Manga *CurrentManga;
 		Manga *NextManga;

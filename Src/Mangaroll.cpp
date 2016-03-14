@@ -111,9 +111,9 @@ void Mangaroll::SelectManga() {
 	ViewMgr.OpenView(MangaSelectionMenu);
 }
 
-void Mangaroll::ShowManga(Manga *manga, float angle) {
+void Mangaroll::ShowManga(Manga *manga) {
 	CurrentManga = manga;
-	Carousel.SetManga(manga, angle);
+	Carousel.SetManga(manga);
 	ViewMgr.OpenView(MangaSettingsMenu);
 	
 }
