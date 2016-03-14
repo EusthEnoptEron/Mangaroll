@@ -26,7 +26,7 @@ namespace OvrMangaroll {
 		void AddPage(Page *page);
 		void Update(float angle, bool onlyVisual = false);
 		int GetProgress(void);
-		void SetProgress(int page);
+		void SetProgress(int page, float angleToAppear = FLT_MAX);
 		int GetCount(void);
 		Page &GetPage(int);
 		String Name;

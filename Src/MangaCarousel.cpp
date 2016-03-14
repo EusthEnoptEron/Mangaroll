@@ -114,7 +114,7 @@ namespace OvrMangaroll {
 		return eyeViewProjection;
 	}
 
-	void MangaCarousel::SetManga(Manga *manga) {
+	void MangaCarousel::SetManga(Manga *manga, float angle) {
 		if (CurrentManga != NULL) {
 			CurrentManga->Unload();
 		}
@@ -123,7 +123,7 @@ namespace OvrMangaroll {
 
 		int progress = CurrentManga->GetProgress();
 		CurrentManga->Update(_Angle, true);
-		CurrentManga->SetProgress(progress);
+		CurrentManga->SetProgress(progress, angle);
 	}
 
 	void MangaCarousel::MoveOut(void) {

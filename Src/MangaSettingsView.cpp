@@ -263,7 +263,6 @@ namespace OvrMangaroll {
 	void MangaSettingsView::OnOpen() {
 		_CloseRequested = false; // We're only just starting
 		CurViewState = eViewState::VIEWSTATE_OPEN;
-		
 	}
 	void MangaSettingsView::OnClose() {
 		_CloseRequested = true;

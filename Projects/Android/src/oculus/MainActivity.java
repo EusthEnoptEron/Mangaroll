@@ -11,8 +11,10 @@ Copyright   :   Copyright 2014 Oculus VR, LLC. All Rights reserved.
 *************************************************************************************/
 package oculus;
 
+import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.speech.SpeechRecognizer;
 import android.util.Log;
 import android.content.Intent;
 import com.oculus.vrappframework.VrActivity;
@@ -77,7 +79,6 @@ public class MainActivity extends VrActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
 		Intent intent = getIntent();
 		String commandString = VrActivity.getCommandStringFromIntent( intent );
 		String fromPackageNameString = VrActivity.getPackageStringFromIntent( intent );
@@ -89,6 +90,12 @@ public class MainActivity extends VrActivity {
 	public static String InsertParam( String source, String paramName, String value) {
         return source.replaceAll(Pattern.quote(paramName), Uri.encode(value));
 	}
+
+//	public void StartSpeechRecognition() {
+//		SpeechRecognizer speech = SpeechRecognizer.createSpeechRecognizer(getApplicationContext());
+//		speech.setRecognitionListener(this);
+//
+//	}
 
 	public static byte[] LoadHttpUrl( String str ) {
 		int totalLen = 0;

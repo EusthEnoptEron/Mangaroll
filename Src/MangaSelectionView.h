@@ -185,6 +185,7 @@ namespace OvrMangaroll {
 
 		SineFader _Fader;
 		bool _CloseRequested;
+		float _AngleOnOpen;
 		static void OnLocalCategory(void *p);
 		static void OnRemoteCategory(void *p);
 	};

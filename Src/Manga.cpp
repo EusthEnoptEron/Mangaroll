@@ -55,7 +55,7 @@ namespace OvrMangaroll {
 		return _SelectionIndex;
 	}
 
-	void Manga::SetProgress(int page) {
+	void Manga::SetProgress(int page, float angleToAppear) {
 		Page *activePage = NULL;
 		Page *p = _First;
 
@@ -73,8 +73,12 @@ namespace OvrMangaroll {
 		}
 
 		// Make the current angle to 0
-		_AngleOffset = -_Angle;
-		this->Rotation = Quatf(Vector3f(0, 1, 0), _Angle / 180.0f * Mathf::Pi);
+		if (angleToAppear == FLT_MAX) {
+			angleToAppear = _Angle;
+		}
+
+		_AngleOffset = -(angleToAppear - 20);
+		this->Rotation = Quatf(Vector3f(0, 1, 0), -_AngleOffset / 180.0f * Mathf::Pi);
 		this->Touch();
 
 		if (activePage != NULL) {

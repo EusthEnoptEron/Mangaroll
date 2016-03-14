@@ -143,7 +143,8 @@ namespace OvrMangaroll {
 	}
 
 	void MangaSelectionView::OnSelectManga(Manga *manga) {
-		_Mangaroll.ShowManga(manga);
+		_Mangaroll.ShowManga(manga, _AngleOnOpen);
+		
 	}
 
 	void MangaSelectionView::OneTimeShutdown() {
@@ -183,6 +184,7 @@ namespace OvrMangaroll {
 		CurViewState = eViewState::VIEWSTATE_OPEN;
 
 		_Fader.StartFadeIn();
+		_AngleOnOpen = _Mangaroll.Carousel.GetAngle();
 	}
 
 	void MangaSelectionView::OnClose() {
