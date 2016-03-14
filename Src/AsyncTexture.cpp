@@ -50,6 +50,8 @@ namespace OvrMangaroll {
 	BufferManager::BufferManager() {
 		S_Buffers = new Array<GLuint>();
 		S_Buffers_Arr = new GLuint[5];
+
+#ifdef USE_PBO
 		// Create buffers
 		glGenBuffers(5, S_Buffers_Arr);
 		int bufferLength = 2000 * 4000 * 4;
@@ -60,6 +62,7 @@ namespace OvrMangaroll {
 			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, buffer);
 			glBufferData(GL_PIXEL_UNPACK_BUFFER, bufferLength, NULL, GL_DYNAMIC_DRAW);
 		}
+#endif
 	}
 
 	GLuint BufferManager::GetBuffer() {
@@ -116,9 +119,11 @@ namespace OvrMangaroll {
 		, _TextureGenerated(false)
 		, _ThreadEvents(0)
 		, _Valid(true)
+		, _Moot(false)
 	{
 		if (path.IsEmpty()) {
 			_Valid = false;
+			_Moot = true;
 		}
 	}
 
@@ -168,7 +173,9 @@ namespace OvrMangaroll {
 			_State = TEXTURE_LOADED;
 		}
 
+#ifdef USE_PBO
 		if (_ThreadEvents & TEXTURE_UPLOADED) {
+			// Not currently used
 			OVR_CAPTURE_CPU_ZONE(Texture_Upload);
 			WARN("Finished writing to PBO!");
 			// Unmap the buffer
@@ -193,6 +200,7 @@ namespace OvrMangaroll {
 			WARN("APPLIED!");
 
 		}
+#endif
 
 		_ThreadEvents = 0;
 	}
@@ -202,14 +210,19 @@ namespace OvrMangaroll {
 		_State = TEXTURE_LOADING;
 
 		// If local / remote...
-		
-		if (_Path.GetLengthI() > 7 && (_Path.Substring(0, 7).CompareNoCase("http://") == 0 || _Path.Substring(0, 8).CompareNoCase("https://") == 0)) {
-			LOG("TEXTURE: %s is a URL", _Path.ToCStr());
-			S_Queue->PostPrintf("call %p %p", DownloadFile, this);
+		if (!_Valid) {
+			// Let's not even try
+			_State = TEXTURE_LOADED;
 		}
 		else {
-			LOG("TEXTURE: %s is a local resource", _Path.ToCStr());
-			S_Queue->PostPrintf("call %p %p", LoadFile, this);
+			if (_Path.GetLengthI() > 7 && (_Path.Substring(0, 7).CompareNoCase("http://") == 0 || _Path.Substring(0, 8).CompareNoCase("https://") == 0)) {
+				LOG("TEXTURE: %s is a URL", _Path.ToCStr());
+				S_Queue->PostPrintf("call %p %p", DownloadFile, this);
+			}
+			else {
+				LOG("TEXTURE: %s is a local resource", _Path.ToCStr());
+				S_Queue->PostPrintf("call %p %p", LoadFile, this);
+			}
 		}
 	}
 
@@ -219,29 +232,31 @@ namespace OvrMangaroll {
 
 		_State = TEXTURE_APPLYING;
 
+		if (_Valid) {
 #ifdef USE_PBO
-		// Make buffers
-		_BID = BufferManager::Instance().GetBuffer();
-		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _BID);
+			// Make buffers
+			_BID = BufferManager::Instance().GetBuffer();
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _BID);
 
-		// Map buffer
-		_GPUBuffer = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY_OES);
+			// Map buffer
+			_GPUBuffer = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY_OES);
 
-		// Get outta this context
-		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+			// Get outta this context
+			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-		S_Queue->PostPrintf("call %p %p", UploadTexture, this);
+			S_Queue->PostPrintf("call %p %p", UploadTexture, this);
 #else
-		glBindTexture(GL_TEXTURE_2D, _TID);
+			glBindTexture(GL_TEXTURE_2D, _TID);
 
-		// Unpack
-		int mipmapWidth = _InternalWidth;
-		int mipmapHeight = _InternalHeight;
+			// Unpack
+			int mipmapWidth = _InternalWidth;
+			int mipmapHeight = _InternalHeight;
 
-		for (int i = 0; i < _Buffers.GetSizeI(); i++) {
-			glTexImage2D(GL_TEXTURE_2D, i, GL_RGBA, mipmapWidth, mipmapHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, (void *)_Buffers[i]);
-			mipmapWidth = Alg::Max(1, mipmapWidth >> 1);
-			mipmapHeight = Alg::Max(1, mipmapHeight >> 1);
+			for (int i = 0; i < _Buffers.GetSizeI(); i++) {
+				glTexImage2D(GL_TEXTURE_2D, i, GL_RGBA, mipmapWidth, mipmapHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, (void *)_Buffers[i]);
+				mipmapWidth = Alg::Max(1, mipmapWidth >> 1);
+				mipmapHeight = Alg::Max(1, mipmapHeight >> 1);
+			}
 		}
 
 		_State = TEXTURE_APPLIED;
