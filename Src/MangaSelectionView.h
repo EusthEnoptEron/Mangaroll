@@ -47,6 +47,7 @@ namespace OvrMangaroll {
 		void AddToMenu(UIMenu *menu, UIObject *parent = NULL);
 		void SetManga(MangaWrapper *manga);
 		MangaWrapper *GetManga();
+		void Update();
 		float Position;
 		int Index;
 		int Width;
@@ -59,6 +60,8 @@ namespace OvrMangaroll {
 		UIImage *_Background;
 		UILabel *_Title;
 		UIImage *_Cover;
+		UIImage *_Preloader;
+
 		UITexture *_CoverTexture;
 		ClickableComponent *_Component;
 		OvrGuiSys *_Gui;

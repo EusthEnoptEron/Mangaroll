@@ -12,6 +12,7 @@
 #include "PathUtils.h"
 #include "jni.h"
 #include "Android\JniUtils.h"
+#include "UI\UITexture.h"
 
 
 using namespace OVR;
@@ -51,6 +52,24 @@ namespace OvrMangaroll {
 	public:
 		static GuideType Guide;
 		static App *Instance;
+	};
+
+	class Assets {
+	public: 
+		UITexture Preloader;
+		static Assets &Instance() {
+			if (_Instance == NULL) {
+				_Instance = new Assets();
+			}
+			return *_Instance;
+		}
+	private:
+		Assets()
+		: Preloader()
+		{
+			Preloader.LoadTextureFromApplicationPackage("assets/preloader.png");
+		}
+		static Assets *_Instance;
 	};
 
 	//class ParamString {

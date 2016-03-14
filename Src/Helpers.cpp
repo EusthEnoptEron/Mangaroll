@@ -23,6 +23,5 @@ namespace OvrMangaroll {
 	GuideType AppState::Guide = GuideType::NONE;
 	App *AppState::Instance = NULL;
 
-
-
+	Assets *Assets::_Instance = NULL;
 }

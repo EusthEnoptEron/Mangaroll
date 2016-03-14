@@ -223,14 +223,15 @@ namespace OvrMangaroll {
 
 	//#######################################
 
-	MangaPanel::MangaPanel(OvrGuiSys &guiSys) 
+	MangaPanel::MangaPanel(OvrGuiSys &guiSys)
 		: UIObject(guiSys)
-	, Width(100)
-	, Height(150)
-	, Border(10)
-	, _Cover(NULL) 
-	, _CoverTexture(NULL)
-	, _Gui(&guiSys)
+		, Width(100)
+		, Height(150)
+		, Border(10)
+		, _Cover(NULL)
+		, _Preloader(NULL)
+		, _CoverTexture(NULL)
+		, _Gui(&guiSys)
 	{
 
 	}
@@ -260,16 +261,31 @@ namespace OvrMangaroll {
 		_Manga = manga;
 		this->GetMenuObject()->SetText(manga->Name.ToCStr());
 
+		_Background->SetVisible(true);
+		_Cover->SetVisible(false);
+
 		//_Title->CalculateTextDimensions();
 		if (manga->GetCover()->IsValid()) {
 			_Title->SetVisible(false);
-			_Cover->SetVisible(true);
+			_Preloader->SetVisible(true);
+			_Background->SetColor(Vector4f(0,0,0,1));
 			_Cover->SetImage(0, SURFACE_TEXTURE_DIFFUSE, manga->GetCover()->Display(), Width - Border, Height - (float(Border) / Width * Height));
 			_Title->SetText("");
 		}
 		else {
 			_Title->SetVisible(true);
-			_Cover->SetVisible(false);
+			_Preloader->SetVisible(false);
+
+			if (manga->GetCover()->IsMoot()) {
+				_Background->SetColor(Vector4f(0, 0, 0, 0.6f));
+
+				//_Background->SetVisible(false);
+				// TODO: show different picture
+			}
+			else {
+				_Background->SetColor(Vector4f(0,0,0,1));
+			}
+
 			_Title->SetTextWordWrapped(manga->Name.ToCStr(), _Gui->GetDefaultFont(), VRMenuObject::DEFAULT_TEXEL_SCALE * Width);
 		}
 		/*VRMenuSurface & surf = _Cover->GetMenuObject()->GetSurface(0);
@@ -292,6 +308,19 @@ namespace OvrMangaroll {
 		}
 	}
 
+	void MangaPanel::Update() {
+		if (_Preloader->GetVisible()) {
+			_Preloader->SetLocalRotation( Quatf(Vector3f(0, 0, 1), -Time::Delta * 5) * _Preloader->GetLocalRotation());
+
+			WARN("MANGA: %p", _Manga);
+			if (_Manga->GetCover()->GetState() >= TEXTURE_LOADED) {
+				_Preloader->SetVisible(false);
+				_Background->SetColor(Vector4f(0,0,0,1));
+				_Cover->SetVisible(true);
+			}
+		}
+	}
+
 	void MangaPanel::Init(void) {
 		UITexture *_BGTexture = new UITexture();
 		_BGTexture->LoadTextureFromApplicationPackage("assets/fill.png");
@@ -305,6 +334,14 @@ namespace OvrMangaroll {
 		_Background->SetColor(Vector4f(0, 0, 0, 1));
 		_Background->SetLocalPosition(Vector3f(0, 0, -0.001f));
 		
+		_Preloader = new UIImage(GuiSys);
+		_Preloader->AddToMenu(Menu, this);
+		_Preloader->SetColor(Vector4f(1, 1, 1, 0.5f));
+		_Preloader->SetImage(0, SURFACE_TEXTURE_DIFFUSE, Assets::Instance().Preloader, Width / 2.0f, Width / 2.0f);
+		_Preloader->SetLocalPosition(Vector3f(0, 0, 0.05f));
+		_Preloader->SetFlags(VRMENUOBJECT_DONT_HIT_ALL);
+		_Preloader->SetVisible(false);
+
 		_Title = new UILabel(GuiSys);
 		_Title->AddToMenu(Menu, this);
 		_Title->SetText("");
@@ -493,6 +530,9 @@ namespace OvrMangaroll {
 			panel->SetManga(_Providers.Back()->At(i));
 			panel->SetVisible(true);
 			_FillCount++;
+		}
+		for (int i = 0; i < _PanelSets[_Front].GetSizeI(); i++) {
+			_PanelSets[_Front][i]->Update();
 		}
 
 		_ArrowLeft->SetVisible(CanSeekBack());
