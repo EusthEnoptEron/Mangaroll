@@ -24,4 +24,14 @@ namespace OvrMangaroll {
 	App *AppState::Instance = NULL;
 
 	Assets *Assets::_Instance = NULL;
+
+
+	String MangaStringUtils::CropToLength(String base, int maxLength) {
+		if (base.GetLengthI() < maxLength) {
+			return base;
+		}
+
+		base = base.Left(maxLength - 3);
+		return base + "...";
+	}
 }

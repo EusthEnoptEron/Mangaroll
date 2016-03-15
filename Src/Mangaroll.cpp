@@ -169,6 +169,7 @@ Matrix4f Mangaroll::Frame( const VrFrame & vrFrame )
 
 		if (_MenuOpen) {
 			GetGuiSys().GetGazeCursor().ShowCursor();
+			//GetGuiSys().GetGazeCursor().ForceDistance(0.5f, eGazeCursorStateType::CURSOR_STATE_NORMAL);
 			Carousel.MoveOut();
 		}
 		else {

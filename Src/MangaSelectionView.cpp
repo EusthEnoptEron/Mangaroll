@@ -262,6 +262,7 @@ namespace OvrMangaroll {
 		this->GetMenuObject()->SetText(manga->Name.ToCStr());
 
 		_Background->SetVisible(true);
+		_Background->SetImage(0, eSurfaceTextureType::SURFACE_TEXTURE_DIFFUSE, Assets::Instance().Fill, Width, Height);
 		_Cover->SetVisible(false);
 
 		//_Title->CalculateTextDimensions();
@@ -277,10 +278,9 @@ namespace OvrMangaroll {
 			_Preloader->SetVisible(false);
 
 			if (manga->GetCover()->IsMoot()) {
-				_Background->SetColor(Vector4f(0, 0, 0, 0.6f));
-
+				_Background->SetColor(Vector4f(1));
+				_Background->SetImage(0, SURFACE_TEXTURE_DIFFUSE, Assets::Instance().Panel, Width, Height);
 				//_Background->SetVisible(false);
-				// TODO: show different picture
 			}
 			else {
 				_Background->SetColor(Vector4f(0,0,0,1));
@@ -322,13 +322,11 @@ namespace OvrMangaroll {
 	}
 
 	void MangaPanel::Init(void) {
-		UITexture *_BGTexture = new UITexture();
-		_BGTexture->LoadTextureFromApplicationPackage("assets/fill.png");
 		this->AddFlags(VRMENUOBJECT_RENDER_HIERARCHY_ORDER);
 
 		_Background = new UIImage(GuiSys);
 		_Background->AddToMenu(Menu, this);
-		_Background->SetImage(0, eSurfaceTextureType::SURFACE_TEXTURE_DIFFUSE, *_BGTexture, Width, Height);
+		_Background->SetImage(0, eSurfaceTextureType::SURFACE_TEXTURE_DIFFUSE, Assets::Instance().Fill, Width, Height);
 		//_Background->GetMenuObject()->BuildDrawSurface
 		_Background->SetMargin(UIRectf(60.0f));
 		_Background->SetColor(Vector4f(0, 0, 0, 1));

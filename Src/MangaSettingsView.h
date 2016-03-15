@@ -124,6 +124,9 @@ namespace OvrMangaroll {
 		UILabel *_ContrastLabel;
 		UIScrubBar *_BrightnessSlider;
 		UILabel *_BrightnessLabel;
+		UIImage *_FXBG;
+		UIImage *_OptionsBG;
+		UIImage *_MainBG;
 
 		SineFader _Fader;
 		ScrubBarComponent _ProgressComponent;
@@ -132,10 +135,17 @@ namespace OvrMangaroll {
 
 		UIImage *_ProgressBG;
 		UIImage *_ProgressFG;
+		UIImage *_SeekPos;
 
 		UITexture _ProgressBGTexture;
 		UITexture _ProgressFGTexture;
 		UITexture _CloseTexture;
+		UITexture _FXBGTexture;
+		UITexture _MainBGTexture;
+		UITexture _OptionsBGTexture;
+		UITexture _SeekPosTexture;
+
+		float _MainContainerWidth;
 
 		UIButton *_CloseButton;
 

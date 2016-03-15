@@ -50,7 +50,7 @@ namespace OvrMangaroll {
 		glUniform1f(glGetUniformLocation(prog->program, "Brightness"), progress - 0.5f);
 	}
 
-	MangaSettingsView::MangaSettingsView(Mangaroll *app) : 
+	MangaSettingsView::MangaSettingsView(Mangaroll *app) :
 		View("MangaSettingsView")
 		, _Mangaroll(app)
 		, _CloseRequested(false)
@@ -71,6 +71,11 @@ namespace OvrMangaroll {
 		, _ProgressFG(NULL)
 		, _ProgressBGTexture()
 		, _ProgressFGTexture()
+		, _FXBGTexture()
+		, _MainBGTexture()
+		, _OptionsBGTexture()
+		, _SeekPosTexture()
+		, _MainContainerWidth(300.0f)
 	{
 	}
 
@@ -113,6 +118,14 @@ namespace OvrMangaroll {
 		const Quatf rightTilt(Vector3f(0, 1, 0), -0.8f);
 
 		OvrGuiSys &gui = _Mangaroll->GetGuiSys();
+
+		_ProgressBGTexture.LoadTextureFromApplicationPackage("assets/progress_bg.png");
+		_ProgressFGTexture.LoadTextureFromApplicationPackage("assets/fill.png");
+		_FXBGTexture.LoadTextureFromApplicationPackage("assets/effects_window.png");
+		_OptionsBGTexture.LoadTextureFromApplicationPackage("assets/options_window.png");
+		_MainBGTexture.LoadTextureFromApplicationPackage("assets/main_window.png");
+		_SeekPosTexture.LoadTextureFromApplicationPackage("assets/img_seek_position.png");
+
 		_Menu = new UIMenu(gui);
 		_Menu->Create("MangaMenu");
 		_Menu->SetFlags(VRMenuFlags_t(VRMENU_FLAG_PLACE_ON_HORIZON) | VRMENU_FLAG_SHORT_PRESS_HANDLED_BY_APP);
@@ -129,13 +142,20 @@ namespace OvrMangaroll {
 		_RightContainer->AddToMenu(_Menu);
 		_RightContainer->SetLocalPose(rightTilt, Vector3f(.5f, 0, -.7f));
 
+		// #########  MAIN WINDOW  ###########
+
+		_MainBG = new UIImage(gui);
+		_MainBG->AddToMenu(_Menu, _CenterContainer);
+		_MainBG->SetLocalPosition(PixelPos(0, -20, -1));
+		_MainBG->SetImage(0, SURFACE_TEXTURE_DIFFUSE, _MainBGTexture, _MainContainerWidth, _MainContainerWidth / _MainBGTexture.Width * _MainBGTexture.Height);
+
 
 		_TitleLabel = new UILabel(gui);
 		_TitleLabel->AddToMenu(_Menu, _CenterContainer);
 		// It's unknown what these parms actually do... but well, it works. "alpha" seems to control the thickness of the outline
 		_TitleLabel->SetFontParms(VRMenuFontParms(true, true, false, false, true, 0.5f, 0.4f, 1));
 		_TitleLabel->SetLocalPose(forward, Vector3f(0, 0.1f, 0));
-		_TitleLabel->SetFontScale(0.7f);
+		_TitleLabel->SetFontScale(0.6f);
 		_TitleLabel->SetText("");
 		
 
@@ -148,29 +168,16 @@ namespace OvrMangaroll {
 		GazeUpdaterComponent *component = new GazeUpdaterComponent();
 
 
-		_CloseTexture.LoadTextureFromApplicationPackage("assets/close.png");
-		_CloseButton = new UIButton(gui);
-		_CloseButton->AddToMenu(_Menu, _RightContainer);
-		_CloseButton->SetButtonImages(_CloseTexture, _CloseTexture, _CloseTexture);
-		_CloseButton->SetOnClick(OnCloseClick, this);
-		_CloseButton->SetLocalPosition(Vector3f(0, 0, 0));
-		_CloseButton->SetDimensions(Vector2f(50, 50));
-		_CloseButton->SetButtonColors(Vector4f(0.8f, 0.8f, 0.8f, 1), Vector4f(1, 1, 1, 1), Vector4f(1, 1, 1, 1));
-		_CloseButton->AddComponent(component);
-		_CloseButton->AddComponent(defaultComponent);
-
 		_PageLabel = new UILabel(gui);
 		_PageLabel->AddToMenu(_Menu, _CenterContainer);
 		_PageLabel->SetFontParms(VRMenuFontParms(true, true, false, false, true, 0.5f, 0.4f, 1));
 		_PageLabel->SetLocalPose(forward, Vector3f(0, 0, 0));
-		_PageLabel->SetFontScale(0.5f);
+		_PageLabel->SetFontScale(0.4f);
+		_PageLabel->SetFlags(VRMENUOBJECT_DONT_HIT_ALL);
 		_PageLabel->SetText("");
 
 		component->HandlesEvent(VRMenuEventFlags_t(VRMENU_EVENT_FOCUS_GAINED) /*| VRMENU_EVENT_FOCUS_LOST | VRMENU_EVENT_FRAME_UPDATE*/);
 		_CenterContainer->AddComponent(component);
-
-		_ProgressBGTexture.LoadTextureFromApplicationPackage("assets/progress_bg.png");
-		_ProgressFGTexture.LoadTextureFromApplicationPackage("assets/fill.png");
 
 
 		float barWidth = 7 * 30;
@@ -187,16 +194,24 @@ namespace OvrMangaroll {
 		_ProgressFG->AddToMenu(_Menu, _ProgressBG);
 		_ProgressFG->SetLocalPosition(PixelPos(-3, 0, 1));
 		_ProgressFG->SetImage(0, SURFACE_TEXTURE_ADDITIVE, _ProgressFGTexture, 0, 0);
-		_ProgressFG->GetMenuObject()->AddFlags(VRMenuObjectFlags_t(VRMENUOBJECT_DONT_HIT_ALL));
+		_ProgressFG->GetMenuObject()->AddFlags(VRMENUOBJECT_DONT_HIT_ALL);
 		_ProgressFG->SetColor(Vector4f(0.12f, 0.3f, 0.06f, 1));
+
 
 		_PageSeekLabel = new UILabel(gui);
 		_PageSeekLabel->AddToMenu(_Menu, _ProgressBG);
 		_PageSeekLabel->GetMenuObject()->AddFlags(VRMENUOBJECT_DONT_HIT_ALL);
 		_PageSeekLabel->SetLocalPose(forward, Vector3f(0, 0, 0));
-		_PageSeekLabel->SetFontScale(0.5f);
+		_PageSeekLabel->SetFontScale(0.3f);
 		_PageSeekLabel->SetText("");
-		_PageSeekLabel->SetTextOffset(Vector3f(0, -0.1f, 0));
+		_PageSeekLabel->SetTextOffset(Vector3f(0, -0.065f, 0.02f));
+
+		_SeekPos = new UIImage(gui);
+		_SeekPos->AddToMenu(_Menu, _PageSeekLabel);
+		_SeekPos->SetLocalPosition(Vector3f(0, -0.06f, 0));
+		_SeekPos->SetColor(Vector4f(0, 0.2f, 0.2f, 1.0f));
+		_SeekPos->SetImage(0, SURFACE_TEXTURE_DIFFUSE, _SeekPosTexture, 70, 30);
+
 
 		_ProgressComponent.SetWidgets(_Menu, _ProgressBG, _ProgressFG, _PageLabel, _PageSeekLabel, barWidth - 6, barHeight - 3);
 		_ProgressComponent.SetOnText(OnText, this);
@@ -204,11 +219,18 @@ namespace OvrMangaroll {
 		_ProgressComponent.SetOnClick(OnPageProgressClick, this);
 		
 
+		// #########  EFFECTS  ###########
+		_FXBG = new UIImage(gui);
+		_FXBG->AddToMenu(_Menu, _LeftContainer);
+		_FXBG->SetLocalPosition(PixelPos(0, -50, -1));
+		_FXBG->SetImage(0, SURFACE_TEXTURE_DIFFUSE, _FXBGTexture, 130.0f, 130.0f / _FXBGTexture.Width * _FXBGTexture.Height);
+		
 		_ContrastLabel = new UILabel(gui);
 		_ContrastLabel->AddToMenu(_Menu, _LeftContainer);
-		_ContrastLabel->SetFontParms(VRMenuFontParms(true, true, false, false, true, 0.5f, 0.4f, 0.4f));
+		_ContrastLabel->SetFontParms(VRMenuFontParms(true, true, false, false, true, 0.5f, 0.4f, 0.3f));
 		_ContrastLabel->SetText("Contrast");
 		_ContrastLabel->SetMargin(UIRectf(5));
+		_ContrastLabel->CalculateTextDimensions();
 				
 		_ContrastSlider = new UIScrubBar(gui, 100, 20);
 		_ContrastSlider->AddToMenu(_Menu, _LeftContainer);
@@ -220,9 +242,10 @@ namespace OvrMangaroll {
 
 		_BrightnessLabel = new UILabel(gui);
 		_BrightnessLabel->AddToMenu(_Menu, _LeftContainer);
-		_BrightnessLabel->SetFontParms(VRMenuFontParms(true, true, false, false, true, 0.5f, 0.4f, 0.4f));
+		_BrightnessLabel->SetFontParms(VRMenuFontParms(true, true, false, false, true, 0.5f, 0.4f, 0.3f));
 		_BrightnessLabel->SetText("Brightness");
 		_BrightnessLabel->SetMargin(UIRectf(3));
+		_BrightnessLabel->CalculateTextDimensions();
 		_BrightnessLabel->SetLocalPosition(Vector3f(0, -.1f, 0));
 
 		_BrightnessSlider = new UIScrubBar(gui, 100, 20);
@@ -232,20 +255,25 @@ namespace OvrMangaroll {
 		_BrightnessSlider->SetColor(Vector4f(0.596f, 0.051f, 0.051f, 1));
 		_BrightnessSlider->GetComponent().SetOnClick(OnBrightnessClick, this);
 
-		//_ProgressBar->AddToMenu(_Menu, true, true, _CenterContainer);
-		//_ProgressBar->SetLocalPose(forward, Vector3f(0, 0, 0));
-		//_ProgressBar->SetColor(Vector4f(1, 1, 1, 1));
-		//_ProgressBar->SetProgress(0.0f);
-		//_ProgressBar->SetDimensions(Vector2f(5, 10));
-		//_ProgressBar->SetBorder(UIRectf(10, 10, 10, 10));
+		// #########  OPTIONS  ###########
 
-		/*_GammaSlider = new UIDiscreteSlider(gui);
-		_GammaSlider->AddToMenu(_Menu, _CenterContainer);
-		_GammaSlider->AddCells(10, 0, 0);
-		_GammaSlider->SetLocalPose(forward, Vector3f(0, 0, 0));*/
-		//_GammaSlider->SetColor(Vector4f(1, 1, 1, 1));
+		_OptionsBG = new UIImage(gui);
+		_OptionsBG->AddToMenu(_Menu, _RightContainer);
+		_OptionsBG->SetLocalPosition(PixelPos(0, -50, -1));
+		_OptionsBG->SetImage(0, SURFACE_TEXTURE_DIFFUSE, _OptionsBGTexture, 130.0f, 130.0f / _OptionsBGTexture.Width * _OptionsBGTexture.Height);
 
-		//gui.GetGazeCursor().UpdateDistance(0.7f, eGazeCursorStateType::CURSOR_STATE_NORMAL);
+
+		_CloseTexture.LoadTextureFromApplicationPackage("assets/close.png");
+		_CloseButton = new UIButton(gui);
+		_CloseButton->AddToMenu(_Menu, _RightContainer);
+		_CloseButton->SetButtonImages(_CloseTexture, _CloseTexture, _CloseTexture);
+		_CloseButton->SetOnClick(OnCloseClick, this);
+		_CloseButton->SetLocalPosition(Vector3f(0, 0, 0));
+		_CloseButton->SetDimensions(Vector2f(50, 50));
+		_CloseButton->SetButtonColors(Vector4f(0.8f, 0.8f, 0.8f, 1), Vector4f(1, 1, 1, 1), Vector4f(1, 1, 1, 1));
+		_CloseButton->AddComponent(component);
+		_CloseButton->AddComponent(defaultComponent);
+
 	}
 
 	void MangaSettingsView::SetPageProgress(float progress) {
@@ -313,7 +341,11 @@ namespace OvrMangaroll {
 		_ProgressComponent.SetMax(_Mangaroll->CurrentManga->GetCount());
 		_ProgressComponent.SetProgress(_Mangaroll->CurrentManga->GetProgress() / (_Mangaroll->CurrentManga->GetCount() - 1.0f));
 		_PageLabel->SetText(String::Format("Page %d", _Mangaroll->CurrentManga->GetProgress() + 1));
-		_TitleLabel->SetText(_Mangaroll->CurrentManga->Name);
+
+		String text = MangaStringUtils::CropToLength(_Mangaroll->CurrentManga->Name, 50);
+		_TitleLabel->SetFontScale( (1 - (text.GetLengthI() / 50.0f)) * 0.4f + 0.3f );
+		_TitleLabel->SetTextWordWrapped(text.ToCStr(), _Mangaroll->GetGuiSys().GetDefaultFont(), PixelScale(_MainContainerWidth - 10));
+
 		_TitleLabel->CalculateTextDimensions();
 
 

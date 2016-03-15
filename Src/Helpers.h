@@ -57,6 +57,9 @@ namespace OvrMangaroll {
 	class Assets {
 	public: 
 		UITexture Preloader;
+		UITexture Panel;
+		UITexture Fill;
+
 		static Assets &Instance() {
 			if (_Instance == NULL) {
 				_Instance = new Assets();
@@ -66,10 +69,18 @@ namespace OvrMangaroll {
 	private:
 		Assets()
 		: Preloader()
+		, Panel()
 		{
 			Preloader.LoadTextureFromApplicationPackage("assets/preloader.png");
+			Panel.LoadTextureFromApplicationPackage("assets/container.png");
+			Fill.LoadTextureFromApplicationPackage("assets/fill.png");
 		}
 		static Assets *_Instance;
+	};
+
+	class MangaStringUtils {
+	public:
+		static String CropToLength(String, int maxLength);
 	};
 
 	//class ParamString {
