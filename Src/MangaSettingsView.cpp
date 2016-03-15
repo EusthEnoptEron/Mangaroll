@@ -47,7 +47,7 @@ namespace OvrMangaroll {
 
 		GlProgram *prog = ShaderManager::Instance()->Get(PAGE_SHADER_NAME);
 		glUseProgram(prog->program);
-		glUniform1f(glGetUniformLocation(prog->program, "Brightness"), progress - 0.5f);
+		glUniform1f(glGetUniformLocation(prog->program, "Brightness"), (progress - 0.5f)*2);
 	}
 
 	MangaSettingsView::MangaSettingsView(Mangaroll *app) :
