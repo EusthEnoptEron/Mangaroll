@@ -257,18 +257,39 @@ namespace OvrMangaroll {
 
 		// #########  OPTIONS  ###########
 
-		_RightContainer->AddFlags(VRMENUOBJECT_RENDER_HIERARCHY_ORDER);
+		//_RightContainer->AddFlags(VRMENUOBJECT_RENDER_HIERARCHY_ORDER);
 		_OptionsBG = new UIImage(gui);
 		_OptionsBG->AddToMenu(_Menu, _RightContainer);
 		_OptionsBG->SetLocalPosition(PixelPos(0, -50, -1));
 		_OptionsBG->SetImage(0, SURFACE_TEXTURE_DIFFUSE, _OptionsBGTexture, 130.0f, 130.0f / _OptionsBGTexture.Width * _OptionsBGTexture.Height);
 
 
-		_ShaderToggle = new UICheckbox(gui, 130.0f, 30.0f);
+		_ShaderToggle = new UICheckbox(gui, 120.0f, 30.0f);
 		_ShaderToggle->AddToMenu(_Menu, _RightContainer);
 		_ShaderToggle->SetText("Show transparent");
 
-		
+		UICheckbox *_ReadDirToggle = new UICheckbox(gui, 120.0f, 30.0f);
+		_ReadDirToggle->AddToMenu(_Menu, _RightContainer);
+		_ReadDirToggle->SetText("Left -> Right");
+		_ReadDirToggle->SetLocalPosition(_ShaderToggle->GetLocalPosition() - Vector3f(0, PixelScale(40.0f), 0));
+		//_ReadDirToggle->AlignToMargin(TOP, _ShaderToggle, BOTTOM);
+
+		UICheckbox *_AutoToggle = new UICheckbox(gui, 120.0f, 30.0f);
+		_AutoToggle->AddToMenu(_Menu, _RightContainer);
+		_AutoToggle->SetText("Auto Progress");
+		_AutoToggle->SetLocalPosition(_ReadDirToggle->GetLocalPosition() - Vector3f(0, PixelScale(40.0f), 0));
+
+		//_AutoToggle->AlignToMargin(TOP, _ReadDirToggle, BOTTOM);
+		//WARN("RECT: %.2f", _ShaderToggle->GetRect().GetHeight());
+
+		UICheckbox *_HelperToggle = new UICheckbox(gui, 120.0f, 30.0f);
+		_HelperToggle->AddToMenu(_Menu, _RightContainer);
+		_HelperToggle->SetText("Position Helper");
+		_HelperToggle->SetLocalPosition(_AutoToggle->GetLocalPosition() - Vector3f(0, PixelScale(40.0f), 0));
+
+		//_HelperToggle->AlignTo(TOP, _ReadDirToggle, BOTTOM);
+
+
 		_CloseTexture.LoadTextureFromApplicationPackage("assets/close.png");
 		_CloseButton = new UIButton(gui);
 		_CloseButton->AddToMenu(_Menu, _RightContainer);
