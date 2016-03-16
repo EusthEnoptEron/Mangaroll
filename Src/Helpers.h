@@ -59,7 +59,7 @@ namespace OvrMangaroll {
 		UITexture Preloader;
 		UITexture Panel;
 		UITexture Fill;
-
+		
 		static Assets &Instance() {
 			if (_Instance == NULL) {
 				_Instance = new Assets();

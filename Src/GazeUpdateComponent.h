@@ -60,6 +60,15 @@ namespace OvrMangaroll {
 			VRMenuObject * self, VRMenuEvent const & event) {
 			return MSG_STATUS_ALIVE;
 		}
+
+		virtual eMsgStatus _OnClick(OvrGuiSys & guiSys, VrFrame const & vrFrame,
+			VRMenuObject * self, VRMenuEvent const & event) {
+			if (_Callback != NULL) {
+				_Callback(_CallbackTarget);
+				return MSG_STATUS_CONSUMED;
+			}
+			return _OnEvent(guiSys, vrFrame, self, event);
+		}
 	private:
 
 		eMsgStatus OnEvent_Impl(OvrGuiSys & guiSys, VrFrame const & vrFrame,
@@ -83,10 +92,7 @@ namespace OvrMangaroll {
 				dist = event.FloatValue.LengthSq();
 
 				if (dist < 20.0f && timeTouchHasBeenDown < 1.0f) {
-					if (_Callback != NULL) {
-						_Callback(_CallbackTarget);
-						return MSG_STATUS_CONSUMED;
-					}
+					return _OnClick(guiSys, vrFrame, self, event);
 				}
 				break;
 			default:

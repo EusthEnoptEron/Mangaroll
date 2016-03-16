@@ -6,6 +6,7 @@
 #include "UI\UIDiscreteSlider.h"
 #include "UI\UIProgressBar.h"
 #include "UI\UIContainer.h"
+#include "UICheckbox.h"
 
 using namespace OVR;
 namespace OvrMangaroll {
@@ -144,10 +145,11 @@ namespace OvrMangaroll {
 		UITexture _MainBGTexture;
 		UITexture _OptionsBGTexture;
 		UITexture _SeekPosTexture;
+		
 
 		float _MainContainerWidth;
 
 		UIButton *_CloseButton;
-
+		UICheckbox *_ShaderToggle;
 	};
 }

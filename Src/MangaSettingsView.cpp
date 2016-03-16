@@ -257,12 +257,18 @@ namespace OvrMangaroll {
 
 		// #########  OPTIONS  ###########
 
+		_RightContainer->AddFlags(VRMENUOBJECT_RENDER_HIERARCHY_ORDER);
 		_OptionsBG = new UIImage(gui);
 		_OptionsBG->AddToMenu(_Menu, _RightContainer);
 		_OptionsBG->SetLocalPosition(PixelPos(0, -50, -1));
 		_OptionsBG->SetImage(0, SURFACE_TEXTURE_DIFFUSE, _OptionsBGTexture, 130.0f, 130.0f / _OptionsBGTexture.Width * _OptionsBGTexture.Height);
 
 
+		_ShaderToggle = new UICheckbox(gui, 130.0f, 30.0f);
+		_ShaderToggle->AddToMenu(_Menu, _RightContainer);
+		_ShaderToggle->SetText("Show transparent");
+
+		
 		_CloseTexture.LoadTextureFromApplicationPackage("assets/close.png");
 		_CloseButton = new UIButton(gui);
 		_CloseButton->AddToMenu(_Menu, _RightContainer);
@@ -272,6 +278,7 @@ namespace OvrMangaroll {
 		_CloseButton->SetDimensions(Vector2f(50, 50));
 		_CloseButton->SetButtonColors(Vector4f(0.8f, 0.8f, 0.8f, 1), Vector4f(1, 1, 1, 1), Vector4f(1, 1, 1, 1));
 		_CloseButton->AddComponent(component);
+		_CloseButton->SetVisible(false);
 		_CloseButton->AddComponent(defaultComponent);
 
 	}
