@@ -215,7 +215,10 @@ namespace OvrMangaroll {
 
 			int index = AppState::Transparent ? 1 : 0;
 			// Draw
-			glUniform1f(_uDisplayTime[index], Time::Elapsed - this->_DisplayTime);
+			
+			glUniform1f(glGetUniformLocation(_Progs[index]->program, "DisplayTime"), Time::Elapsed - this->_DisplayTime);
+			//glUniform1f(_uDisplayTime[index], Time::Elapsed - this->_DisplayTime);
+			// ^--- WHY IN THE NAME OF FUCKING JESUS CHRIST DOES THE UNIFORM LOCATION CHANGE HERE?!
 			glUniformMatrix4fv(_Progs[index]->uModel, 1, GL_TRUE, (m * Mat).M[0]);
 
 			glActiveTexture(GL_TEXTURE0);
