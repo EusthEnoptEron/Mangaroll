@@ -103,8 +103,8 @@ void Mangaroll::OneTimeInit( const char * fromPackage, const char * launchIntent
 	Time::Delta = 0;
 	Time::Elapsed = vrapi_GetTimeInSeconds();
 
-	ViewMgr.OpenView(MangaSettingsMenu);
-	MangaSettingsMenu.ShowGUI();
+	ViewMgr.OpenView(MangaSelectionMenu);
+
 }
 
 void Mangaroll::SelectManga() {
