@@ -25,9 +25,9 @@ namespace OvrMangaroll {
 		const Posef pose(Quatf(Vector3f(0.0f, 1.0f, 0.0f), 0.0f), Vector3f(0.0f, 0.0f, 0.0f));
 
 		Vector3f defaultScale(1.0f);
-		VRMenuFontParms fontParms(HORIZONTAL_CENTER, VERTICAL_CENTER, false, false, false, 1.0f);
+		VRMenuFontParms fontParms(HORIZONTAL_LEFT, VERTICAL_CENTER, false, false, false, 1.0f);
 
-		VRMenuObjectParms parms(VRMENU_BUTTON, Array< VRMenuComponent* >(), VRMenuSurfaceParms(),
+		VRMenuObjectParms parms(VRMENU_CONTAINER, Array< VRMenuComponent* >(), VRMenuSurfaceParms(),
 			"", pose, defaultScale, fontParms, menu->AllocId(),
 			VRMenuObjectFlags_t(), VRMenuObjectInitFlags_t(VRMENUOBJECT_INIT_FORCE_POSITION));
 
@@ -39,9 +39,9 @@ namespace OvrMangaroll {
 	void UICheckbox::Init() {
 		AddComponent(&_Component);
 
-		_Tick.AddToMenu(Menu, this);
 		_Text.AddToMenu(Menu, this);
 		_Background.AddToMenu(Menu, this);
+		_Tick.AddToMenu(Menu, this);
 
 		// Load images
 		_DisabledTexture.LoadTextureFromApplicationPackage("assets/checkbox_base.png");
@@ -58,7 +58,6 @@ namespace OvrMangaroll {
 		_Text.SetLocalPosition(Vector3f(0, 0, 0.01f));
 		_Text.SetFontScale(0.25f);
 		_Text.SetText("");
-		_Text.SetAlign(HorizontalJustification::HORIZONTAL_LEFT, VerticalJustification::VERTICAL_CENTER);
 		UpdateImage();
 
 		this->SetDimensions(Vector2f(_Width, _Height) * VRMenuObject::DEFAULT_TEXEL_SCALE);

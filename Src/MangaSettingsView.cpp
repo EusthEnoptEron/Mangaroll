@@ -260,32 +260,32 @@ namespace OvrMangaroll {
 		//_RightContainer->AddFlags(VRMENUOBJECT_RENDER_HIERARCHY_ORDER);
 		_OptionsBG = new UIImage(gui);
 		_OptionsBG->AddToMenu(_Menu, _RightContainer);
-		_OptionsBG->SetLocalPosition(PixelPos(0, -50, -1));
+		_OptionsBG->SetLocalPosition(PixelPos(0, -50, -10));
 		_OptionsBG->SetImage(0, SURFACE_TEXTURE_DIFFUSE, _OptionsBGTexture, 130.0f, 130.0f / _OptionsBGTexture.Width * _OptionsBGTexture.Height);
-
-
+		_OptionsBG->AddFlags(VRMENUOBJECT_RENDER_HIERARCHY_ORDER);
 		_ShaderToggle = new UICheckbox(gui, 120.0f, 30.0f);
-		_ShaderToggle->AddToMenu(_Menu, _RightContainer);
+		_ShaderToggle->AddToMenu(_Menu, _OptionsBG);
+		_ShaderToggle->SetLocalPosition(PixelPos(0, 50, 10)); // Compensate
 		_ShaderToggle->SetText("Show transparent");
 
 		UICheckbox *_ReadDirToggle = new UICheckbox(gui, 120.0f, 30.0f);
-		_ReadDirToggle->AddToMenu(_Menu, _RightContainer);
+		_ReadDirToggle->AddToMenu(_Menu, _OptionsBG);
 		_ReadDirToggle->SetText("Left -> Right");
-		_ReadDirToggle->SetLocalPosition(_ShaderToggle->GetLocalPosition() - Vector3f(0, PixelScale(40.0f), 0));
+		_ReadDirToggle->SetLocalPosition(_ShaderToggle->GetLocalPosition() + Vector3f(0, -PixelScale(35), 0));
 		//_ReadDirToggle->AlignToMargin(TOP, _ShaderToggle, BOTTOM);
 
 		UICheckbox *_AutoToggle = new UICheckbox(gui, 120.0f, 30.0f);
-		_AutoToggle->AddToMenu(_Menu, _RightContainer);
+		_AutoToggle->AddToMenu(_Menu, _OptionsBG);
 		_AutoToggle->SetText("Auto Progress");
-		_AutoToggle->SetLocalPosition(_ReadDirToggle->GetLocalPosition() - Vector3f(0, PixelScale(40.0f), 0));
+		_AutoToggle->SetLocalPosition(_ReadDirToggle->GetLocalPosition() - Vector3f(0, PixelScale(35), 0));
 
 		//_AutoToggle->AlignToMargin(TOP, _ReadDirToggle, BOTTOM);
 		//WARN("RECT: %.2f", _ShaderToggle->GetRect().GetHeight());
 
 		UICheckbox *_HelperToggle = new UICheckbox(gui, 120.0f, 30.0f);
-		_HelperToggle->AddToMenu(_Menu, _RightContainer);
+		_HelperToggle->AddToMenu(_Menu, _OptionsBG);
 		_HelperToggle->SetText("Position Helper");
-		_HelperToggle->SetLocalPosition(_AutoToggle->GetLocalPosition() - Vector3f(0, PixelScale(40.0f), 0));
+		_HelperToggle->SetLocalPosition(_AutoToggle->GetLocalPosition() - Vector3f(0, PixelScale(35), 0));
 
 		//_HelperToggle->AlignTo(TOP, _ReadDirToggle, BOTTOM);
 
@@ -366,16 +366,17 @@ namespace OvrMangaroll {
 	void MangaSettingsView::ShowGUI(void) {
 		// Update values
 		_Menu->GetVRMenu()->RepositionMenu(GetEyeViewMatrix(0));
-		_ProgressComponent.SetMax(_Mangaroll->CurrentManga->GetCount());
-		_ProgressComponent.SetProgress(_Mangaroll->CurrentManga->GetProgress() / (_Mangaroll->CurrentManga->GetCount() - 1.0f));
-		_PageLabel->SetText(String::Format("Page %d", _Mangaroll->CurrentManga->GetProgress() + 1));
+		if (_Mangaroll->CurrentManga != NULL) {
+			_ProgressComponent.SetMax(_Mangaroll->CurrentManga->GetCount());
+			_ProgressComponent.SetProgress(_Mangaroll->CurrentManga->GetProgress() / (_Mangaroll->CurrentManga->GetCount() - 1.0f));
+			_PageLabel->SetText(String::Format("Page %d", _Mangaroll->CurrentManga->GetProgress() + 1));
 
-		String text = MangaStringUtils::CropToLength(_Mangaroll->CurrentManga->Name, 50);
-		_TitleLabel->SetFontScale( (1 - (text.GetLengthI() / 50.0f)) * 0.4f + 0.3f );
-		_TitleLabel->SetTextWordWrapped(text.ToCStr(), _Mangaroll->GetGuiSys().GetDefaultFont(), PixelScale(_MainContainerWidth - 10));
+			String text = MangaStringUtils::CropToLength(_Mangaroll->CurrentManga->Name, 50);
+			_TitleLabel->SetFontScale((1 - (text.GetLengthI() / 50.0f)) * 0.4f + 0.3f);
+			_TitleLabel->SetTextWordWrapped(text.ToCStr(), _Mangaroll->GetGuiSys().GetDefaultFont(), PixelScale(_MainContainerWidth - 10));
 
-		_TitleLabel->CalculateTextDimensions();
-
+			_TitleLabel->CalculateTextDimensions();
+		}
 
 		_Fader.StartFadeIn();
 	}
