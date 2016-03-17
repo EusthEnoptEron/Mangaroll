@@ -13,7 +13,7 @@
 #include "jni.h"
 #include "Android\JniUtils.h"
 #include "UI\UITexture.h"
-
+#include "UI\UIObject.h"
 
 using namespace OVR;
 namespace OvrMangaroll {
@@ -51,6 +51,11 @@ namespace OvrMangaroll {
 	class AppState {
 	public:
 		static GuideType Guide;
+		static bool Transparent;
+		static bool LeftToRight;
+		static bool AutoRotate;
+		static float Contrast;
+		static float Brightness;
 		static App *Instance;
 	};
 

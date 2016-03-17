@@ -112,8 +112,11 @@ void Mangaroll::SelectManga() {
 }
 
 void Mangaroll::ShowManga(Manga *manga) {
-	CurrentManga = manga;
-	Carousel.SetManga(manga);
+	if (manga != NULL) {
+		CurrentManga = manga;
+		Carousel.SetManga(manga);
+	}
+
 	ViewMgr.OpenView(MangaSettingsMenu);
 	
 }

@@ -106,7 +106,10 @@ namespace OvrMangaroll {
 		void ShowGUI(void);
 		void HideGUI(void);
 	private:
-
+		static void OnShaderChanged(UICheckbox *, void *, bool);
+		static void OnReadDirChanged(UICheckbox *, void *, bool);
+		static void OnAutoRotateChanged(UICheckbox *, void *, bool);
+		static void OnGuideChanged(UICheckbox *, void *, bool);
 		void UpdateMenuState(void);
 
 		Mangaroll *_Mangaroll;

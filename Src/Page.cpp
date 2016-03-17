@@ -213,9 +213,10 @@ namespace OvrMangaroll {
 		if(this->_DisplayState == DisplayState::VISIBLE && _ATexture->GetState() == TEXTURE_APPLIED) {
 			this->UpdateModel();
 
+			int index = AppState::Transparent ? 1 : 0;
 			// Draw
-			glUniform1f(glGetUniformLocation( _Prog.program, "DisplayTime" ), Time::Elapsed - this->_DisplayTime);
-			glUniformMatrix4fv( _Prog.uModel, 1, GL_TRUE, (m * Mat).M[0]);
+			glUniform1f(_uDisplayTime[index], Time::Elapsed - this->_DisplayTime);
+			glUniformMatrix4fv(_Progs[index]->uModel, 1, GL_TRUE, (m * Mat).M[0]);
 
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(_ATexture->GetTarget(), _ATexture->Display());

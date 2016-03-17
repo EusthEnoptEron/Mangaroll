@@ -75,6 +75,7 @@
     <ClCompile Include="Src\Page.cpp" />
     <ClCompile Include="Src\RemotePage.cpp" />
     <ClCompile Include="Src\ShaderManager.cpp" />
+    <ClCompile Include="Src\UICheckbox.cpp" />
     <ClCompile Include="Src\View.cpp" />
     <ClCompile Include="Src\ViewManager.cpp" />
     <ClCompile Include="Src\Web.cpp" />
@@ -97,6 +98,7 @@
     <ClInclude Include="Src\RemotePage.h" />
     <ClInclude Include="Src\ShaderManager.h" />
     <ClInclude Include="Src\turbojpeg.h" />
+    <ClInclude Include="Src\UICheckbox.h" />
     <ClInclude Include="Src\View.h" />
     <ClInclude Include="Src\ViewManager.h" />
     <ClInclude Include="Src\Web.h" />

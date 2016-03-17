@@ -20,6 +20,9 @@ namespace OvrMangaroll {
 		, CurrentManga(NULL)
 		, NextManga(NULL)
 		, _Prog(NULL)
+		, _Progs()
+		, _uContrast()
+		, _uBrightness()
 		, _CenterEyeViewMatrix()
 		, _Mangaroll(app)
 		, _PrevLookAt(0, 0, -1.0f)
@@ -35,11 +38,13 @@ namespace OvrMangaroll {
 	}
 
 	void MangaCarousel::OneTimeInit(const char * launchIntent) {
-		_Prog = ShaderManager::Instance()->Get(PAGE_SHADER_NAME);
-		glUseProgram(_Prog->program);
-		glUniform1f(glGetUniformLocation(_Prog->program, "Contrast"), 1.0f);
-		glUniform1f(glGetUniformLocation(_Prog->program, "Brightness"), 0.0f);
+		_Progs[0] = ShaderManager::Instance()->Get(PAGE_SHADER_NAME);
+		_Progs[1] = ShaderManager::Instance()->Get(PAGE_SHADER_NAME, PAGE_TRANSPARENT_FRAG_NAME);
 
+		_uContrast[0] = glGetUniformLocation(_Progs[0]->program, "Contrast");
+		_uContrast[1] = glGetUniformLocation(_Progs[1]->program, "Contrast");
+		_uBrightness[0] = glGetUniformLocation(_Progs[0]->program, "Brightness");
+		_uBrightness[1] = glGetUniformLocation(_Progs[1]->program, "Brightness");
 
 		const char * scenePath = "assets/dojo_scene.ovrscene";
 
@@ -94,6 +99,8 @@ namespace OvrMangaroll {
 		const Matrix4f eyeProjectionMatrix = GetEyeProjectionMatrix(eye, fovDegreesX, fovDegreesY);
 		const Matrix4f eyeViewProjection = Scene.DrawEyeView(eye, fovDegreesX, fovDegreesY);
 
+		int idx = AppState::Transparent ? 1 : 0;
+		_Prog = _Progs[idx];
 
 		if (CurrentManga != NULL) {
 			glUseProgram(_Prog->program);
@@ -101,6 +108,8 @@ namespace OvrMangaroll {
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glUniformMatrix4fv(_Prog->uView, 1, GL_TRUE, eyeViewMatrix.M[0]);
 			glUniformMatrix4fv(_Prog->uProjection, 1, GL_TRUE, eyeProjectionMatrix.M[0]);
+			glUniform1f(_uContrast[idx], AppState::Contrast);
+			glUniform1f(_uBrightness[idx], AppState::Brightness);
 
 			CurrentManga->Draw(Matrix4f::Scaling((1-_Fader.GetFadeAlpha()) + 1));
 		}

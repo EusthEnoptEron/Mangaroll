@@ -84,6 +84,9 @@
     <ClInclude Include="Src\AnimationManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Src\UICheckbox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Mangaroll.cpp">
@@ -132,6 +135,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Src\AnimationManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\UICheckbox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

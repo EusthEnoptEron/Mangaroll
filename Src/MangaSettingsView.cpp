@@ -26,7 +26,6 @@ namespace OvrMangaroll {
 		((MangaSettingsView *)obj)->HideGUI();
 	}
 
-
 	float lastProgressClick = 0;
 	void OnPageProgressClick(ScrubBarComponent *slider, void *object, float progress) {
 		if (Time::Elapsed - lastProgressClick > 0.1f) {
@@ -36,18 +35,21 @@ namespace OvrMangaroll {
 	}
 	void OnContrastClick(ScrubBarComponent *slider, void *object, float progress) {
 		slider->SetProgress(progress);
-		
-		GlProgram *prog = ShaderManager::Instance()->Get(PAGE_SHADER_NAME);
+		AppState::Contrast = progress * 2;
+
+		/*GlProgram *prog = ShaderManager::Instance()->Get(PAGE_SHADER_NAME);
 		glUseProgram(prog->program);
-		glUniform1f(glGetUniformLocation(prog->program, "Contrast"), progress*2);
+		glUniform1f(glGetUniformLocation(prog->program, "Contrast"), progress*2);*/
 	}
 
 	void OnBrightnessClick(ScrubBarComponent *slider, void *object, float progress) {
 		slider->SetProgress(progress);
 
-		GlProgram *prog = ShaderManager::Instance()->Get(PAGE_SHADER_NAME);
-		glUseProgram(prog->program);
-		glUniform1f(glGetUniformLocation(prog->program, "Brightness"), (progress - 0.5f)*2);
+		//GlProgram *prog = ShaderManager::Instance()->Get(PAGE_SHADER_NAME);
+		AppState::Brightness = (progress - 0.5f) * 2;
+
+		//glUseProgram(prog->program);
+		//glUniform1f(glGetUniformLocation(prog->program, "Brightness"), (progress - 0.5f)*2);
 	}
 
 	MangaSettingsView::MangaSettingsView(Mangaroll *app) :
@@ -97,6 +99,10 @@ namespace OvrMangaroll {
 	}
 	Matrix4f MangaSettingsView::Frame(const VrFrame & vrFrame) {		
 		UpdateMenuState();
+		
+		if (vrFrame.Input.buttonPressed & BUTTON_SWIPE_DOWN) {
+			HideGUI();
+		}
 
 		return _Mangaroll->Carousel.Frame(vrFrame);
 	}
@@ -263,29 +269,36 @@ namespace OvrMangaroll {
 		_OptionsBG->SetLocalPosition(PixelPos(0, -50, -10));
 		_OptionsBG->SetImage(0, SURFACE_TEXTURE_DIFFUSE, _OptionsBGTexture, 130.0f, 130.0f / _OptionsBGTexture.Width * _OptionsBGTexture.Height);
 		_OptionsBG->AddFlags(VRMENUOBJECT_RENDER_HIERARCHY_ORDER);
-		_ShaderToggle = new UICheckbox(gui, 120.0f, 30.0f);
+
+		float toggleHeight = 25.0f;
+
+		_ShaderToggle = new UICheckbox(gui, 120.0f, toggleHeight);
 		_ShaderToggle->AddToMenu(_Menu, _OptionsBG);
 		_ShaderToggle->SetLocalPosition(PixelPos(0, 50, 10)); // Compensate
 		_ShaderToggle->SetText("Show transparent");
+		_ShaderToggle->SetOnValueChanged(OnShaderChanged, this);
 
-		UICheckbox *_ReadDirToggle = new UICheckbox(gui, 120.0f, 30.0f);
+		UICheckbox *_ReadDirToggle = new UICheckbox(gui, 120.0f, toggleHeight);
 		_ReadDirToggle->AddToMenu(_Menu, _OptionsBG);
 		_ReadDirToggle->SetText("Left -> Right");
-		_ReadDirToggle->SetLocalPosition(_ShaderToggle->GetLocalPosition() + Vector3f(0, -PixelScale(35), 0));
+		_ReadDirToggle->SetLocalPosition(_ShaderToggle->GetLocalPosition() + Vector3f(0, -PixelScale(toggleHeight + 5), 0));
+		_ReadDirToggle->SetOnValueChanged(OnReadDirChanged, this);
 		//_ReadDirToggle->AlignToMargin(TOP, _ShaderToggle, BOTTOM);
 
-		UICheckbox *_AutoToggle = new UICheckbox(gui, 120.0f, 30.0f);
+		UICheckbox *_AutoToggle = new UICheckbox(gui, 120.0f, toggleHeight);
 		_AutoToggle->AddToMenu(_Menu, _OptionsBG);
 		_AutoToggle->SetText("Auto Progress");
-		_AutoToggle->SetLocalPosition(_ReadDirToggle->GetLocalPosition() - Vector3f(0, PixelScale(35), 0));
+		_AutoToggle->SetLocalPosition(_ReadDirToggle->GetLocalPosition() - Vector3f(0, PixelScale(toggleHeight + 5), 0));
+		_AutoToggle->SetOnValueChanged(OnAutoRotateChanged, this);
 
 		//_AutoToggle->AlignToMargin(TOP, _ReadDirToggle, BOTTOM);
 		//WARN("RECT: %.2f", _ShaderToggle->GetRect().GetHeight());
 
-		UICheckbox *_HelperToggle = new UICheckbox(gui, 120.0f, 30.0f);
+		UICheckbox *_HelperToggle = new UICheckbox(gui, 120.0f, toggleHeight);
 		_HelperToggle->AddToMenu(_Menu, _OptionsBG);
-		_HelperToggle->SetText("Position Helper");
-		_HelperToggle->SetLocalPosition(_AutoToggle->GetLocalPosition() - Vector3f(0, PixelScale(35), 0));
+		_HelperToggle->SetText("Anti-Head motions");
+		_HelperToggle->SetLocalPosition(_AutoToggle->GetLocalPosition() - Vector3f(0, PixelScale(toggleHeight + 5), 0));
+		_HelperToggle->SetOnValueChanged(OnGuideChanged, this);
 
 		//_HelperToggle->AlignTo(TOP, _ReadDirToggle, BOTTOM);
 
@@ -303,7 +316,6 @@ namespace OvrMangaroll {
 		_CloseButton->AddComponent(defaultComponent);
 
 	}
-
 	void MangaSettingsView::SetPageProgress(float progress) {
 		int prevPage = _ProgressComponent.GetMax() * _ProgressComponent.GetProgress();
 		_ProgressComponent.SetProgress(progress);
@@ -385,6 +397,28 @@ namespace OvrMangaroll {
 		_Fader.StartFadeOut();
 	}
 
+
+	// ########### STATIC EVENT HANDLERS ###############
+	void MangaSettingsView::OnShaderChanged(UICheckbox *, void *p, bool transparent) {
+		//MangaSettingsView *self = (MangaSettingsView *)p;
+
+		AppState::Transparent = transparent;
+	}
+
+	void MangaSettingsView::OnReadDirChanged(UICheckbox *, void *p, bool leftToRight) {
+		//MangaSettingsView *self = (MangaSettingsView *)p;
+		AppState::LeftToRight = leftToRight;
+	}
+	void MangaSettingsView::OnAutoRotateChanged(UICheckbox *, void *p, bool autoRotate) {
+		//MangaSettingsView *self = (MangaSettingsView *)p;
+		AppState::AutoRotate = autoRotate;
+	}
+	void MangaSettingsView::OnGuideChanged(UICheckbox *, void *p, bool guide) {
+		//MangaSettingsView *self = (MangaSettingsView *)p;
+		AppState::Guide = guide ? GuideType::ENLARGE : GuideType::NONE;
+	}
+
+	// ##########################################
 
 
 //##################################################################

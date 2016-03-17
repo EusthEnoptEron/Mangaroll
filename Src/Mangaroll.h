@@ -50,7 +50,7 @@ private:
 	OvrGuiSys *		GuiSys;
 public:
 	void SelectManga();
-	void ShowManga(Manga *manga);
+	void ShowManga(Manga *manga = NULL);
 	class ovrLocale &	GetLocale() { return *Locale; }
 	OvrGuiSys &GetGuiSys(void);
 	Manga *CurrentManga;

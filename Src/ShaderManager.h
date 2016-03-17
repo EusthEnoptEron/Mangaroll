@@ -7,6 +7,7 @@
 using namespace OVR;
 namespace OvrMangaroll {
 	const char * const PAGE_SHADER_NAME = "assets/MangaPage.vert";
+	const char * const PAGE_TRANSPARENT_FRAG_NAME = "assets/TransparentMangaPage.frag";
 
 	class ShaderManager {
 	public:

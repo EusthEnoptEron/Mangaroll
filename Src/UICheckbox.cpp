@@ -64,7 +64,7 @@ namespace OvrMangaroll {
 
 	}
 
-	void UICheckbox::SetOnValueChanged(void(*cb)(UICheckbox *, bool, void *), void *obj) {
+	void UICheckbox::SetOnValueChanged(void(*cb)(UICheckbox *, void *, bool), void *obj) {
 		_CallbackObject = obj;
 		_Callback = cb;
 	}
@@ -85,7 +85,7 @@ namespace OvrMangaroll {
 		UpdateImage();
 
 		if (_Callback != NULL) {
-			_Callback(this, IsChecked(), _CallbackObject);
+			_Callback(this, _CallbackObject, IsChecked());
 		}
 	}
 

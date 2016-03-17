@@ -16,25 +16,31 @@ namespace OvrMangaroll {
 
 	class Page : public GlObject {
 	public:
-		Page(String _path) : 
+		Page(String _path) :
 			GlObject(),
 			_Path(_path),
-			_Offset(0), 
-			_DisplayState(INVISIBLE), 
-			_Next(NULL), 
+			_Offset(0),
+			_DisplayState(INVISIBLE),
+			_Next(NULL),
 			_Prev(NULL),
 			_Geometry(),
-			_Width(0), 
+			_Width(0),
 			_Positionable(false),
 			_Selected(false),
 			_Model(ovrMatrix4f_CreateIdentity()),
 			_HighOffset(0),
 			_Origin(PLACING_NONE),
 			_DisplayTime(0),
+			_Progs(),
+			_uDisplayTime(),
 			_Loaded(false),
 			_ATexture(NULL)
 		{
-			_Prog = *ShaderManager::Instance()->Get(PAGE_SHADER_NAME);
+			_Progs[0] = ShaderManager::Instance()->Get(PAGE_SHADER_NAME);
+			_Progs[1] = ShaderManager::Instance()->Get(PAGE_SHADER_NAME, PAGE_TRANSPARENT_FRAG_NAME);
+			_uDisplayTime[0] = glGetUniformLocation(_Progs[0]->program, "DisplayTime");
+			_uDisplayTime[1] = glGetUniformLocation(_Progs[1]->program, "DisplayTime");
+
 			_ATexture = new AsyncTexture(_path, 3);
 			_ATexture->MaxHeight = 1500;
 		};
@@ -47,7 +53,6 @@ namespace OvrMangaroll {
 		void Update(float angle, bool onlyVisual = false);
 		void SetNext(Page *next);
 		void SetPrev(Page *prev);
-		void SetProgram(GlProgram &prog) { _Prog = prog; }
 		Page *GetNext(void);
 		void Load(void);
 		void Draw(const Matrix4f &m);
@@ -80,8 +85,10 @@ namespace OvrMangaroll {
 		float _DisplayTime;
 	private:
 		void UpdateStates(float);
-		
-		GlProgram _Prog;
+
+		GlProgram *_Progs[2];
+		int _uDisplayTime[2];
+
 		bool _Loaded;
 	protected:
 

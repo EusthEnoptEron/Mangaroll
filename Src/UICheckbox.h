@@ -39,7 +39,7 @@ namespace OvrMangaroll {
 		~UICheckbox();
 
 		void AddToMenu(UIMenu *menu, UIObject *parent = NULL);
-		void SetOnValueChanged(void(*)(UICheckbox *, bool, void *), void *);
+		void SetOnValueChanged(void(*)(UICheckbox *, void *, bool), void *);
 
 		void SetText(String text);
 		void SetChecked(bool checked);
@@ -55,7 +55,7 @@ namespace OvrMangaroll {
 		void Init();
 		void UpdateImage();
 
-		void(*_Callback)(UICheckbox *, bool, void *);
+		void(*_Callback)(UICheckbox *, void *, bool);
 		void *_CallbackObject;
 		float _Width;
 		float _Height;

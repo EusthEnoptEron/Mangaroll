@@ -209,6 +209,12 @@ namespace OvrMangaroll {
 	Matrix4f MangaSelectionView::Frame(const VrFrame & vrFrame) {
 		UpdateGUI();
 
+		if (vrFrame.Input.buttonPressed & BUTTON_SWIPE_DOWN) {
+			if (_Mangaroll.CurrentManga != NULL) {
+				_Mangaroll.ShowManga();
+			}
+		}
+
 		return _Mangaroll.Carousel.Frame(vrFrame);
 	}
 	Matrix4f MangaSelectionView::GetEyeViewMatrix(const int eye) const {
