@@ -30,7 +30,6 @@ namespace OvrMangaroll {
 			
 			String vertexShader = LoadShader(vertPath);
 			String fragShader = LoadShader(fragPath);
-			
 			GlProgram prog = BuildProgram(vertexShader.ToCStr(), fragShader.ToCStr());
 
 			_LoadedPrograms.Add(key, prog);

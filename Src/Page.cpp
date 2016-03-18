@@ -170,6 +170,18 @@ namespace OvrMangaroll {
 
 			LOG("LOADED %s", _Path.ToCStr());
 			CreateMesh();
+			
+			if (!_Initialized) {
+				// Only do this once
+
+				_Progs[0] = ShaderManager::Instance()->Get(PAGE_SHADER_NAME);
+				_Progs[1] = ShaderManager::Instance()->Get(PAGE_SHADER_NAME, PAGE_TRANSPARENT_FRAG_NAME);
+
+				_uDisplayTime[0] = glGetUniformLocation(_Progs[0]->program, "DisplayTime");
+				_uDisplayTime[1] = glGetUniformLocation(_Progs[1]->program, "DisplayTime");
+
+				_Initialized = true;
+			}
 
 			_DisplayTime = Time::Elapsed;
 		}
@@ -216,7 +228,7 @@ namespace OvrMangaroll {
 			int index = AppState::Transparent ? 1 : 0;
 			// Draw
 			
-			glUniform1f(glGetUniformLocation(_Progs[index]->program, "DisplayTime"), Time::Elapsed - this->_DisplayTime);
+			glUniform1f(_uDisplayTime[index], Time::Elapsed - this->_DisplayTime);
 			//glUniform1f(_uDisplayTime[index], Time::Elapsed - this->_DisplayTime);
 			// ^--- WHY IN THE NAME OF FUCKING JESUS CHRIST DOES THE UNIFORM LOCATION CHANGE HERE?!
 			glUniformMatrix4fv(_Progs[index]->uModel, 1, GL_TRUE, (m * Mat).M[0]);

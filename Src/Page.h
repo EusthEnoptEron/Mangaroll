@@ -34,16 +34,10 @@ namespace OvrMangaroll {
 			_Progs(),
 			_uDisplayTime(),
 			_Loaded(false),
+			_Initialized(false),
 			_ATexture(NULL)
 		{
-			_Progs[0] = ShaderManager::Instance()->Get(PAGE_SHADER_NAME);
-			_Progs[1] = ShaderManager::Instance()->Get(PAGE_SHADER_NAME, PAGE_TRANSPARENT_FRAG_NAME);
-
-			// v----- defunct
-			_uDisplayTime[0] = glGetUniformLocation(_Progs[0]->program, "DisplayTime");
-			_uDisplayTime[1] = glGetUniformLocation(_Progs[1]->program, "DisplayTime");
-
-			WARN("UNIFORM, DISPLAYTIME: %d (%d [%p])", _uDisplayTime[1], _Progs[1]->program, _Progs[1]);
+			// NOTE: this constructor may be called on a thread
 			_ATexture = new AsyncTexture(_path, 3);
 			_ATexture->MaxHeight = 1500;
 		};
@@ -93,6 +87,7 @@ namespace OvrMangaroll {
 		int _uDisplayTime[2];
 
 		bool _Loaded;
+		bool _Initialized;
 	protected:
 
 		void CreateMesh(void);
