@@ -48,6 +48,7 @@ namespace OvrMangaroll {
 		Array<MangaWrapper *> _Mangas;
 		String _BasePath;
 		bool IsSupportedExt(String ext) {
+			ext = ext.ToLower();
 			return  (ext == ".jpg" || ext == ".tga" ||
 				ext == ".png" || ext == ".bmp" ||
 				ext == ".psd" || ext == ".gif" ||
