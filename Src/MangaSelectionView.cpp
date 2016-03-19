@@ -278,8 +278,7 @@ namespace OvrMangaroll {
 
 	void MangaPanel::SetManga(MangaWrapper *manga) {
 		_Manga = manga;
-		this->GetMenuObject()->SetText(manga->Name.ToCStr());
-
+		
 		_Background->SetVisible(true);
 		_Background->SetImage(0, eSurfaceTextureType::SURFACE_TEXTURE_DIFFUSE, Assets::Instance().Fill, Width, Height);
 		_Cover->SetVisible(false);
@@ -302,13 +301,15 @@ namespace OvrMangaroll {
 				_Background->SetColor(Vector4f(0, 0, 0, 1));
 			}
 		}
-		if (manga->IsContainer() || !manga->GetCover()->IsValid()) {
+		if (/*manga->IsContainer() || */!manga->GetCover()->IsValid()) {
 			_Title->SetVisible(true);
 			_Title->SetTextWordWrapped(manga->Name.ToCStr(), _Gui->GetDefaultFont(), VRMenuObject::DEFAULT_TEXEL_SCALE * Width);
+			this->GetMenuObject()->SetText("");
 		}
 		else {
 			_Title->SetVisible(false);
 			_Title->SetText("");
+			this->GetMenuObject()->SetText(manga->Name.ToCStr());
 		}
 
 		/*VRMenuSurface & surf = _Cover->GetMenuObject()->GetSurface(0);
@@ -656,7 +657,7 @@ namespace OvrMangaroll {
 		switch (event.EventType) {
 		case VRMENU_EVENT_FOCUS_GAINED:
 			_ActivePanel = _Gui.GetVRMenuMgr().ToObject(_Gui.GetVRMenuMgr().ToObject(event.TargetHandle)->GetParentHandle());
-			if (_ActivePanel->GetText() != "Container") {
+			if (_ActivePanel->GetText() != "Container" && !_ActivePanel->GetText().IsEmpty()) {
 				_Title->SetVisible(true);
 				_Title->SetTextColor(Vector4f(1));
 				_Title->SetTextWordWrapped(_ActivePanel->GetText().ToCStr(), _Gui.GetDefaultFont(), 0.6f);

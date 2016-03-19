@@ -53,6 +53,7 @@ namespace OvrMangaroll {
 		int Width;
 		int Height;
 		int Border;
+		bool IsTitleVisible() { return _Title->GetVisible(); }
 	private:
 		MangaSelectorComponent *_Selector;
 		MangaWrapper *_Manga;
