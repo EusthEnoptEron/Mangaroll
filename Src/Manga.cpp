@@ -16,6 +16,7 @@ namespace OvrMangaroll {
 			, _SelectionIndex(0)
 			, _Progress(0)
 			, _AngleOffset(0)
+			, _LastSetPage(0)
 	{
 			WARN("YAY 2");
 	}
@@ -81,6 +82,8 @@ namespace OvrMangaroll {
 		this->Rotation = Quatf(Vector3f(0, 1, 0), -_AngleOffset / 180.0f * Mathf::Pi);
 		this->Touch();
 
+		_LastSetPage = page;
+
 		if (activePage != NULL) {
 			activePage->SetOffset(0);
 		}
@@ -119,21 +122,17 @@ namespace OvrMangaroll {
 		bool electionFinished = false;
 		Page *selectionCandidate = NULL;
 		int selectionIndex = 0;
-		bool weakSelection = true;
 
 		int i = 0;
 		if(_First != NULL) {
 			do {
 				ref->Update(angle, onlyVisual);
 				if (Selectionable && !electionFinished) {
-					if (ref->IsTarget(angle) || (weakSelection && !ref->IsValid())) {
+					if (ref->IsTarget(angle)) {
 						selectionCandidate = ref;
 						selectionIndex = i;
 
-						if (ref->IsValid()) {
-							weakSelection = false;
-						}
-						if (_Selection == ref && !weakSelection) {
+						if (_Selection == ref) {
 							electionFinished = true; // Prioritize
 						}
 						
@@ -186,6 +185,7 @@ namespace OvrMangaroll {
 
 	void RemoteManga::_Init() {
 		Fetch();
+		
 	}
 	void RemoteManga::Fetch() {
 		_Loading = true;
@@ -204,10 +204,21 @@ namespace OvrMangaroll {
 	void RemoteManga::_Update() {
 		// Clear payload
 		if (!_Loading && _Payload.GetSizeI() > 0) {
+			// were we already able to set page?
+			bool setPage = true;
+			if (_Count > _LastSetPage) {
+				setPage = false;
+			}
+
 			for (int i = 0; i < _Payload.GetSizeI(); i++) {
 				AddPage(_Payload[i]);
 			}
 			_Payload.Clear();
+
+			if (setPage && _Count > _LastSetPage) {
+				// We can now set the page!
+				SetProgress(_LastSetPage);
+			}
 		}
 
 		if (!_Loading && _HasMore && _SelectionIndex > _Count - 3) {

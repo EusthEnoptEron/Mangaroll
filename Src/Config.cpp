@@ -1,4 +1,5 @@
 #include "Config.h"
+#include "Manga.h"
 
 namespace OvrMangaroll {
 
@@ -98,8 +99,11 @@ namespace OvrMangaroll {
 			while (!reader.IsEndOfArray()) {
 				const JsonReader element(reader.GetNextArrayElement());
 				if (element.IsArray()) {
-					_Progress.Add(element.GetNextArrayString(), 
-						MangaInfo(element.GetNextArrayInt32(), element.GetNextArrayInt32()));
+					String uid = element.GetNextArrayString();
+					if (_Progress.Get(uid) == NULL) {
+						_Progress.Set(uid,
+							MangaInfo(element.GetNextArrayInt32(), element.GetNextArrayInt32()));
+					}
 				}
 			}
 		}
@@ -108,8 +112,8 @@ namespace OvrMangaroll {
 	void Config::SerializeReadingStates(JSON *conf) {
 		JSON * progress = JSON::CreateArray();
 		conf->AddItem("progress", progress);
-		
-		for (Hash<String, MangaInfo>::Iterator it = _Progress.Begin(); it != _Progress.End(); ++it) {
+
+		for (StringHash<MangaInfo>::Iterator it = _Progress.Begin(); it != _Progress.End(); ++it) {
 			JSON *item = JSON::CreateArray();
 			progress->AddArrayElement(item);
 
@@ -117,6 +121,22 @@ namespace OvrMangaroll {
 			item->AddArrayNumber(it->Second.PagesRead);
 			item->AddArrayNumber(it->Second.PagesTotal);
 		}
+	}
+
+	void Config::Persist(Manga *manga) {
+		_Progress.Set(manga->UID, MangaInfo(manga->GetProgress(), manga->GetCount()));
+	}
+
+	bool Config::HasInfo(Manga *manga) const {
+		return _Progress.Get(manga->UID) != NULL;
+	}
+
+	MangaInfo Config::GetProgress(Manga *manga) const {
+		const MangaInfo *progress = _Progress.Get(manga->UID);
+		if (progress == NULL) {
+			return MangaInfo(0, manga->GetCount() || -1);
+		}
+		return *progress;
 	}
 
 

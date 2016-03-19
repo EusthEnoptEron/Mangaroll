@@ -10,8 +10,14 @@ using namespace OVR;
 namespace OvrMangaroll {
 
 	class MangaProvider;
+	
+	class IBrowserObject {
+	public:
+		virtual ~IBrowserObject() {}
+		String UID;
+	};
 
-	class Manga : public GlObject
+	class Manga : public GlObject, public IBrowserObject
 	{
 	public:
 		Manga(void);
@@ -30,7 +36,6 @@ namespace OvrMangaroll {
 		int GetCount(void);
 		Page &GetPage(int);
 		String Name;
-		String ID;
 		bool Selectionable;
 		void Unload();
 	protected:
@@ -46,6 +51,7 @@ namespace OvrMangaroll {
 		float _Angle;
 		int _Progress;
 		int _AngleOffset;
+		int _LastSetPage;
 	};
 
 	class RemoteManga : public Manga {

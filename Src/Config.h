@@ -6,6 +6,7 @@
 #include "Helpers.h"
 #include "Kernel\OVR_JSON.h"
 #include "Kernel\OVR_Hash.h"
+#include "Kernel\OVR_StringHash.h"
 #include "jni.h"
 
 using namespace OVR;
@@ -32,8 +33,8 @@ namespace OvrMangaroll {
 		void Save();
 
 		MangaInfo GetProgress(Manga *manga) const;
-		void SetProgress(String mangaId, MangaInfo info);
-		bool IsAvailable(Manga *manga) const;
+		void Persist(Manga *manga);
+		bool HasInfo(Manga *manga) const;
 
 	public:
 		// When you add a property, make sure they are properly serialized and deserialized
@@ -58,7 +59,7 @@ namespace OvrMangaroll {
 
 	private:
 		String _Path;
-		Hash<String, MangaInfo> _Progress;
+		StringHash<MangaInfo> _Progress;
 
 	};
 }

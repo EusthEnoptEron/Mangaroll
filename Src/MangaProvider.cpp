@@ -14,6 +14,7 @@ namespace OvrMangaroll {
 		, _Mangas()
 		, _BasePath("")
 	{
+		UID = "Local";
 	}
 
 	LocalMangaProvider::LocalMangaProvider(String basePath)
@@ -84,6 +85,7 @@ namespace OvrMangaroll {
 		if (isManga) {
 			Manga *manga = new Manga();
 			manga->Name = ExtractDirectory(dir);
+			manga->UID = BuildUID(manga->Name);
 			LOG("Add manga: %s", manga->Name.ToCStr());
 			String cover("");
 			for (int i = 0; i < files.GetSizeI(); i++) {
@@ -109,6 +111,7 @@ namespace OvrMangaroll {
 				MangaWrapper *wrapper = new MangaWrapper(subProvider);
 				wrapper->SetThumb(subProvider->GetFirstManga()->GetThumb());
 				wrapper->Name = ExtractDirectory(dir);
+				subProvider->UID = BuildUID(wrapper->Name);
 				_Mangas.PushBack(wrapper);
 			}
 			else {
@@ -132,6 +135,7 @@ namespace OvrMangaroll {
 		, _Initialized(false)
 		, _Services()
 	{
+		UID = "Online";
 	}
 
 	void MangaServiceProvider::LoadMore() {
@@ -161,6 +165,7 @@ namespace OvrMangaroll {
 									elementReader.GetChildStringByName("showUrl")
 									);
 								provider->Name = elementReader.GetChildStringByName("name");
+								provider->UID = BuildUID(provider->Name);
 								MangaWrapper *wrapper = new MangaWrapper(provider);
 								wrapper->Name = provider->Name;
 								wrapper->SetThumb("");
@@ -242,6 +247,7 @@ namespace OvrMangaroll {
 								RemoteMangaProvider *container = new RemoteMangaProvider(provider->_BrowseUrl, provider->_ShowUrl);
 								MangaWrapper *wrapper = new MangaWrapper(container);
 								container->Id = mangaReader.GetChildStringByName("id");
+								container->UID = provider->BuildUID(container->Id);
 								wrapper->Name = mangaReader.GetChildStringByName("name");
 								container->Name = mangaReader.GetChildStringByName("name");
 								wrapper->SetThumb(mangaReader.GetChildStringByName("thumb"));
@@ -252,6 +258,7 @@ namespace OvrMangaroll {
 
 								manga->Name = mangaReader.GetChildStringByName("name");
 								manga->ID = mangaReader.GetChildStringByName("id");
+								manga->UID = provider->BuildUID(manga->ID);
 								manga->FetchUrl = provider->_ShowUrl;
 								wrapper->SetThumb(mangaReader.GetChildStringByName("thumb"));
 								wrapper->Name = manga->Name;

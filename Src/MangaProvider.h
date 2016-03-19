@@ -9,7 +9,7 @@ using namespace OVR;
 namespace OvrMangaroll {
 	
 	// Interface for providers of manga
-	class MangaProvider {
+	class MangaProvider : public IBrowserObject {
 	public:
 		virtual ~MangaProvider() {}
 
@@ -22,6 +22,9 @@ namespace OvrMangaroll {
 		MangaProvider() : Id("") {}
 		MangaProvider(const MangaProvider &);
 		String Id;
+		String BuildUID(String identifier) {
+			return UID + "/" + identifier;
+		}
 	};
 
 

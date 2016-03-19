@@ -137,19 +137,22 @@ namespace OvrMangaroll {
 
 	void MangaCarousel::SetManga(Manga *manga) {
 		if (CurrentManga != NULL) {
+			AppState::Conf->Persist(CurrentManga);
 			CurrentManga->Unload();
 		}
 		CurrentManga = manga; 
 		manga->Init();
-
-		int progress = CurrentManga->GetProgress();
 		CurrentManga->Update(_Angle, true);
-		CurrentManga->SetProgress(progress);
+		CurrentManga->SetProgress(AppState::Conf->GetProgress(manga).PagesRead);
+		LOG("Loaded manga: %s at p%d", manga->Name.ToCStr(), AppState::Conf->GetProgress(manga).PagesRead);
 		CurrentManga->Position = Vector3f(0,-0.1f,0); // Move down by a bit
 	}
 
 	void MangaCarousel::MoveOut(void) {
 		_Operatable = false;
+		if (CurrentManga != NULL) {
+			AppState::Conf->Persist(CurrentManga);
+		}
 
 		_Fader.StartFadeOut();
 	}
