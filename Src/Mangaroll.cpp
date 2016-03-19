@@ -17,6 +17,7 @@ Copyright   :   Copyright 2014 Oculus VR, LLC. All Rights reserved.
 #include "Helpers.h"
 #include <OVR_Capture.h>
 #include "AsyncTexture.h"
+#include "Config.h"
 
 #if 0
 	#define GL( func )		func; EglCheckErrors();
@@ -58,6 +59,7 @@ Mangaroll::Mangaroll()
 	, Locale( NULL )
 	, ViewMgr()
 	, _MenuOpen(false)
+	, _LastConfSync(0)
 {
 	CenterEyeViewMatrix = ovrMatrix4f_CreateIdentity();
 }
@@ -79,7 +81,10 @@ void Mangaroll::Configure( ovrSettings & settings )
 void Mangaroll::OneTimeInit( const char * fromPackage, const char * launchIntentJSON, const char * launchIntentURI )
 {
 	OVR::Capture::InitForRemoteCapture();
+
 	AppState::Instance = app;
+	_Config = Config::Load(app);
+	AppState::Conf = _Config;
 
 	OVR_UNUSED( fromPackage );
 	OVR_UNUSED( launchIntentJSON );
@@ -95,6 +100,7 @@ void Mangaroll::OneTimeInit( const char * fromPackage, const char * launchIntent
 	String fontName;
 	GetLocale().GetString( "@string/font_name", "efigs.fnt", fontName );
 	GuiSys->Init( this->app, *SoundEffectPlayer, fontName.ToCStr(), &app->GetDebugLines() );
+
 
 	Carousel.OneTimeInit(launchIntentURI);
 	MangaSettingsMenu.OneTimeInit(launchIntentURI);
@@ -126,6 +132,10 @@ void Mangaroll::ShowManga(Manga *manga) {
 
 void Mangaroll::OneTimeShutdown()
 {
+	_Config->Save();
+
+	delete _Config;
+
 	OVR::Capture::Shutdown();
 	delete SoundEffectPlayer;
 	SoundEffectPlayer = NULL;
@@ -171,6 +181,12 @@ Matrix4f Mangaroll::Frame( const VrFrame & vrFrame )
 	HMD::Direction = lookAt;
 
 	
+	if (Time::Elapsed - _LastConfSync > 60) {
+		_Config->Save();
+		_LastConfSync = Time::Elapsed;
+	}
+
+	
 	AsyncTextureManager::Instance().Update();
 	Animator.Progress(Time::Delta);
 
@@ -188,6 +204,8 @@ Matrix4f Mangaroll::Frame( const VrFrame & vrFrame )
 		}
 		else {
 			GetGuiSys().GetGazeCursor().HideCursor();
+			GetGuiSys().GetGazeCursor().ClearGhosts();
+
 			Carousel.MoveIn();
 		}
 	}

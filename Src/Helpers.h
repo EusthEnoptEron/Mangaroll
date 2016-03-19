@@ -47,16 +47,11 @@ namespace OvrMangaroll {
 	enum GuideType {
 		NONE, ENLARGE, FOLLOW
 	};
-
+	
+	class Config;
 	class AppState {
 	public:
-		static GuideType Guide;
-		static bool Transparent;
-		static bool LeftToRight;
-		static bool AutoRotate;
-		static float Contrast;
-		static float Brightness;
-		static float Zoom;
+		static Config *Conf;
 		static App *Instance;
 	};
 

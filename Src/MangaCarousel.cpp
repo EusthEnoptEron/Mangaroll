@@ -4,6 +4,7 @@
 #include "Mangaroll.h"
 
 #include "GLES3\gl3_loader.h"
+#include "Config.h"
 
 
 
@@ -76,10 +77,10 @@ namespace OvrMangaroll {
 			}*/
 			if (vrFrame.Input.buttonPressed & BUTTON_TOUCH) {
 				_Scaling = true;
-				_StartZoom = AppState::Zoom;
+				_StartZoom = AppState::Conf->Zoom;
 			}
 			if (_Scaling) {
-				AppState::Zoom = Alg::Clamp(_StartZoom + (vrFrame.Input.touchRelative.y / 500.0f), 0.0f, 1.0f);
+				AppState::Conf->Zoom = Alg::Clamp(_StartZoom + (vrFrame.Input.touchRelative.y / 500.0f), 0.0f, 1.0f);
 			}
 		}
 		if (vrFrame.Input.buttonReleased & BUTTON_TOUCH) {
@@ -110,7 +111,7 @@ namespace OvrMangaroll {
 		const Matrix4f eyeProjectionMatrix = GetEyeProjectionMatrix(eye, fovDegreesX, fovDegreesY);
 		const Matrix4f eyeViewProjection = Scene.DrawEyeView(eye, fovDegreesX, fovDegreesY);
 
-		int idx = AppState::Transparent ? 1 : 0;
+		int idx = AppState::Conf->Transparent ? 1 : 0;
 		_Prog = _Progs[idx];
 
 		if (CurrentManga != NULL) {
@@ -119,8 +120,8 @@ namespace OvrMangaroll {
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glUniformMatrix4fv(_Prog->uView, 1, GL_TRUE, eyeViewMatrix.M[0]);
 			glUniformMatrix4fv(_Prog->uProjection, 1, GL_TRUE, eyeProjectionMatrix.M[0]);
-			glUniform1f(_uContrast[idx], AppState::Contrast);
-			glUniform1f(_uBrightness[idx], AppState::Brightness);
+			glUniform1f(_uContrast[idx], AppState::Conf->Contrast);
+			glUniform1f(_uBrightness[idx], AppState::Conf->Brightness);
 
 			CurrentManga->Draw(Matrix4f::Scaling((1-_Fader.GetFadeAlpha()) + 1));
 		}

@@ -6,6 +6,7 @@
 #include "Helpers.h"
 #include "Kernel\OVR_String_Utils.h"
 #include "GazeUpdateComponent.h"
+#include "Config.h"
 
 namespace OvrMangaroll {
 
@@ -35,7 +36,7 @@ namespace OvrMangaroll {
 	}
 	void OnContrastClick(ScrubBarComponent *slider, void *object, float progress) {
 		slider->SetProgress(progress);
-		AppState::Contrast = progress * 2;
+		AppState::Conf->Contrast = progress * 2;
 
 		/*GlProgram *prog = ShaderManager::Instance()->Get(PAGE_SHADER_NAME);
 		glUseProgram(prog->program);
@@ -46,7 +47,7 @@ namespace OvrMangaroll {
 		slider->SetProgress(progress);
 
 		//GlProgram *prog = ShaderManager::Instance()->Get(PAGE_SHADER_NAME);
-		AppState::Brightness = (progress - 0.5f) * 2;
+		AppState::Conf->Brightness = (progress - 0.5f) * 2;
 
 		//glUseProgram(prog->program);
 		//glUniform1f(glGetUniformLocation(prog->program, "Brightness"), (progress - 0.5f)*2);
@@ -403,20 +404,20 @@ namespace OvrMangaroll {
 	void MangaSettingsView::OnShaderChanged(UICheckbox *, void *p, bool transparent) {
 		//MangaSettingsView *self = (MangaSettingsView *)p;
 
-		AppState::Transparent = transparent;
+		AppState::Conf->Transparent = transparent;
 	}
 
 	void MangaSettingsView::OnReadDirChanged(UICheckbox *, void *p, bool leftToRight) {
 		//MangaSettingsView *self = (MangaSettingsView *)p;
-		AppState::LeftToRight = leftToRight;
+		AppState::Conf->LeftToRight = leftToRight;
 	}
 	void MangaSettingsView::OnAutoRotateChanged(UICheckbox *, void *p, bool autoRotate) {
 		//MangaSettingsView *self = (MangaSettingsView *)p;
-		AppState::AutoRotate = autoRotate;
+		AppState::Conf->AutoRotate = autoRotate;
 	}
 	void MangaSettingsView::OnGuideChanged(UICheckbox *, void *p, bool guide) {
 		//MangaSettingsView *self = (MangaSettingsView *)p;
-		AppState::Guide = guide ? GuideType::FOLLOW : GuideType::NONE;
+		AppState::Conf->Guided = guide;
 	}
 
 	// ##########################################

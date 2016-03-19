@@ -30,6 +30,7 @@ namespace OvrMangaroll {
 		int GetCount(void);
 		Page &GetPage(int);
 		String Name;
+		String ID;
 		bool Selectionable;
 		void Unload();
 	protected:

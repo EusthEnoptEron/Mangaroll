@@ -59,10 +59,13 @@ public class MainActivity extends VrActivity {
 //        } catch (Exception e) {}
 //    }
 
+	public String getConfigDir() {
+		return getFilesDir().getAbsolutePath() + "/";
+	}
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-		String fileDir = getFilesDir().getAbsolutePath();
 
 		Intent intent = getIntent();
 		String commandString = VrActivity.getCommandStringFromIntent( intent );

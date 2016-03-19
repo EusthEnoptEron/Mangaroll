@@ -66,6 +66,8 @@ private:
 	ViewManager ViewMgr;
 	double _LastPress;
 	bool _MenuOpen;
+	Config *_Config;
+	float _LastConfSync;
 };
 
 } // namespace OvrTemplateApp

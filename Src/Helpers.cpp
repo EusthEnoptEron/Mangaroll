@@ -20,15 +20,8 @@ namespace OvrMangaroll {
 	float HMD::HorizontalAngle = 0;
 	float HMD::VerticalAngle = 0;
 
-	GuideType AppState::Guide = GuideType::NONE;
 	App *AppState::Instance = NULL;
-	bool AppState::Transparent = false;
-	bool AppState::LeftToRight = false;
-	bool AppState::AutoRotate = false;
-	float AppState::Contrast = 1.0f;
-	float AppState::Brightness = 0.0f;
-	float AppState::Zoom = 0.0f;
-
+	Config *AppState::Conf = NULL;
 	Assets *Assets::_Instance = NULL;
 
 

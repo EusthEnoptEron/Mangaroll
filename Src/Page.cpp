@@ -5,6 +5,7 @@
 #include "stb_image.h"
 #include "ImageData.h"
 #include "Helpers.h"
+#include "Config.h"
 
 namespace OvrMangaroll {
 
@@ -135,10 +136,10 @@ namespace OvrMangaroll {
 
 				float x = cos(radianOffset) * RADIUS;
 				float z = -sin(radianOffset) * RADIUS;
-				float distance = AppState::Zoom * 0.75f;
+				float distance = AppState::Conf->Zoom * 0.75f;
 
 				Vector3f targetPos = Vector3f(-x, 0.0f, -z) * distance;
-				if(AppState::Guide == GuideType::FOLLOW) {
+				if (AppState::Conf->Guided) {
 					float maxAngle = atan( (HEIGHT / 2) / RADIUS );
 					float verticalAngle = Acos(HMD::Direction.ProjectToPlane(Vector3f(0.0f, 1.0f, 0.0f)).Length());
 				
@@ -241,7 +242,7 @@ namespace OvrMangaroll {
 		if(this->_DisplayState == DisplayState::VISIBLE && _ATexture->GetState() == TEXTURE_APPLIED) {
 			this->UpdateModel();
 
-			int index = AppState::Transparent ? 1 : 0;
+			int index = AppState::Conf->Transparent ? 1 : 0;
 			// Draw
 			
 			glUniform1f(_uDisplayTime[index], Time::Elapsed - this->_DisplayTime);
