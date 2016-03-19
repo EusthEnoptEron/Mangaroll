@@ -9,12 +9,10 @@ Copyright   :   Copyright 2014 Oculus VR, LLC. All Rights reserved.
 
 
 *************************************************************************************/
-package oculus;
+package ch.zomg.mangaroll;
 
-import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
-import android.speech.SpeechRecognizer;
 import android.util.Log;
 import android.content.Intent;
 import com.oculus.vrappframework.VrActivity;
@@ -22,17 +20,7 @@ import com.oculus.vrappframework.VrActivity;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLDecoder;
-import java.security.SecureRandom;
 import java.util.regex.Pattern;
-
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-import java.security.cert.X509Certificate;
 
 public class MainActivity extends VrActivity {
 	public static final String TAG = "Mangaroll";
@@ -40,11 +28,6 @@ public class MainActivity extends VrActivity {
 	/** Load jni .so on initialization */
 	static {
 		Log.d(TAG, "LoadLibrary");
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 //        disableCertificateValidation();
 		System.loadLibrary("mangaroll");
 	}
@@ -79,6 +62,8 @@ public class MainActivity extends VrActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+		String fileDir = getFilesDir().getAbsolutePath();
+
 		Intent intent = getIntent();
 		String commandString = VrActivity.getCommandStringFromIntent( intent );
 		String fromPackageNameString = VrActivity.getPackageStringFromIntent( intent );

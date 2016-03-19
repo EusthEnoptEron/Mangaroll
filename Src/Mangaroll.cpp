@@ -31,10 +31,11 @@ using namespace OVR;
 #if defined( OVR_OS_ANDROID )
 extern "C" {
 
-jlong Java_oculus_MainActivity_nativeSetAppInterface( JNIEnv * jni, jclass clazz, jobject activity,
+jlong Java_ch_zomg_mangaroll_MainActivity_nativeSetAppInterface( JNIEnv * jni, jclass clazz, jobject activity,
 		jstring fromPackageName, jstring commandString, jstring uriString )
 {
 	LOG( "nativeSetAppInterface" );
+	
 	return (new OvrMangaroll::Mangaroll())->SetActivity( jni, clazz, activity, fromPackageName, commandString, uriString );
 }
 
