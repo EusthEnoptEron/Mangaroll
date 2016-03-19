@@ -136,7 +136,7 @@ namespace OvrMangaroll {
 
 				float x = cos(radianOffset) * RADIUS;
 				float z = -sin(radianOffset) * RADIUS;
-				float distance = AppState::Conf->Zoom * 0.75f;
+				float distance = AppState::Conf->Zoom * 0.7f;
 
 				Vector3f targetPos = Vector3f(-x, 0.0f, -z) * distance;
 				if (AppState::Conf->Guided) {
