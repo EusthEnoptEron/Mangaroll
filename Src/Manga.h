@@ -74,6 +74,7 @@ namespace OvrMangaroll {
 		virtual ~MangaWrapper() {}
 
 		void SetThumb(String path);
+		String GetThumb() { return _Cover->GetPath(); }
 		AsyncTexture *GetCover() { return _Cover; }
 		MangaProvider *GetContainer() { return _Category; }
 		Manga *GetManga() { return _Manga; }

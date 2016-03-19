@@ -12,52 +12,117 @@ namespace OvrMangaroll {
 		: MangaProvider()
 		, _Initialized(false)
 		, _Mangas()
+		, _BasePath("")
+	{
+	}
+
+	LocalMangaProvider::LocalMangaProvider(String basePath)
+		: MangaProvider()
+		, _Initialized(false)
+		, _Mangas()
+		, _BasePath(basePath)
 	{
 	}
 
 	void LocalMangaProvider::LoadMore() {
 		_Initialized = true;
+	
+		if (_BasePath.IsEmpty()) {
+			// SEARCH FOR MANGA
+			const OvrStoragePaths & paths = AppState::Instance->GetStoragePaths();
 
-		// SEARCH FOR MANGA
-		const OvrStoragePaths & paths = AppState::Instance->GetStoragePaths();
+			Array<String> SearchPaths;
+			paths.PushBackSearchPathIfValid(EST_SECONDARY_EXTERNAL_STORAGE, EFT_ROOT, "RetailMedia/", SearchPaths);
+			paths.PushBackSearchPathIfValid(EST_SECONDARY_EXTERNAL_STORAGE, EFT_ROOT, "", SearchPaths);
+			paths.PushBackSearchPathIfValid(EST_PRIMARY_EXTERNAL_STORAGE, EFT_ROOT, "RetailMedia/", SearchPaths);
+			paths.PushBackSearchPathIfValid(EST_PRIMARY_EXTERNAL_STORAGE, EFT_ROOT, "", SearchPaths);
 
-		Array<String> SearchPaths;
-		paths.PushBackSearchPathIfValid(EST_SECONDARY_EXTERNAL_STORAGE, EFT_ROOT, "RetailMedia/", SearchPaths);
-		paths.PushBackSearchPathIfValid(EST_SECONDARY_EXTERNAL_STORAGE, EFT_ROOT, "", SearchPaths);
-		paths.PushBackSearchPathIfValid(EST_PRIMARY_EXTERNAL_STORAGE, EFT_ROOT, "RetailMedia/", SearchPaths);
-		paths.PushBackSearchPathIfValid(EST_PRIMARY_EXTERNAL_STORAGE, EFT_ROOT, "", SearchPaths);
+			StringHash<String> results = RelativeDirectoryFileList(SearchPaths, "Manga/");
+			String mangaPath;
 
-		StringHash<String> results = RelativeDirectoryFileList(SearchPaths, "Manga/");
-		String mangaPath;
-
-		// Load all mangas...
-		for (StringHash<String>::Iterator it = results.Begin(); it != results.End(); ++it) {
-			if (it->Second.GetCharAt(it->Second.GetLengthI() - 1) == '/') {
-				mangaPath = GetFullPath(SearchPaths, it->Second);
-				Manga *manga = new Manga();
-
-				Array<String> images = DirectoryFileList(mangaPath.ToCStr());
-
-				manga->Name = ExtractDirectory(mangaPath);
-				String cover("");
-				for (int i = 0; i < images.GetSizeI(); i++) {
-					//WARN("%s -> %s", images[i].ToCStr(), images[i].GetExtension().ToCStr());
-					if (images[i].GetExtension() == ".jpg") {
-						manga->AddPage(new LocalPage(images[i]));
-
-						if (cover.IsEmpty()) {
-							cover = images[i];
-						}
-					}
+			// Load all mangas...
+			for (StringHash<String>::Iterator it = results.Begin(); it != results.End(); ++it) {
+				if (it->Second.GetCharAt(it->Second.GetLengthI() - 1) == '/') {
+					mangaPath = GetFullPath(SearchPaths, it->Second);
+					ExploreDirectory(mangaPath);
 				}
+			}
+		}
+		else {
+			// We have a base path to explore
+			Array<String> files = DirectoryFileList(_BasePath.ToCStr());
 
-				MangaWrapper *wrapper = new MangaWrapper(manga);
-				wrapper->SetThumb(cover);
-				wrapper->Name = manga->Name;
-				_Mangas.PushBack(wrapper);
+			for (int i = 0; i < files.GetSizeI(); i++) {
+				if (files[i].Right(1) == "/") {
+					ExploreDirectory(files[i]);
+				}
 			}
 		}
 	}
+
+	void LocalMangaProvider::ExploreDirectory(String dir) {
+		Array<String> files = DirectoryFileList(dir.ToCStr());
+		LOG("Exploring directory: %s", dir.ToCStr());
+		bool isManga = false;
+		bool isContainer = false;
+
+		// Try to parse as manga
+		for (int i = 0; i < files.GetSizeI(); i++) {
+			if (files[i].Right(1) == "/") {
+				isManga = false;
+				isContainer = true;
+				break;
+			}
+			if (files[i].GetExtension().ToLower() == ".jpg") {
+				isManga = true;
+			}
+		}
+		
+		LOG("Found... %s", isManga ? "Manga" : (isContainer ? "Container" : "Nothing"));
+
+		if (isManga) {
+			Manga *manga = new Manga();
+			manga->Name = ExtractDirectory(dir);
+			LOG("Add manga: %s", manga->Name.ToCStr());
+			String cover("");
+			for (int i = 0; i < files.GetSizeI(); i++) {
+				if (files[i].GetExtension().ToLower() == ".jpg") {
+					manga->AddPage(new LocalPage(files[i]));
+
+					if (cover.IsEmpty()) {
+						cover = files[i];
+					}
+				}
+			}
+
+			MangaWrapper *wrapper = new MangaWrapper(manga);
+			wrapper->SetThumb(cover);
+			wrapper->Name = manga->Name;
+			_Mangas.PushBack(wrapper);
+		}
+		else if (isContainer) {
+			LocalMangaProvider *subProvider = new LocalMangaProvider(dir);
+			subProvider->LoadMore();
+			if (subProvider->HasManga()) {
+				MangaWrapper *wrapper = new MangaWrapper(subProvider);
+				wrapper->SetThumb(subProvider->GetFirstManga()->GetThumb());
+				wrapper->Name = ExtractDirectory(dir);
+				_Mangas.PushBack(wrapper);
+			}
+			else {
+				delete subProvider;
+			}
+		}
+	}
+
+	bool LocalMangaProvider::HasManga() {
+		return _Mangas.GetSizeI() > 0;
+	}
+
+	MangaWrapper *LocalMangaProvider::GetFirstManga() {
+		return _Mangas.Front();
+	}
+
 
 	// ############### SERVICE PROVIDER IMPLEMENTATION #############
 	MangaServiceProvider::MangaServiceProvider()

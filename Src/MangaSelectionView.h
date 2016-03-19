@@ -57,6 +57,7 @@ namespace OvrMangaroll {
 		MangaSelectorComponent *_Selector;
 		MangaWrapper *_Manga;
 		void Init(void);
+		void UpdateCoverAspectRatio();
 		UIImage *_Background;
 		UILabel *_Title;
 		UIImage *_Cover;

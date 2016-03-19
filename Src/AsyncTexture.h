@@ -44,6 +44,7 @@ namespace OvrMangaroll {
 		int MaxHeight;
 		bool IsValid() { return _Valid; }
 		bool IsMoot() { return _Moot; }
+		String GetPath() { return _Path; }
 	private:
 		void GenerateTexture();
 		void DeleteTexture();

@@ -263,6 +263,20 @@ namespace OvrMangaroll {
 	MangaWrapper *MangaPanel::GetManga() {
 		return _Manga;
 	}
+	void MangaPanel::UpdateCoverAspectRatio() {
+		//float realWidth = _Manga->GetCover()->GetWidth();
+		//float realHeight = _Manga->GetCover()->GetHeight();
+		//float width = Width - Border;
+		//float height = Height - Border;
+
+		//float aspectTex = realHeight / realWidth;
+		//float aspectSurf = height / width;
+
+		//_Cover->GetMenuObject()->GetSurface(0).SetUVRange(Rect<float>(0, 0, (aspectSurf / aspectTex), 1));
+		//LOG("[%s] UVs: %.2f", _Manga->Name.ToCStr(), (aspectSurf / aspectTex));
+		//_Cover->GetMenuObject()->GetSurface(0).RegenerateSurfaceGeometry();
+	}
+
 	void MangaPanel::SetManga(MangaWrapper *manga) {
 		_Manga = manga;
 		this->GetMenuObject()->SetText(manga->Name.ToCStr());
@@ -273,14 +287,11 @@ namespace OvrMangaroll {
 
 		//_Title->CalculateTextDimensions();
 		if (manga->GetCover()->IsValid()) {
-			_Title->SetVisible(false);
 			_Preloader->SetVisible(true);
 			_Background->SetColor(Vector4f(0,0,0,1));
 			_Cover->SetImage(0, SURFACE_TEXTURE_DIFFUSE, manga->GetCover()->Display(), Width - Border, Height - (float(Border) / Width * Height));
-			_Title->SetText("");
 		}
 		else {
-			_Title->SetVisible(true);
 			_Preloader->SetVisible(false);
 
 			if (manga->GetCover()->IsMoot()) {
@@ -289,18 +300,24 @@ namespace OvrMangaroll {
 				//_Background->SetVisible(false);
 			}
 			else {
-				_Background->SetColor(Vector4f(0,0,0,1));
+				_Background->SetColor(Vector4f(0, 0, 0, 1));
 			}
-
+		}
+		if (manga->IsContainer() || !manga->GetCover()->IsValid()) {
+			_Title->SetVisible(true);
 			_Title->SetTextWordWrapped(manga->Name.ToCStr(), _Gui->GetDefaultFont(), VRMenuObject::DEFAULT_TEXEL_SCALE * Width);
 		}
+		else {
+			_Title->SetVisible(false);
+			_Title->SetText("");
+		}
+
 		/*VRMenuSurface & surf = _Cover->GetMenuObject()->GetSurface(0);
 		surf.SetClipUVs();*/
 		//_Cover->SetLocalPosition( Vector3f(25,-25,0) );
 
 		//_Cover->SetBorder(UIRectf(10.0f));
 		//_Cover->SetLocalPosition(_Cover->GetLocalPosition() + Vector3f(0, 0, 0.05f));
-
 	}
 
 	void MangaPanel::OnClick(void *p) {
@@ -320,6 +337,8 @@ namespace OvrMangaroll {
 
 			WARN("MANGA: %p", _Manga);
 			if (_Manga->GetCover()->GetState() >= TEXTURE_LOADED) {
+				UpdateCoverAspectRatio();
+
 				_Preloader->SetVisible(false);
 				_Background->SetColor(Vector4f(0,0,0,1));
 				_Cover->SetVisible(true);
@@ -618,7 +637,7 @@ namespace OvrMangaroll {
 	}
 
 	bool MangaSelectorComponent::ProviderCaughtUp() {
-		return _Index < _Providers.Back()->GetCurrentSize();
+		return _Index < _Providers.Back()->GetCurrentSize() || (!_Providers.Back()->HasMore() && !_Providers.Back()->IsLoading());
 	}
 	
 	eMsgStatus MangaSelectorComponent::OnEvent_Impl(OvrGuiSys & guiSys, VrFrame const & vrFrame,

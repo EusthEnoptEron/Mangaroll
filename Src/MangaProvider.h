@@ -29,6 +29,7 @@ namespace OvrMangaroll {
 	class LocalMangaProvider : public MangaProvider {
 	public:
 		LocalMangaProvider();
+		LocalMangaProvider(String basePath);
 		virtual ~LocalMangaProvider() {}
 
 		// Implement
@@ -40,9 +41,12 @@ namespace OvrMangaroll {
 		virtual void LoadMore();
 	private:
 		LocalMangaProvider(const LocalMangaProvider &);
-
+		void ExploreDirectory(String dir);
+		MangaWrapper *GetFirstManga();
+		bool HasManga();
 		bool _Initialized;
 		Array<MangaWrapper *> _Mangas;
+		String _BasePath;
 	};
 
 
