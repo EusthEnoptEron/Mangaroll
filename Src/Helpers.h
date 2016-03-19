@@ -88,30 +88,15 @@ namespace OvrMangaroll {
 		static String CropToLength(String, int maxLength);
 	};
 
-	//class ParamString {
-	//public:
-	//	static String InsertParam(char *source, char *paramName, char *value) {
-	//		const ovrJava  *java = AppState::Instance->GetJava();
-	//		JNIEnv *env = java->Env;
-	//		jclass clazz = env->GetObjectClass(java->ActivityObject);
-	//		jmethodID _InsertParam = env->GetStaticMethodID(clazz, "InsertParam", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
+	class ParamString {
+	public:
+		static const char * const PARAM_PAGE;
+		static const char * const PARAM_ID;
 
-	//		// Prepare params
-	//		jstring src = env->NewStringUTF(source);
-	//		jstring param = env->NewStringUTF(paramName);
-	//		jstring value = env->NewStringUTF(value);
+		static String InsertParam(const char *source, const char *paramName, const char *value);
 
-	//		jstring result = (jstring)env->CallStaticObjectMethod(clazz, _InsertParam, src, param, value);
-	//		const char *resultString = env->GetStringUTFChars(result, JNI_TRUE);
-
-	//		// Clean up
-	//		
-
-	//		return resultString;
-	//	}
-
-	//	static void InsertParam(String source, String paramName, int value) {
-	//		
-	//	}
-	//};
+		static String InsertParam(const char *source, const char *paramName, int value) {
+			return InsertParam(source, paramName, String::Format("%d", value).ToCStr());
+		}
+	};
 }

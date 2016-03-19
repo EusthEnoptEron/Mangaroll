@@ -138,7 +138,10 @@ namespace OvrMangaroll {
 
 
 	void RemoteMangaProvider::LoadMore() {
-		Web::Download(String::Format(_BrowseUrl.ToCStr(), _Page, Id.ToCStr()),
+		String url = ParamString::InsertParam(_BrowseUrl.ToCStr(), ParamString::PARAM_PAGE, _Page);
+		url = ParamString::InsertParam(url.ToCStr(), ParamString::PARAM_ID, Id.ToCStr());
+
+		Web::Download(url,
 			RemoteMangaProvider::FetchFn
 			, this);
 		_Loading = true;
@@ -171,7 +174,7 @@ namespace OvrMangaroll {
 							if (mangaReader.GetChildBoolByName("container")) {
 								RemoteMangaProvider *container = new RemoteMangaProvider(provider->_BrowseUrl, provider->_ShowUrl);
 								MangaWrapper *wrapper = new MangaWrapper(container);
-								container->Id = String::Format("%d", mangaReader.GetChildInt32ByName("id"));
+								container->Id = mangaReader.GetChildStringByName("id");
 								wrapper->Name = mangaReader.GetChildStringByName("name");
 								container->Name = mangaReader.GetChildStringByName("name");
 								wrapper->SetThumb(mangaReader.GetChildStringByName("thumb"));
@@ -181,7 +184,7 @@ namespace OvrMangaroll {
 								MangaWrapper *wrapper = new MangaWrapper(manga);
 
 								manga->Name = mangaReader.GetChildStringByName("name");
-								manga->ID = mangaReader.GetChildInt32ByName("id");
+								manga->ID = mangaReader.GetChildStringByName("id");
 								manga->FetchUrl = provider->_ShowUrl;
 								wrapper->SetThumb(mangaReader.GetChildStringByName("thumb"));
 								wrapper->Name = manga->Name;

@@ -174,7 +174,7 @@ namespace OvrMangaroll {
 
 	RemoteManga::RemoteManga()
 		: Manga()
-		, ID(0)
+		, ID("")
 		, FetchUrl("")
 		, _Payload()
 		, _Loading(false)
@@ -190,8 +190,12 @@ namespace OvrMangaroll {
 	void RemoteManga::Fetch() {
 		_Loading = true;
 		_HasMore = false;
+
+		String url = ParamString::InsertParam(FetchUrl.ToCStr(), ParamString::PARAM_PAGE, _Page);
+		url = ParamString::InsertParam(url.ToCStr(), ParamString::PARAM_ID, ID.ToCStr());
+
 		Web::Download(
-			String::Format(FetchUrl.ToCStr(), ID, _Page),
+			url,
 			RemoteManga::OnDownload,
 			this
 		);

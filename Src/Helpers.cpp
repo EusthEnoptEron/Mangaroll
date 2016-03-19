@@ -39,4 +39,34 @@ namespace OvrMangaroll {
 		base = base.Left(maxLength - 3);
 		return base + "...";
 	}
+
+	const char * const ParamString::PARAM_ID = "{id}";
+	const char * const ParamString::PARAM_PAGE = "{page}";
+
+	String ParamString::InsertParam(const char *source, const char *paramName, const char *value) {
+		const ovrJava  *java = AppState::Instance->GetJava();
+		JNIEnv *env = java->Env;
+		jclass clazz = env->GetObjectClass(java->ActivityObject);
+		jmethodID _InsertParam = env->GetStaticMethodID(clazz, "InsertParam", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
+
+		// Prepare params
+		jstring src = env->NewStringUTF(source);
+		jstring param = env->NewStringUTF(paramName);
+		jstring jvalue = env->NewStringUTF(value);
+		jboolean jtrue = (jboolean)JNI_TRUE;
+
+		jstring result = (jstring)env->CallStaticObjectMethod(clazz, _InsertParam, src, param, jvalue);
+		const char *resultCharArray = env->GetStringUTFChars(result, &jtrue);
+		String resultString(resultCharArray);
+
+		// Clean up
+		env->ReleaseStringUTFChars(result, resultCharArray);
+		env->DeleteLocalRef(result);
+		env->DeleteLocalRef(jvalue);
+		env->DeleteLocalRef(param);
+		env->DeleteLocalRef(src);
+		env->DeleteLocalRef(clazz);
+
+		return resultString;
+	}
 }

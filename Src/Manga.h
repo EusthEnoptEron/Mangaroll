@@ -51,7 +51,7 @@ namespace OvrMangaroll {
 	public:
 		RemoteManga();
 		virtual ~RemoteManga() {}
-		int ID;
+		String ID;
 		String FetchUrl;
 	protected:
 		virtual void _Init();
