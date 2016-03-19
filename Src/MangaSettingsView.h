@@ -154,5 +154,8 @@ namespace OvrMangaroll {
 
 		UIButton *_CloseButton;
 		UICheckbox *_ShaderToggle;
+		UICheckbox *_AutoToggle;
+		UICheckbox *_ReadDirToggle;
+		UICheckbox *_HelperToggle;
 	};
 }

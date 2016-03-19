@@ -280,14 +280,14 @@ namespace OvrMangaroll {
 		_ShaderToggle->SetText("Show transparent");
 		_ShaderToggle->SetOnValueChanged(OnShaderChanged, this);
 
-		UICheckbox *_ReadDirToggle = new UICheckbox(gui, 120.0f, toggleHeight);
+		_ReadDirToggle = new UICheckbox(gui, 120.0f, toggleHeight);
 		_ReadDirToggle->AddToMenu(_Menu, _OptionsBG);
 		_ReadDirToggle->SetText("Left -> Right");
 		_ReadDirToggle->SetLocalPosition(_ShaderToggle->GetLocalPosition() + Vector3f(0, -PixelScale(toggleHeight + 5), 0));
 		_ReadDirToggle->SetOnValueChanged(OnReadDirChanged, this);
 		//_ReadDirToggle->AlignToMargin(TOP, _ShaderToggle, BOTTOM);
 
-		UICheckbox *_AutoToggle = new UICheckbox(gui, 120.0f, toggleHeight);
+		_AutoToggle = new UICheckbox(gui, 120.0f, toggleHeight);
 		_AutoToggle->AddToMenu(_Menu, _OptionsBG);
 		_AutoToggle->SetText("Auto Progress");
 		_AutoToggle->SetLocalPosition(_ReadDirToggle->GetLocalPosition() - Vector3f(0, PixelScale(toggleHeight + 5), 0));
@@ -296,7 +296,7 @@ namespace OvrMangaroll {
 		//_AutoToggle->AlignToMargin(TOP, _ReadDirToggle, BOTTOM);
 		//WARN("RECT: %.2f", _ShaderToggle->GetRect().GetHeight());
 
-		UICheckbox *_HelperToggle = new UICheckbox(gui, 120.0f, toggleHeight);
+		_HelperToggle = new UICheckbox(gui, 120.0f, toggleHeight);
 		_HelperToggle->AddToMenu(_Menu, _OptionsBG);
 		_HelperToggle->SetText("Anti-Head motions");
 		_HelperToggle->SetLocalPosition(_AutoToggle->GetLocalPosition() - Vector3f(0, PixelScale(toggleHeight + 5), 0));
@@ -390,6 +390,12 @@ namespace OvrMangaroll {
 			_TitleLabel->SetTextWordWrapped(text.ToCStr(), _Mangaroll->GetGuiSys().GetDefaultFont(), PixelScale(_MainContainerWidth - 10));
 
 			_TitleLabel->CalculateTextDimensions();
+
+			_ShaderToggle->SetChecked(AppState::Conf->Transparent);
+			_AutoToggle->SetChecked(AppState::Conf->AutoRotate);
+			_ReadDirToggle->SetChecked(AppState::Conf->LeftToRight);
+			_HelperToggle->SetChecked(AppState::Conf->Guided);
+
 		}
 
 		_Fader.StartFadeIn();
