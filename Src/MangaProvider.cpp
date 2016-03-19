@@ -73,7 +73,8 @@ namespace OvrMangaroll {
 				isContainer = true;
 				break;
 			}
-			if (files[i].GetExtension().ToLower() == ".jpg") {
+
+			if (IsSupportedExt(files[i].GetExtension())) {
 				isManga = true;
 			}
 		}
@@ -86,7 +87,8 @@ namespace OvrMangaroll {
 			LOG("Add manga: %s", manga->Name.ToCStr());
 			String cover("");
 			for (int i = 0; i < files.GetSizeI(); i++) {
-				if (files[i].GetExtension().ToLower() == ".jpg") {
+				if (IsSupportedExt(files[i].GetExtension())) {
+					
 					manga->AddPage(new LocalPage(files[i]));
 
 					if (cover.IsEmpty()) {

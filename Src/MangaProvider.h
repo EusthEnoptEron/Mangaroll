@@ -47,6 +47,12 @@ namespace OvrMangaroll {
 		bool _Initialized;
 		Array<MangaWrapper *> _Mangas;
 		String _BasePath;
+		bool IsSupportedExt(String ext) {
+			return  (ext == ".jpg" || ext == ".tga" ||
+				ext == ".png" || ext == ".bmp" ||
+				ext == ".psd" || ext == ".gif" ||
+				ext == ".hdr" || ext == ".pic");
+		}
 	};
 
 
