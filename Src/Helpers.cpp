@@ -47,27 +47,16 @@ namespace OvrMangaroll {
 	String ParamString::InsertParam(const char *source, const char *paramName, const char *value) {
 		const ovrJava  *java = AppState::Instance->GetJava();
 		JNIEnv *env = java->Env;
-		jclass clazz = env->GetObjectClass(java->ActivityObject);
-		jmethodID _InsertParam = env->GetStaticMethodID(clazz, "InsertParam", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
+		JavaClass clazz = JavaClass(env, env->GetObjectClass(java->ActivityObject));
+
+		jmethodID _InsertParam = env->GetStaticMethodID(clazz.GetJClass(), "InsertParam", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;");
 
 		// Prepare params
-		jstring src = env->NewStringUTF(source);
-		jstring param = env->NewStringUTF(paramName);
-		jstring jvalue = env->NewStringUTF(value);
-		jboolean jtrue = (jboolean)JNI_TRUE;
-
-		jstring result = (jstring)env->CallStaticObjectMethod(clazz, _InsertParam, src, param, jvalue);
-		const char *resultCharArray = env->GetStringUTFChars(result, &jtrue);
-		String resultString(resultCharArray);
-
-		// Clean up
-		env->ReleaseStringUTFChars(result, resultCharArray);
-		env->DeleteLocalRef(result);
-		env->DeleteLocalRef(jvalue);
-		env->DeleteLocalRef(param);
-		env->DeleteLocalRef(src);
-		env->DeleteLocalRef(clazz);
-
+		JavaString src = JavaString(env, source);
+		JavaString param = JavaString(env, paramName);
+		JavaString jvalue = JavaString(env, value);	
+		JavaUTFChars result = JavaUTFChars(env, (jstring)env->CallStaticObjectMethod(clazz.GetJClass(), _InsertParam, src.GetJString(), param.GetJString(), jvalue.GetJString()));
+		String resultString(result.ToStr());
 		return resultString;
 	}
 }
