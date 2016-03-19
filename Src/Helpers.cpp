@@ -27,6 +27,7 @@ namespace OvrMangaroll {
 	bool AppState::AutoRotate = false;
 	float AppState::Contrast = 1.0f;
 	float AppState::Brightness = 0.0f;
+	float AppState::Zoom = 0.0f;
 
 	Assets *Assets::_Instance = NULL;
 

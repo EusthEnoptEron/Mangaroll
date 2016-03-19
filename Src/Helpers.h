@@ -56,6 +56,7 @@ namespace OvrMangaroll {
 		static bool AutoRotate;
 		static float Contrast;
 		static float Brightness;
+		static float Zoom;
 		static App *Instance;
 	};
 

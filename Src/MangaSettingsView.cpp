@@ -138,29 +138,29 @@ namespace OvrMangaroll {
 
 		_CenterContainer = new UIContainer(gui);
 		_CenterContainer->AddToMenu(_Menu);
+		//_CenterContainer->AddFlags(VRMENUOBJECT_RENDER_HIERARCHY_ORDER);
 		_CenterContainer->SetLocalPose(forward, Vector3f(0, 0, -.9f));
 
 		_LeftContainer = new UIContainer(gui);
 		_LeftContainer->AddToMenu(_Menu);
-		_LeftContainer->SetLocalPose(leftTilt, Vector3f(-.5f, 0, -.7f));
+		_LeftContainer->SetLocalPose(leftTilt, Vector3f(-.4f, 0, -.7f));
 		
 		_RightContainer = new UIContainer(gui);
 		_RightContainer->AddToMenu(_Menu);
-		_RightContainer->SetLocalPose(rightTilt, Vector3f(.5f, 0, -.7f));
+		_RightContainer->SetLocalPose(rightTilt, Vector3f(.4f, 0, -.7f));
 
 		// #########  MAIN WINDOW  ###########
 
 		_MainBG = new UIImage(gui);
 		_MainBG->AddToMenu(_Menu, _CenterContainer);
-		_MainBG->SetLocalPosition(PixelPos(0, -20, -1));
+		_MainBG->SetLocalPosition(PixelPos(0, -20, -20));
 		_MainBG->SetImage(0, SURFACE_TEXTURE_DIFFUSE, _MainBGTexture, _MainContainerWidth, _MainContainerWidth / _MainBGTexture.Width * _MainBGTexture.Height);
-
 
 		_TitleLabel = new UILabel(gui);
 		_TitleLabel->AddToMenu(_Menu, _CenterContainer);
 		// It's unknown what these parms actually do... but well, it works. "alpha" seems to control the thickness of the outline
 		_TitleLabel->SetFontParms(VRMenuFontParms(true, true, false, false, true, 0.5f, 0.4f, 1));
-		_TitleLabel->SetLocalPose(forward, Vector3f(0, 0.1f, 0));
+		_TitleLabel->SetLocalPose(forward, Vector3f(0, 0.05f, 0));
 		_TitleLabel->SetFontScale(0.6f);
 		_TitleLabel->SetText("");
 		
@@ -177,7 +177,7 @@ namespace OvrMangaroll {
 		_PageLabel = new UILabel(gui);
 		_PageLabel->AddToMenu(_Menu, _CenterContainer);
 		_PageLabel->SetFontParms(VRMenuFontParms(true, true, false, false, true, 0.5f, 0.4f, 1));
-		_PageLabel->SetLocalPose(forward, Vector3f(0, 0, 0));
+		_PageLabel->SetLocalPose(forward, Vector3f(0, -0.05f, 0));
 		_PageLabel->SetFontScale(0.4f);
 		_PageLabel->SetFlags(VRMENUOBJECT_DONT_HIT_ALL);
 		_PageLabel->SetText("");
@@ -192,7 +192,7 @@ namespace OvrMangaroll {
 		_ProgressBG = new UIImage(gui);
 		_ProgressBG->AddToMenu(_Menu, _CenterContainer);
 		_ProgressBG->SetImage(0, eSurfaceTextureType::SURFACE_TEXTURE_DIFFUSE, _ProgressBGTexture, barWidth, barHeight);
-		_ProgressBG->SetLocalPose(forward, Vector3f(0, -0.05f, 0));
+		_ProgressBG->SetLocalPose(forward, Vector3f(0, -0.1f, 0));
 		_ProgressBG->AddComponent(&_ProgressComponent);
 		_ProgressBG->GetMenuObject()->AddFlags(VRMENUOBJECT_RENDER_HIERARCHY_ORDER);
 
@@ -201,7 +201,8 @@ namespace OvrMangaroll {
 		_ProgressFG->SetLocalPosition(PixelPos(-3, 0, 1));
 		_ProgressFG->SetImage(0, SURFACE_TEXTURE_ADDITIVE, _ProgressFGTexture, 0, 0);
 		_ProgressFG->GetMenuObject()->AddFlags(VRMENUOBJECT_DONT_HIT_ALL);
-		_ProgressFG->SetColor(Vector4f(0.12f, 0.3f, 0.06f, 1));
+		//_ProgressFG->SetColor(Vector4f(0.12f, 0.3f, 0.06f, 1));
+		_ProgressFG->SetColor(Vector4f(0, 0.2f, 0.2f, 1));
 
 
 		_PageSeekLabel = new UILabel(gui);
@@ -223,7 +224,7 @@ namespace OvrMangaroll {
 		_ProgressComponent.SetOnText(OnText, this);
 		_ProgressComponent.SetProgress(0.5f);
 		_ProgressComponent.SetOnClick(OnPageProgressClick, this);
-		
+	
 
 		// #########  EFFECTS  ###########
 		_FXBG = new UIImage(gui);
@@ -415,7 +416,7 @@ namespace OvrMangaroll {
 	}
 	void MangaSettingsView::OnGuideChanged(UICheckbox *, void *p, bool guide) {
 		//MangaSettingsView *self = (MangaSettingsView *)p;
-		AppState::Guide = guide ? GuideType::ENLARGE : GuideType::NONE;
+		AppState::Guide = guide ? GuideType::FOLLOW : GuideType::NONE;
 	}
 
 	// ##########################################

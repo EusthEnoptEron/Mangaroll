@@ -30,6 +30,7 @@ namespace OvrMangaroll {
 		, _LastPress(0)
 		, _Fader(1)
 		, _Operatable(true)
+		, _Scaling(false)
 	{
 	}
 
@@ -69,10 +70,20 @@ namespace OvrMangaroll {
 
 		if (_Operatable) {
 			// Only update this when operatable
-			if (vrFrame.Input.buttonState & BUTTON_TOUCH_SINGLE) {
+			/*if (vrFrame.Input.buttonState & BUTTON_TOUCH_SINGLE) {
 				AppState::Guide = (GuideType)((AppState::Guide + 1) % 3);
 				_LastPress = Time::Elapsed;
+			}*/
+			if (vrFrame.Input.buttonPressed & BUTTON_TOUCH) {
+				_Scaling = true;
+				_StartZoom = AppState::Zoom;
 			}
+			if (_Scaling) {
+				AppState::Zoom = Alg::Clamp(_StartZoom + (vrFrame.Input.touchRelative.y / 500.0f), 0.0f, 1.0f);
+			}
+		}
+		if (vrFrame.Input.buttonReleased & BUTTON_TOUCH) {
+			_Scaling = false;
 		}
 
 		if (CurrentManga != NULL) {
@@ -133,6 +144,7 @@ namespace OvrMangaroll {
 		int progress = CurrentManga->GetProgress();
 		CurrentManga->Update(_Angle, true);
 		CurrentManga->SetProgress(progress);
+		CurrentManga->Position = Vector3f(0,-0.1f,0); // Move down by a bit
 	}
 
 	void MangaCarousel::MoveOut(void) {

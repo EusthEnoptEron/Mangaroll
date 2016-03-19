@@ -47,6 +47,9 @@ namespace OvrMangaroll {
 		float _LastPress;
 		SineFader _Fader;
 		bool _Operatable;
+		bool _Scaling;
+		// Zoom at start
+		float _StartZoom;
 	};
 
 

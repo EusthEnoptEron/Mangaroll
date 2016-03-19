@@ -24,6 +24,8 @@ Copyright   :   Copyright 2014 Oculus VR, LLC. All Rights reserved.
 	#define GL( func )		func;
 #endif
 
+//#define MR_DEBUG
+
 using namespace OVR;
 
 #if defined( OVR_OS_ANDROID )
@@ -136,6 +138,14 @@ void Mangaroll::OneTimeShutdown()
 
 bool Mangaroll::OnKeyEvent( const int keyCode, const int repeatCount, const KeyEventType eventType )
 {
+#ifdef MR_DEBUG
+	// Crash button
+	if (keyCode == OVR_KEY_ESCAPE && eventType == KeyEventType::KEY_EVENT_LONG_PRESS) {
+		// Crash
+		((Mangaroll *)NULL)->OnKeyEvent(keyCode, repeatCount, eventType);
+	}
+#endif
+
 	if ( GuiSys->OnKeyEvent( keyCode, repeatCount, eventType ) )
 	{
 		return true;

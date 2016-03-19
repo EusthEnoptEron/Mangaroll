@@ -44,11 +44,24 @@ namespace OvrMangaroll {
 		if(IsVisible()) {
 			Vector3f pos = Position;
 			pos.y = 0;
-			float distance = RADIUS - pos.Length(); // 0/0/0 is default. Moves toward the camera when selected
-			float angularWidth = acosf(1 - (_ChordLength * _ChordLength) / (2 * distance * distance)) * Mathf::RadToDegreeFactor;
-			float angularOffset = _AngularOffset - (angularWidth - _AngularWidth) / 2;
-			float angleEnd = angularOffset + angularWidth;
-			return angle > angularOffset && angle < angleEnd;
+			float zoom = pos.Length(); // 0/0/0 is default. Moves toward the camera when selected
+			float margin = zoom * _AngularWidth * 0.5f;
+			float angularOffset = _AngularOffset - margin;
+			float angularEnd = _AngularOffset + _AngularWidth + margin;
+
+			//// Calculate the angle of the isosceles triangle
+			//float x = Alg::Clamp(-(_ChordLength * _ChordLength) / (2 * distance * distance), -1.0f, 1.0f);
+			//float angularWidth = acosf(x) * Mathf::RadToDegreeFactor;
+			//if (_Selected) {
+			//	LOG("Distance: %.2f Angular Width: %.2f Chord: %.2f, Cos: %.2f", distance, angularWidth, _ChordLength, 1 - (_ChordLength * _ChordLength) / (2 * distance * distance));
+			//}
+
+			//if (angularWidth == NAN) return true;
+
+			//float angularOffset = _AngularOffset - (angularWidth - _AngularWidth) / 2;
+			//float angleEnd = angularOffset + angularWidth;
+
+			return angle > angularOffset && angle < angularEnd;
 		}
 		return false;
 	}
@@ -115,14 +128,14 @@ namespace OvrMangaroll {
 		}
 
 		if(_DisplayState == DisplayState::VISIBLE) {
-			if(_Selected && AppState::Guide >= GuideType::ENLARGE) {
+			if(_Selected) {
 				float radianOffset = Mathf::Pi / 2;// - widthInRadians / 2; // Makes sure this thing is centered
 				radianOffset += DegreeToRad(_AngularOffset);
 				radianOffset += DegreeToRad(_AngularWidth) / 2.0f;
 
 				float x = cos(radianOffset) * RADIUS;
 				float z = -sin(radianOffset) * RADIUS;
-				float distance = AppState::Guide == GuideType::ENLARGE ? 0.2f : 0.4f;
+				float distance = AppState::Zoom * 0.75f;
 
 				Vector3f targetPos = Vector3f(-x, 0.0f, -z) * distance;
 				if(AppState::Guide == GuideType::FOLLOW) {
@@ -135,6 +148,9 @@ namespace OvrMangaroll {
 
 					targetPos += (-verticalShift * (HEIGHT / 3) * Vector3f(0, 1, 0));
 				}
+
+				LOG("Target Position: %.2f/%.2f/%.2f", targetPos.x, targetPos.y, targetPos.z);
+				LOG("Current Position: %.2f/%.2f/%.2f", Position.x, Position.y, Position.z);
 				Position = Position.Lerp(targetPos, Time::Delta * 10);
 
 				Touch();

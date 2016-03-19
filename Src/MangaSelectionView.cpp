@@ -233,7 +233,7 @@ namespace OvrMangaroll {
 		: UIObject(guiSys)
 		, Width(100)
 		, Height(150)
-		, Border(10)
+		, Border(3)
 		, _Cover(NULL)
 		, _Preloader(NULL)
 		, _CoverTexture(NULL)
@@ -380,7 +380,7 @@ namespace OvrMangaroll {
 		_Component = new ClickableComponent();
 		_Component->SetCallback(OnClick, this);
 		AddComponent(new OvrDefaultComponent(
-			Vector3f(0, 0, .05f), 1.4f, 0.25f, 0
+			Vector3f(0, 0, .05f), 1.3f, 0.25f, 0
 		));
 		AddComponent(_Component);
 
