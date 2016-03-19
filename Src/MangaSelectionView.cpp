@@ -573,6 +573,7 @@ namespace OvrMangaroll {
 
 		UpdatePanels();
 
+		// ### Process Label ###
 		if (_ActivePanel != NULL && _Transition.GetFadeState() != Fader::FADE_IN) {
 			Vector3f pos = _ActivePanel->GetLocalPosition();
 			pos.z += 1; // Parent container is positioned a little more toward the player
@@ -596,10 +597,12 @@ namespace OvrMangaroll {
 			}
 		}
 
-		if (_Transition.GetFadeState() == Fader::FADE_IN) {
-			_Transition.Update(1.0f, Time::Delta);
+		// ### Process Transition ###
 
-			// Apply values
+		if (_Transition.GetFadeState() == Fader::FADE_IN) {
+			_Transition.Update(ProviderCaughtUp() ? 1.0f : 0.1f, Time::Delta);
+
+			// Apply values (Front is new, back is old)
 			_Containers[_Front]->SetColor(Vector4f(_Transition.GetFadeAlpha()));
 			_Containers[_Back]->SetColor(Vector4f(1 - _Transition.GetFadeAlpha()));
 
@@ -612,6 +615,10 @@ namespace OvrMangaroll {
 				CleanPanels();
 			}
 		}
+	}
+
+	bool MangaSelectorComponent::ProviderCaughtUp() {
+		return _Index < _Providers.Back()->GetCurrentSize();
 	}
 	
 	eMsgStatus MangaSelectorComponent::OnEvent_Impl(OvrGuiSys & guiSys, VrFrame const & vrFrame,

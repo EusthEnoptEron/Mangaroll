@@ -113,6 +113,7 @@ namespace OvrMangaroll {
 		MangaPanel *CreatePanel(int x, int y, UIObject *container);
 		static void OnGoBackward(UIButton *, void *);
 		static void OnGoForward(UIButton *, void *);
+		bool ProviderCaughtUp();
 
 		UIMenu *_Menu;
 		UIObject *_Parent;
