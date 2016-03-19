@@ -41,9 +41,10 @@ $(call import-module,LibOVRKernel/Projects/AndroidPrebuilt/jni)
 $(call import-module,VrApi/Projects/AndroidPrebuilt/jni)
 $(call import-module,VrAppSupport/SystemUtils/Projects/AndroidPrebuilt/jni)
 $(call import-module,VrAppFramework/Projects/AndroidPrebuilt/jni)
-$(call import-module,VrAppSupport/VrGui/Projects/AndroidPrebuilt/jni)
+# $(call import-module,VrAppSupport/VrGui/Projects/AndroidPrebuilt/jni)
 $(call import-module,VrAppSupport/VrLocale/Projects/AndroidPrebuilt/jni)
 $(call import-module,VrAppSupport/VrModel/Projects/AndroidPrebuilt/jni)
 $(call import-module,VrAppSupport/VrSound/Projects/AndroidPrebuilt/jni)
 
-include E:/Dev/Oculus/Mobile/VrCapture/Projects/Android/jni/Android.mk
+include ../../../../../VrCapture/Projects/Android/jni/Android.mk
+include ../../../../../VrAppSupport/VrGUI/Projects/Android/jni/Android.mk

@@ -264,17 +264,16 @@ namespace OvrMangaroll {
 		return _Manga;
 	}
 	void MangaPanel::UpdateCoverAspectRatio() {
-		//float realWidth = _Manga->GetCover()->GetWidth();
-		//float realHeight = _Manga->GetCover()->GetHeight();
-		//float width = Width - Border;
-		//float height = Height - Border;
+		float realWidth = _Manga->GetCover()->GetWidth();
+		float realHeight = _Manga->GetCover()->GetHeight();
+		float width = Width - Border;
+		float height = Height - Border;
 
-		//float aspectTex = realHeight / realWidth;
-		//float aspectSurf = height / width;
+		float aspectTex = realHeight / realWidth;
+		float aspectSurf = height / width;
 
-		//_Cover->GetMenuObject()->GetSurface(0).SetUVRange(Rect<float>(0, 0, (aspectSurf / aspectTex), 1));
-		//LOG("[%s] UVs: %.2f", _Manga->Name.ToCStr(), (aspectSurf / aspectTex));
-		//_Cover->GetMenuObject()->GetSurface(0).RegenerateSurfaceGeometry();
+		_Cover->GetMenuObject()->GetSurface(0).SetUVRange(Rect<float>(0, 0, (aspectTex / aspectSurf), 1));
+		_Cover->GetMenuObject()->GetSurface(0).RegenerateSurfaceGeometry();
 	}
 
 	void MangaPanel::SetManga(MangaWrapper *manga) {
