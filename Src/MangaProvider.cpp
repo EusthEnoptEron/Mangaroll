@@ -30,6 +30,7 @@ namespace OvrMangaroll {
 	
 		if (_BasePath.IsEmpty()) {
 			// SEARCH FOR MANGA
+			LOG("Looking for manga...");
 			const OvrStoragePaths & paths = AppState::Instance->GetStoragePaths();
 
 			Array<String> SearchPaths;
@@ -40,14 +41,16 @@ namespace OvrMangaroll {
 
 			StringHash<String> results = RelativeDirectoryFileList(SearchPaths, "Manga/");
 			String mangaPath;
-
+			LOG("Found %d manga folders", results.GetSize());
 			// Load all mangas...
 			for (StringHash<String>::Iterator it = results.Begin(); it != results.End(); ++it) {
 				if (it->Second.GetCharAt(it->Second.GetLengthI() - 1) == '/') {
+					LOG("Looking into %s", it->Second.ToCStr());
 					mangaPath = GetFullPath(SearchPaths, it->Second);
 					ExploreDirectory(mangaPath);
 				}
 			}
+			LOG("Done looking.");
 		}
 		else {
 			// We have a base path to explore

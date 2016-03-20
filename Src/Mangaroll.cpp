@@ -47,6 +47,24 @@ jlong Java_ch_zomg_mangaroll_MainActivity_nativeSetAppInterface( JNIEnv * jni, j
 namespace OvrMangaroll
 {
 
+	//==============================================================
+	// ovrGuiSoundEffectPlayer
+	class ovrGuiSoundEffectPlayer : public OvrGuiSys::SoundEffectPlayer
+	{
+	public:
+		ovrGuiSoundEffectPlayer(ovrSoundEffectContext & context)
+			: SoundEffectContext(context)
+		{
+		}
+
+		virtual bool Has(const char * name) const OVR_OVERRIDE{ return SoundEffectContext.GetMapping().HasSound(name); }
+		virtual void Play(const char * name) OVR_OVERRIDE{ SoundEffectContext.Play(name); }
+
+	private:
+		ovrSoundEffectContext & SoundEffectContext;
+	};
+
+
 Mangaroll::Mangaroll()
 	: GuiSys( OvrGuiSys::Create() )
 	, CurrentManga(NULL)
@@ -93,7 +111,7 @@ void Mangaroll::OneTimeInit( const char * fromPackage, const char * launchIntent
 
 	SoundEffectContext = new ovrSoundEffectContext( *java->Env, java->ActivityObject );
 	SoundEffectContext->Initialize();
-	SoundEffectPlayer = new OvrGuiSys::ovrDummySoundEffectPlayer();
+	SoundEffectPlayer = new ovrGuiSoundEffectPlayer(*SoundEffectContext);
 
 	Locale = ovrLocale::Create( *app, "default" );
 	

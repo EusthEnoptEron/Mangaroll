@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
     </Filter>
+    <Filter Include="Source Files\VrGUI">
+      <UniqueIdentifier>{cdd06a9d-51a4-45ab-991b-8a60278fe005}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\VrGUI">
+      <UniqueIdentifier>{68eacd1e-676d-4e36-b341-c87397fae0c6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="projects\android\build\outputs\lint-results-release-fatal.html" />
@@ -84,6 +90,87 @@
     <ClInclude Include="Src\UICheckbox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\VRMenuEvent.h">
+      <Filter>Header Files\VrGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\VRMenuEventHandler.h">
+      <Filter>Header Files\VrGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\VRMenuMgr.h">
+      <Filter>Header Files\VrGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\VRMenuObject.h">
+      <Filter>Header Files\VrGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\ActionComponents.h">
+      <Filter>Header Files\VrGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\AnimComponents.h">
+      <Filter>Header Files\VrGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\CollisionPrimitive.h">
+      <Filter>Header Files\VrGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\DefaultComponent.h">
+      <Filter>Header Files\VrGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\Fader.h">
+      <Filter>Header Files\VrGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\FolderBrowser.h">
+      <Filter>Header Files\VrGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\GazeCursor.h">
+      <Filter>Header Files\VrGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\GazeCursorLocal.h">
+      <Filter>Header Files\VrGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\GuiSys.h">
+      <Filter>Header Files\VrGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\Lerp.h">
+      <Filter>Header Files\VrGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\MetaDataManager.h">
+      <Filter>Header Files\VrGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\ProgressBarComponent.h">
+      <Filter>Header Files\VrGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\ScrollBarComponent.h">
+      <Filter>Header Files\VrGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\ScrollManager.h">
+      <Filter>Header Files\VrGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\SliderComponent.h">
+      <Filter>Header Files\VrGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\SoundLimiter.h">
+      <Filter>Header Files\VrGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\SwipeHintComponent.h">
+      <Filter>Header Files\VrGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\TextFade_Component.h">
+      <Filter>Header Files\VrGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\ui_default.h">
+      <Filter>Header Files\VrGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\VolumePopup.h">
+      <Filter>Header Files\VrGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\VRMenu.h">
+      <Filter>Header Files\VrGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\VRMenuComponent.h">
+      <Filter>Header Files\VrGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Mangaroll.cpp">
@@ -132,6 +219,78 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Src\UICheckbox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\ScrollBarComponent.cpp">
+      <Filter>Source Files\VrGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\ScrollManager.cpp">
+      <Filter>Source Files\VrGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\SliderComponent.cpp">
+      <Filter>Source Files\VrGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\SoundLimiter.cpp">
+      <Filter>Source Files\VrGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\SwipeHintComponent.cpp">
+      <Filter>Source Files\VrGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\TextFade_Component.cpp">
+      <Filter>Source Files\VrGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\VolumePopup.cpp">
+      <Filter>Source Files\VrGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\VRMenu.cpp">
+      <Filter>Source Files\VrGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\VRMenuComponent.cpp">
+      <Filter>Source Files\VrGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\VRMenuEvent.cpp">
+      <Filter>Source Files\VrGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\VRMenuEventHandler.cpp">
+      <Filter>Source Files\VrGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\VRMenuMgr.cpp">
+      <Filter>Source Files\VrGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\VRMenuObject.cpp">
+      <Filter>Source Files\VrGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\ActionComponents.cpp">
+      <Filter>Source Files\VrGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\AnimComponents.cpp">
+      <Filter>Source Files\VrGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\CollisionPrimitive.cpp">
+      <Filter>Source Files\VrGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\DefaultComponent.cpp">
+      <Filter>Source Files\VrGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\Fader.cpp">
+      <Filter>Source Files\VrGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\FolderBrowser.cpp">
+      <Filter>Source Files\VrGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\GazeCursor.cpp">
+      <Filter>Source Files\VrGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\GuiSys.cpp">
+      <Filter>Source Files\VrGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\MetaDataManager.cpp">
+      <Filter>Source Files\VrGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\ProgressBarComponent.cpp">
+      <Filter>Source Files\VrGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Config.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

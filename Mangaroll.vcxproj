@@ -62,8 +62,32 @@
   <ItemDefinitionGroup>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\ActionComponents.cpp" />
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\AnimComponents.cpp" />
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\CollisionPrimitive.cpp" />
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\DefaultComponent.cpp" />
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\Fader.cpp" />
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\FolderBrowser.cpp" />
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\GazeCursor.cpp" />
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\GuiSys.cpp" />
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\MetaDataManager.cpp" />
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\ProgressBarComponent.cpp" />
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\ScrollBarComponent.cpp" />
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\ScrollManager.cpp" />
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\SliderComponent.cpp" />
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\SoundLimiter.cpp" />
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\SwipeHintComponent.cpp" />
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\TextFade_Component.cpp" />
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\VolumePopup.cpp" />
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\VRMenu.cpp" />
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\VRMenuComponent.cpp" />
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\VRMenuEvent.cpp" />
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\VRMenuEventHandler.cpp" />
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\VRMenuMgr.cpp" />
+    <ClCompile Include="..\..\..\VrAppSupport\VrGUI\Src\VRMenuObject.cpp" />
     <ClCompile Include="Src\AnimationManager.cpp" />
     <ClCompile Include="Src\AsyncTexture.cpp" />
+    <ClCompile Include="Src\Config.cpp" />
     <ClCompile Include="Src\Helpers.cpp" />
     <ClCompile Include="Src\Manga.cpp" />
     <ClCompile Include="Src\MangaCarousel.cpp" />
@@ -80,9 +104,36 @@
     <ClCompile Include="Src\Web.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\ActionComponents.h" />
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\AnimComponents.h" />
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\CollisionPrimitive.h" />
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\DefaultComponent.h" />
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\Fader.h" />
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\FolderBrowser.h" />
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\GazeCursor.h" />
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\GazeCursorLocal.h" />
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\GuiSys.h" />
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\Lerp.h" />
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\MetaDataManager.h" />
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\ProgressBarComponent.h" />
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\ScrollBarComponent.h" />
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\ScrollManager.h" />
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\SliderComponent.h" />
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\SoundLimiter.h" />
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\SwipeHintComponent.h" />
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\TextFade_Component.h" />
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\ui_default.h" />
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\VolumePopup.h" />
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\VRMenu.h" />
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\VRMenuComponent.h" />
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\VRMenuEvent.h" />
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\VRMenuEventHandler.h" />
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\VRMenuMgr.h" />
+    <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\VRMenuObject.h" />
     <ClInclude Include="assets\TransparentMangaPage.frag" />
     <ClInclude Include="Src\AnimationManager.h" />
     <ClInclude Include="Src\AsyncTexture.h" />
+    <ClInclude Include="Src\Config.h" />
     <ClInclude Include="Src\GazeUpdateComponent.h" />
     <ClInclude Include="Src\GlObject.h" />
     <ClInclude Include="Src\Helpers.h" />

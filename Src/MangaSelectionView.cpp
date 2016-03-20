@@ -114,6 +114,8 @@ namespace OvrMangaroll {
 		}
 
 		if (!self->_LocalCategoryComponent.Selected) {
+			self->_Mangaroll.GetGuiSys().GetSoundEffectPlayer().Play("sv_select");
+
 			self->_LocalCategoryComponent.Selected = true;
 			self->_RemoteCategoryComponent.Selected = false;
 
@@ -125,7 +127,6 @@ namespace OvrMangaroll {
 		MangaSelectionView *self = (MangaSelectionView *)p;
 		
 		if (self->_LocalCategoryComponent.Selected == self->_RemoteCategoryComponent.Selected) {
-			WARN("ANIMATE");
 			self->_Mangaroll.Animator.AddTask(
 				new AnimatePosition(
 				self->_LabelContainer->GetMenuObject(),
@@ -135,6 +136,8 @@ namespace OvrMangaroll {
 		}
 
 		if (!self->_RemoteCategoryComponent.Selected) {
+			self->_Mangaroll.GetGuiSys().GetSoundEffectPlayer().Play("sv_select");
+
 			self->_RemoteCategoryComponent.Selected = true;
 			self->_LocalCategoryComponent.Selected = false;
 
@@ -713,6 +716,7 @@ namespace OvrMangaroll {
 		switch (event.EventType) {
 		case VRMENU_EVENT_FOCUS_GAINED:
 			_Focused = true;
+			guiSys.GetSoundEffectPlayer().Play("sv_focusgained");
 			break;
 		case VRMENU_EVENT_FOCUS_LOST:
 			_Focused = false;
