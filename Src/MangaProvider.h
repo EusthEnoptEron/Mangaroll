@@ -57,6 +57,11 @@ namespace OvrMangaroll {
 				ext == ".psd" || ext == ".gif" ||
 				ext == ".hdr" || ext == ".pic");
 		}
+
+		bool IsComicBook(String ext) {
+			ext = ext.ToLower();
+			return ext == ".cbr" || ext == ".cbz";
+		}
 	};
 
 

@@ -2,6 +2,12 @@
 #include "Kernel\OVR_JSON.h"
 #include "Helpers.h"
 #include "Web.h"
+#include "jni.h"
+#include "Android\JniUtils.h"
+
+#ifndef ANDROID
+#define ANDROID
+#endif
 
 namespace OvrMangaroll {
 
@@ -171,6 +177,8 @@ namespace OvrMangaroll {
 		_Update();
 	}
 
+
+	// #################### REMOTE MANGA #######################
 	RemoteManga::RemoteManga()
 		: Manga()
 		, ID("")
@@ -249,6 +257,48 @@ namespace OvrMangaroll {
 		delete file;
 		self->_Loading = false;
 	}
+
+	// ################# COMIC BOOK ##############
+	ComicBook::ComicBook(String filePath)
+		: Manga()
+		, _Path(filePath)
+		, _Valid(true)
+	{
+		Name = ExtractFileBase(filePath);
+		PopulateFileList();
+	}
+
+	void ComicBook::PopulateFileList() {
+		const ovrJava *java = AppState::Instance->GetJava();
+		JNIEnv* env = java->Env;
+
+		JavaClass clazz(env, env->GetObjectClass(java->ActivityObject));
+		JavaString pathArg(env, _Path.ToCStr());
+
+		jmethodID getFileList = env->GetStaticMethodID(clazz.GetJClass(), "GetArchiveFileList", "(Ljava/lang/String;)[Ljava/lang/String;");
+		jobjectArray fileList = (jobjectArray)(env->CallStaticObjectMethod(clazz.GetJClass(), getFileList, pathArg.GetJString()));
+		
+		if (fileList != NULL) {
+
+			int length = env->GetArrayLength(fileList);
+			for (int i = 0; i < length; i++) {
+				JavaUTFChars file(env, (jstring)env->GetObjectArrayElement(fileList, i));
+
+				// Build page with custom protocol
+				String protocol = _Path.Right(3).ToLower() == "cbr" ? "rar" : "zip";
+				Page *page = new Page(protocol + "://" + _Path + "/" + file);
+				AddPage(page);
+			}
+
+			env->DeleteLocalRef(fileList);
+		}
+		else {
+			WARN("Could not open archive! %s", _Path.ToCStr());
+			_Valid = false;
+		}
+	}
+
+
 
 
 	MangaWrapper::MangaWrapper(MangaProvider *provider)

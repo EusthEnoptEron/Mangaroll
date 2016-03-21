@@ -16,17 +16,19 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.github.junrar.Archive;
-import com.github.junrar.exception.RarException;
-import com.github.junrar.impl.FileVolumeManager;
-import com.github.junrar.rarfile.FileHeader;
 import com.oculus.vrappframework.VrActivity;
+import junrar.Archive;
+import junrar.exception.RarException;
+import junrar.impl.FileVolumeManager;
+import junrar.rarfile.FileHeader;
 
 import org.apache.commons.io.IOUtils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -147,9 +149,9 @@ public class MainActivity extends VrActivity {
 	public static String[] GetArchiveFileList(String path) {
 
 		if (path.endsWith(".cbz")) {
-			return GetRarFileList(path);
-		} else if (path.endsWith(".cbr")) {
 			return GetZipFileList(path);
+		} else if (path.endsWith(".cbr")) {
+			return GetRarFileList(path);
 		}
 		return null;
 	}
@@ -160,7 +162,7 @@ public class MainActivity extends VrActivity {
 		if(splitPos >= 0) {
 			splitPos += 4;
 			String archiveFile = path.substring(6, splitPos);
-			String relativePath = path.substring(splitPos);
+			String relativePath = path.substring(splitPos+1); // +1 because of slash
 
 			if(type.equals("rar")) {
 				return unrar(archiveFile, relativePath);
@@ -173,11 +175,14 @@ public class MainActivity extends VrActivity {
 	}
 
 	private static byte[] unzip(String archiveFile, String relativePath) {
+		Log.i(TAG,"Unpacking "+ relativePath);
 		try(ZipFile zipFile = new ZipFile(archiveFile)) {
 			ZipEntry entry = zipFile.getEntry(relativePath);
 
 			try(InputStream stream = zipFile.getInputStream(entry)) {
-				return IOUtils.toByteArray(stream);
+				byte[] file = IOUtils.toByteArray(stream);
+				Log.i(TAG, "File is " + file.length + " bytes long!");
+				return file;
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -189,14 +194,18 @@ public class MainActivity extends VrActivity {
 	private static byte[] unrar(String archiveFile, String relativePath) {
 		File f = new File(archiveFile);
 
-		try(Archive a = new Archive(new FileVolumeManager(f))) {
+		try(Archive a = new Archive(new FileVolumeManager(f));
+				ByteArrayOutputStream output = new ByteArrayOutputStream() ) {
 			FileHeader fh = a.nextFileHeader();
 			while (fh != null) {
 				String name = fh.getFileNameString().trim();
-
 				if (name.equals(relativePath)) {
-					return IOUtils.toByteArray(a.getInputStream(fh));
+					a.extractFile(fh, output);
+					byte[] byteArray = output.toByteArray();
+					String lol  = "lol";
+					return  byteArray;
 				}
+				fh = a.nextFileHeader();
 			}
 		} catch (RarException e) {
 			e.printStackTrace();
@@ -232,13 +241,14 @@ public class MainActivity extends VrActivity {
 		File f = new File(path);
 		try(Archive a = new Archive(new FileVolumeManager(f))) {
 			FileHeader fh = a.nextFileHeader();
-
 			while(fh != null) {
 				String name = fh.getFileNameString().trim();
 
 				if(name.toLowerCase().endsWith(".jpg") || name.toLowerCase().endsWith(".png")) {
 					fileList.add(fh.getFileNameString().trim());
 				}
+
+				fh = a.nextFileHeader();
 			}
 			return fileList.toArray(new String[fileList.size()]);
 		} catch (RarException e) {

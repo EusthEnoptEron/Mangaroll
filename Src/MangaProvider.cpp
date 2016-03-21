@@ -73,19 +73,32 @@ namespace OvrMangaroll {
 		// Try to parse as manga
 		for (int i = 0; i < files.GetSizeI(); i++) {
 			if (files[i].Right(1) == "/") {
+				// Found a container (folder)!
 				isManga = false;
 				isContainer = true;
-				break;
 			}
 
-			if (IsSupportedExt(files[i].GetExtension())) {
+			if (!isContainer && IsSupportedExt(files[i].GetExtension())) {
 				isManga = true;
+			}
+
+			if (IsComicBook(files[i].GetExtension())) {
+				ComicBook *manga = new ComicBook(files[i]);
+				manga->UID = BuildUID(manga->Name);
+
+				LOG("Add comic book: %s", manga->Name.ToCStr());
+
+				MangaWrapper *wrapper = new MangaWrapper(manga);
+				wrapper->SetThumb(manga->GetThumb());
+				wrapper->Name = manga->Name;
+				_Mangas.PushBack(wrapper);
 			}
 		}
 		
 		LOG("Found... %s", isManga ? "Manga" : (isContainer ? "Container" : "Nothing"));
 
 		if (isManga) {
+			// This directory *is* a manga, add it to the provider
 			Manga *manga = new Manga();
 			manga->Name = ExtractDirectory(dir);
 			manga->UID = BuildUID(manga->Name);
@@ -108,6 +121,8 @@ namespace OvrMangaroll {
 			_Mangas.PushBack(wrapper);
 		}
 		else if (isContainer) {
+			// This directory contains more than one manga, so add it as a provider
+
 			LocalMangaProvider *subProvider = new LocalMangaProvider(dir);
 			subProvider->LoadMore();
 			if (subProvider->HasManga()) {

@@ -73,6 +73,20 @@ namespace OvrMangaroll {
 		int _Page;
 	};
 
+	class ComicBook : public Manga {
+	public:
+		ComicBook(String filePath);
+		virtual ~ComicBook() {}
+		String GetThumb() {
+			return _Count > 0 ? GetPage(0).GetPath() : "";
+		}
+		bool IsValid() { return _Valid; }
+	private:
+		void PopulateFileList();
+		String _Path;
+		bool _Valid;
+
+	};
 
 	class MangaWrapper {
 	public:

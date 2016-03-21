@@ -6,8 +6,8 @@ dependencies {
   compile project(':VrAppSupport:VrGUI:Projects:AndroidPrebuilt')
   compile project(':VrAppSupport:VrLocale:Projects:AndroidPrebuilt')
   compile project(':VrAppSupport:VrSound:Projects:AndroidPrebuilt')
-  compile 'com.github.junrar:junrar:0.7'
   compile 'org.apache.commons:commons-io:1.3.2'
+  compile files('jar/junrar-0.9-albertus.jar')
 }
 
 android {

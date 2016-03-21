@@ -33,14 +33,19 @@ namespace OvrMangaroll {
 
 	void *Web::DownloadFn(Thread *,void *p) {
 		DownloadMeta *meta = (DownloadMeta *)p;
-		LOG("DOWNLOADING %s", meta->url.ToCStr());
+		LOG("DOWNLOADING %s, Protocol: %s", meta->url.ToCStr(), meta->url.GetProtocol().ToCStr());
 		JNIEnv *env;
 		const ovrJava *java = AppState::Instance->GetJava();
 
 		
 		ovr_AttachCurrentThread(java->Vm, &env, NULL);
 		jclass clazz = env->GetObjectClass(java->ActivityObject);
-		jmethodID _LoadHttpUrl = env->GetStaticMethodID(clazz, "LoadHttpUrl", "(Ljava/lang/String;)[B");
+		
+		String protocol = meta->url.Left(6);
+		bool comicBook = protocol == "rar://" || protocol == "zip://";
+
+		jmethodID _LoadHttpUrl = env->GetStaticMethodID(clazz, comicBook ? "LoadArchivedFile" : "LoadHttpUrl", "(Ljava/lang/String;)[B");
+
 
 		// Download stuff
 		jstring jstr = env->NewStringUTF(meta->url.ToCStr());
