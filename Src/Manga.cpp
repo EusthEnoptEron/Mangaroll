@@ -4,6 +4,7 @@
 #include "Web.h"
 #include "jni.h"
 #include "Android\JniUtils.h"
+#include "Config.h"
 
 #ifndef ANDROID
 #define ANDROID
@@ -85,7 +86,9 @@ namespace OvrMangaroll {
 		}
 
 		_AngleOffset = -(angleToAppear - 20);
-		this->Rotation = Quatf(Vector3f(0, 1, 0), -_AngleOffset / 180.0f * Mathf::Pi);
+
+		float rotation = AppState::Conf->LeftToRight ? _AngleOffset + 180 : -_AngleOffset;
+		this->Rotation = Quatf(Vector3f(0, 1, 0), rotation / 180.0f * Mathf::Pi);
 		this->Touch();
 
 		_LastSetPage = page;

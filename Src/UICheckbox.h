@@ -54,6 +54,7 @@ namespace OvrMangaroll {
 	private:
 		void Init();
 		void UpdateImage();
+		void InternalSetChecked(bool checked);
 
 		void(*_Callback)(UICheckbox *, void *, bool);
 		void *_CallbackObject;

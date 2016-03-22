@@ -33,6 +33,8 @@ namespace OvrMangaroll {
 		float GetAngle() {
 			return _Angle;
 		}
+
+		void ChangeDirection();
 	private:
 		GlProgram *_Prog;
 		GlProgram *_Progs[2];

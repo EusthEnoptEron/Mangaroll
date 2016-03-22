@@ -136,6 +136,11 @@ namespace OvrMangaroll {
 
 				float x = cos(radianOffset) * RADIUS;
 				float z = -sin(radianOffset) * RADIUS;
+
+				if (AppState::Conf->LeftToRight) {
+					z *= -1;
+				}
+
 				float distance = AppState::Conf->Zoom * 0.7f;
 
 				Vector3f targetPos = Vector3f(-x, 0.0f, -z) * distance;
@@ -289,10 +294,18 @@ namespace OvrMangaroll {
 		float y1 = +Page::HEIGHT / 2.0f;
 		int index = 0;
 		
+		int off1 = 0;
+		int off2 = AppState::Conf->LeftToRight ? 2 : 1;
+		int off3 = AppState::Conf->LeftToRight ? 1 : 2;
+
 		for ( int i = 0; i < Page::SEGMENTS; i++ ) {
 			float progress =  (i / float(Page::SEGMENTS - 1));
 			float x = cos( progress * widthInRadians + radianOffset ) * RADIUS;
 			float z = -sin( progress * widthInRadians + radianOffset) * RADIUS;
+
+			if (AppState::Conf->LeftToRight) {
+				z *= -1;
+			}
 
 			attribs.position[i * 2] = Vector3f(x, y0, z);
 			attribs.position[i * 2 + 1] = Vector3f(x, y1, z);
@@ -301,18 +314,24 @@ namespace OvrMangaroll {
 
 			attribs.uv0[i * 2] = Vector2f(1 - progress, 1);
 			attribs.uv0[i * 2 + 1] = Vector2f(1 - progress, 0);
+			if (AppState::Conf->LeftToRight) {
+				attribs.uv0[i * 2].x = 1 - attribs.uv0[i * 2].x;
+				attribs.uv0[i * 2+1].x = 1 - attribs.uv0[i * 2+1].x;
+			}
 
 			if(i > 0) {
 				// Add index
 				// T1
-                indices[index++] = (i * 2 - 1);
-                indices[index++] = (i * 2 + 1);
-                indices[index++] = (i * 2 - 2);
+				indices[index + off1] = (i * 2 - 1);
+				indices[index + off2] = (i * 2 + 1);
+				indices[index + off3] = (i * 2 - 2);
+				index += 3;
 
                 // T2
-                indices[index++] = (i * 2 + 1);
-                indices[index++] = (i * 2);
-                indices[index++] = (i * 2 - 2);
+				indices[index + off1] = (i * 2 + 1);
+				indices[index + off2] = (i * 2);
+				indices[index + off3] = (i * 2 - 2);
+				index += 3;
 			}
 		}
 

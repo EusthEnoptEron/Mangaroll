@@ -414,8 +414,10 @@ namespace OvrMangaroll {
 	}
 
 	void MangaSettingsView::OnReadDirChanged(UICheckbox *, void *p, bool leftToRight) {
-		//MangaSettingsView *self = (MangaSettingsView *)p;
+		MangaSettingsView *self = (MangaSettingsView *)p;
 		AppState::Conf->LeftToRight = leftToRight;
+		
+		self->_Mangaroll->Carousel.ChangeDirection();
 	}
 	void MangaSettingsView::OnAutoRotateChanged(UICheckbox *, void *p, bool autoRotate) {
 		//MangaSettingsView *self = (MangaSettingsView *)p;

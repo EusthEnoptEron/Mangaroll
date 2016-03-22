@@ -65,7 +65,7 @@ namespace OvrMangaroll {
 		float angleB = RadToDegree(atan2(HMD::Direction[0], HMD::Direction[2]));
 		float angleDiff = deltaAngle(angleA, angleB);
 		//angleDiff *= -1;
-		_Angle -= angleDiff;
+		_Angle -= AppState::Conf->LeftToRight ? -angleDiff : angleDiff;
 
 		_PrevLookAt = HMD::Direction;
 
@@ -96,6 +96,14 @@ namespace OvrMangaroll {
 		_Fader.Update(3, Time::Delta);
 
 		return _CenterEyeViewMatrix;
+	}
+
+	void MangaCarousel::ChangeDirection() {
+		_Angle = -_Angle;
+
+		if (CurrentManga != NULL) {
+			CurrentManga->SetProgress(CurrentManga->GetProgress());
+		}
 	}
 
 	Matrix4f MangaCarousel::GetEyeViewMatrix(const int eye) const {

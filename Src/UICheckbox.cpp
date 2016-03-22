@@ -81,11 +81,20 @@ namespace OvrMangaroll {
 	}
 
 	void UICheckbox::SetChecked(bool checked) {
-		_Checked = checked;
-		UpdateImage();
+		if (_Checked != checked) {
+			_Checked = checked;
+			UpdateImage();
+		}
+	}
 
-		if (_Callback != NULL) {
-			_Callback(this, _CallbackObject, IsChecked());
+	void UICheckbox::InternalSetChecked(bool checked) {
+		if (_Checked != checked) {
+			_Checked = checked;
+			UpdateImage();
+
+			if (_Callback != NULL) {
+				_Callback(this, _CallbackObject, IsChecked());
+			}
 		}
 	}
 
@@ -114,7 +123,7 @@ namespace OvrMangaroll {
 
 	eMsgStatus UICheckboxComponent::_OnClick(OvrGuiSys & guiSys, VrFrame const & vrFrame,
 		VRMenuObject * self, VRMenuEvent const & event) {
-		_Owner->SetChecked(!_Owner->IsChecked());
+		_Owner->InternalSetChecked(!_Owner->IsChecked());
 		return MSG_STATUS_CONSUMED;
 	}
 
