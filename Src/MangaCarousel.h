@@ -33,14 +33,14 @@ namespace OvrMangaroll {
 		float GetAngle() {
 			return _Angle;
 		}
-
 		void ChangeDirection();
+
 	private:
 		GlProgram *_Prog;
 		GlProgram *_Progs[2];
 		int _uContrast[2];
 		int _uBrightness[2];
-
+		
 
 		ovrMatrix4f _CenterEyeViewMatrix;
 		Mangaroll *_Mangaroll;
@@ -52,6 +52,17 @@ namespace OvrMangaroll {
 		bool _Scaling;
 		// Zoom at start
 		float _StartZoom;
+		// The current forward angle
+		float _ForwardAngle;
+
+		// Deg
+		static const float SCROLL_ANGLE_MIN;
+		static const float SCROLL_ANGLE_MAX;
+
+		// Deg / sec
+		static const float SCROLL_SPEED_MIN;
+		static const float SCROLL_SPEED_MAX;
+
 	};
 
 

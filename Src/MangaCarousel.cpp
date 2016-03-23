@@ -9,6 +9,13 @@
 
 
 namespace OvrMangaroll {
+
+	const float MangaCarousel::SCROLL_ANGLE_MIN = 5.0f;
+	const float MangaCarousel::SCROLL_ANGLE_MAX = 90.0f;
+	const float MangaCarousel::SCROLL_SPEED_MIN = 0.0f;
+	const float MangaCarousel::SCROLL_SPEED_MAX = 60.0f;
+
+
 	float deltaAngle(float angle1, float angle2) {
 		float a = angle1 - angle2;
 		a += (a>180) ? -360 : (a<-180) ? 360 : 0;
@@ -32,6 +39,7 @@ namespace OvrMangaroll {
 		, _Fader(1)
 		, _Operatable(true)
 		, _Scaling(false)
+		, _ForwardAngle(0)
 	{
 	}
 
@@ -81,6 +89,18 @@ namespace OvrMangaroll {
 			}
 			if (_Scaling) {
 				AppState::Conf->Zoom = Alg::Clamp(_StartZoom + (vrFrame.Input.touchRelative.y / 500.0f), 0.0f, 1.0f);
+			}
+			
+			if (CurrentManga != NULL && AppState::Conf->AutoRotate) {
+				// We might have to auto-rotate
+				float deltaAngle = _ForwardAngle - _Angle;
+				float absAngle = Alg::Abs(deltaAngle);
+				if (absAngle >= SCROLL_ANGLE_MIN) {
+					float speedMix = Alg::Clamp( (absAngle - SCROLL_ANGLE_MIN) / (SCROLL_ANGLE_MAX - SCROLL_ANGLE_MIN), 0.0f, 1.0f);
+					float speed = Alg::Lerp(SCROLL_SPEED_MIN, SCROLL_SPEED_MAX, speedMix) * (deltaAngle < 0 ? 1 : -1);
+					LOG("Moving at %.2f deg/s", speed);
+					CurrentManga->IncreaseAngleOffset(speed * Time::Delta);
+				}
 			}
 		}
 		if (vrFrame.Input.buttonReleased & BUTTON_TOUCH) {
@@ -169,5 +189,8 @@ namespace OvrMangaroll {
 		_Operatable = true;
 
 		_Fader.StartFadeIn();
+
+		// This is the new forward
+		_ForwardAngle = _Angle;
 	}
 }

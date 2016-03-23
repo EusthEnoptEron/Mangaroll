@@ -38,9 +38,11 @@ namespace OvrMangaroll {
 		String Name;
 		bool Selectionable;
 		void Unload();
+		void IncreaseAngleOffset(float deg);
 	protected:
 		virtual void _Init() { }
 		virtual void _Update() { }
+		void ApplyAngleOffset();
 		bool _Initialized;
 		GlProgram _Prog;
 		int _Count;
@@ -50,7 +52,7 @@ namespace OvrMangaroll {
 		int _SelectionIndex;
 		float _Angle;
 		int _Progress;
-		int _AngleOffset;
+		float _AngleOffset;
 		int _LastSetPage;
 	};
 

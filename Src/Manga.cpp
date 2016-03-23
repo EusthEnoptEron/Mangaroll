@@ -86,12 +86,9 @@ namespace OvrMangaroll {
 		}
 
 		_AngleOffset = -(angleToAppear - 20);
-
-		float rotation = AppState::Conf->LeftToRight ? _AngleOffset + 180 : -_AngleOffset;
-		this->Rotation = Quatf(Vector3f(0, 1, 0), rotation / 180.0f * Mathf::Pi);
-		this->Touch();
-
 		_LastSetPage = page;
+
+		ApplyAngleOffset();
 
 		if (activePage != NULL) {
 			activePage->SetOffset(0);
@@ -120,6 +117,17 @@ namespace OvrMangaroll {
 			p->Reset();
 			p = p->GetNext();
 		}
+	}
+
+	void Manga::IncreaseAngleOffset(float deg) {
+		_AngleOffset += deg;
+		ApplyAngleOffset();
+	}
+
+	void Manga::ApplyAngleOffset() {
+		float rotation = AppState::Conf->LeftToRight ? _AngleOffset + 180 : -_AngleOffset;
+		this->Rotation = Quatf(Vector3f(0, 1, 0), rotation / 180.0f * Mathf::Pi);
+		this->Touch();
 	}
 
 	void Manga::Update(float angle, bool onlyVisual) {
