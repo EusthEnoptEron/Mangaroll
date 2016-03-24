@@ -51,7 +51,7 @@ namespace OvrMangaroll {
 				}
 				else if(IsComicBook(it->Second.GetExtension())) {
 					LOG("Found comic book: %s", it->Second.ToCStr());
-					AddComicBook(it->Second);
+					AddComicBook(GetFullPath(SearchPaths, it->Second));
 				}
 			}
 			LOG("Done looking.");

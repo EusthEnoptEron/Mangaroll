@@ -185,7 +185,7 @@ public class MainActivity extends VrActivity {
 				return file;
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			Log.e(TAG, e.getMessage());
 			return new byte[0];
 		}
 	}
@@ -201,16 +201,14 @@ public class MainActivity extends VrActivity {
 				String name = fh.getFileNameString().trim();
 				if (name.equals(relativePath)) {
 					a.extractFile(fh, output);
-					byte[] byteArray = output.toByteArray();
-					String lol  = "lol";
-					return  byteArray;
+					return  output.toByteArray();
 				}
 				fh = a.nextFileHeader();
 			}
 		} catch (RarException e) {
-			e.printStackTrace();
+			Log.e(TAG, e.getMessage());
 		} catch (IOException e) {
-			e.printStackTrace();
+			Log.e(TAG, e.getMessage());
 		}
 		return null;
 	}
@@ -230,6 +228,7 @@ public class MainActivity extends VrActivity {
 				}
 			}
 		} catch (IOException e) {
+			Log.e(TAG, e.getMessage());
 			return null;
 		}
 		return fileList.toArray(new String[fileList.size()]);
@@ -252,10 +251,10 @@ public class MainActivity extends VrActivity {
 			}
 			return fileList.toArray(new String[fileList.size()]);
 		} catch (RarException e) {
-			e.printStackTrace();
+			Log.e(TAG, e.getMessage());
 			return null;
 		} catch (IOException e) {
-			e.printStackTrace();
+			Log.e(TAG, e.getMessage());
 			return null;
 		}
 	}
