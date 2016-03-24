@@ -27,6 +27,18 @@ namespace OvrMangaroll {
 		}
 	};
 
+	struct LocalScanResult {
+	public:
+		Array<String> ComicBooks;
+		bool HasFolders;
+		bool HasImages;
+
+		LocalScanResult()
+			: ComicBooks()
+			, HasFolders(false)
+			, HasImages(false)
+		{}
+	};
 
 	// Provider that looks for manga locally
 	class LocalMangaProvider : public MangaProvider {
@@ -58,13 +70,16 @@ namespace OvrMangaroll {
 				ext == ".hdr" || ext == ".pic");
 		}
 
+		LocalScanResult ScanDirectory(String dir, const Array<String> &files);
+		void AddComicBook(String file);
+
 		bool IsComicBook(String ext) {
 			ext = ext.ToLower();
 			return ext == ".cbr" || ext == ".cbz";
 		}
 	};
 
-
+	// Provides online services to fetch manga from
 	class MangaServiceProvider : public MangaProvider {
 	public:
 		MangaServiceProvider();

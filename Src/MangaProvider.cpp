@@ -49,6 +49,10 @@ namespace OvrMangaroll {
 					mangaPath = GetFullPath(SearchPaths, it->Second);
 					ExploreDirectory(mangaPath);
 				}
+				else if(IsComicBook(it->Second.GetExtension())) {
+					LOG("Found comic book: %s", it->Second.ToCStr());
+					AddComicBook(it->Second);
+				}
 			}
 			LOG("Done looking.");
 		}
@@ -64,38 +68,55 @@ namespace OvrMangaroll {
 		}
 	}
 
+	void LocalMangaProvider::AddComicBook(String file) {
+		ComicBook *manga = new ComicBook(file);
+		manga->UID = BuildUID(manga->Name);
+
+		LOG("Add comic book: %s", manga->Name.ToCStr());
+
+		MangaWrapper *wrapper = new MangaWrapper(manga);
+		wrapper->SetThumb(manga->GetThumb());
+		wrapper->Name = manga->Name;
+		_Mangas.PushBack(wrapper);
+	}
+
+	// Interprets a directory
+	// a) has folders -> directory is a manga with sub mangas
+	// b) has no folders but images -> directory is a manga
+	// *) 
 	void LocalMangaProvider::ExploreDirectory(String dir) {
+		// Create file list here already, to prevent doing it twice
 		Array<String> files = DirectoryFileList(dir.ToCStr());
 		LOG("Exploring directory: %s", dir.ToCStr());
-		bool isManga = false;
-		bool isContainer = false;
+		
+		LocalScanResult scan = ScanDirectory(dir, files);
 
-		// Try to parse as manga
-		for (int i = 0; i < files.GetSizeI(); i++) {
-			if (files[i].Right(1) == "/") {
-				// Found a container (folder)!
-				isManga = false;
-				isContainer = true;
-			}
+		LOG("Has Images: %d, Has Folders: %d, #Comic Books: %d", scan.HasImages, scan.HasFolders, scan.ComicBooks.GetSizeI());
 
-			if (!isContainer && IsSupportedExt(files[i].GetExtension())) {
-				isManga = true;
-			}
+		// Read comic books
+		for (int i = 0; i < scan.ComicBooks.GetSizeI(); i++) {
+			AddComicBook(scan.ComicBooks[i]);
+		}
 
-			if (IsComicBook(files[i].GetExtension())) {
-				ComicBook *manga = new ComicBook(files[i]);
-				manga->UID = BuildUID(manga->Name);
+		bool isManga = scan.HasImages && !scan.HasFolders;
+		if (scan.HasFolders) {
+			// This directory contains more than one manga, so add it as a provider
 
-				LOG("Add comic book: %s", manga->Name.ToCStr());
-
-				MangaWrapper *wrapper = new MangaWrapper(manga);
-				wrapper->SetThumb(manga->GetThumb());
-				wrapper->Name = manga->Name;
+			LocalMangaProvider *subProvider = new LocalMangaProvider(dir);
+			subProvider->LoadMore();
+			if (subProvider->HasManga()) {
+				MangaWrapper *wrapper = new MangaWrapper(subProvider);
+				wrapper->SetThumb(subProvider->GetFirstManga()->GetThumb());
+				wrapper->Name = ExtractDirectory(dir);
+				subProvider->UID = BuildUID(wrapper->Name);
 				_Mangas.PushBack(wrapper);
 			}
+			else {
+				delete subProvider;
+				// Give manga a second chance
+				isManga = scan.HasImages;
+			}
 		}
-		
-		LOG("Found... %s", isManga ? "Manga" : (isContainer ? "Container" : "Nothing"));
 
 		if (isManga) {
 			// This directory *is* a manga, add it to the provider
@@ -120,22 +141,30 @@ namespace OvrMangaroll {
 			wrapper->Name = manga->Name;
 			_Mangas.PushBack(wrapper);
 		}
-		else if (isContainer) {
-			// This directory contains more than one manga, so add it as a provider
+	}
 
-			LocalMangaProvider *subProvider = new LocalMangaProvider(dir);
-			subProvider->LoadMore();
-			if (subProvider->HasManga()) {
-				MangaWrapper *wrapper = new MangaWrapper(subProvider);
-				wrapper->SetThumb(subProvider->GetFirstManga()->GetThumb());
-				wrapper->Name = ExtractDirectory(dir);
-				subProvider->UID = BuildUID(wrapper->Name);
-				_Mangas.PushBack(wrapper);
+	LocalScanResult LocalMangaProvider::ScanDirectory(String dir, const Array<String> &files) {
+		LocalScanResult result;
+
+		LOG("Exploring directory: %s", dir.ToCStr());
+
+		// Try to parse as manga
+		for (int i = 0; i < files.GetSizeI(); i++) {
+			if (files[i].Right(1) == "/") {
+				// Found a container (folder)!
+				result.HasFolders = true;
 			}
-			else {
-				delete subProvider;
+
+			if (IsSupportedExt(files[i].GetExtension())) {
+				result.HasImages = true;
+			}
+
+			if (IsComicBook(files[i].GetExtension())) {
+				result.ComicBooks.PushBack(files[i]);
 			}
 		}
+
+		return result;
 	}
 
 	bool LocalMangaProvider::HasManga() {
