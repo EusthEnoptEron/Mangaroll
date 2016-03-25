@@ -8,8 +8,8 @@ LOCAL_SRC_FILES := libjpeg.a
 
 include $(PREBUILT_STATIC_LIBRARY)
 
-include $(CLEAR_VARS)
 
+include $(CLEAR_VARS)
 include ../../../../../cflags.mk
 
 LOCAL_MODULE			:= mangaroll
@@ -34,7 +34,8 @@ LOCAL_SRC_FILES			:= ../../../Src/Mangaroll.cpp \
 
 LOCAL_STATIC_LIBRARIES	:= vrsound vrmodel vrlocale vrgui vrappframework systemutils libovrkernel jpeg stbs
 LOCAL_SHARED_LIBRARIES	:= vrapi
-LOCAL_STATIC_LIBRARIES  += vrcapture
+LOCAL_STATIC_LIBRARIES += vrcapture
+LOCAL_STATIC_LIBRARIES += freetype
 
 include $(BUILD_SHARED_LIBRARY)
 
@@ -49,5 +50,6 @@ $(call import-module,VrAppSupport/VrModel/Projects/AndroidPrebuilt/jni)
 $(call import-module,VrAppSupport/VrSound/Projects/AndroidPrebuilt/jni)
 
 
+include ../../Lib/freetype-2.6/freetype/Android.mk
 include ../../../../../VrCapture/Projects/Android/jni/Android.mk
 include ../../../../../VrAppSupport/VrGUI/Projects/Android/jni/Android.mk
