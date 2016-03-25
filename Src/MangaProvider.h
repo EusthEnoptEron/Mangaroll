@@ -29,12 +29,12 @@ namespace OvrMangaroll {
 
 	struct LocalScanResult {
 	public:
-		Array<String> ComicBooks;
+		Array<String> Archives;
 		bool HasFolders;
 		bool HasImages;
 
 		LocalScanResult()
-			: ComicBooks()
+			: Archives()
 			, HasFolders(false)
 			, HasImages(false)
 		{}
@@ -71,11 +71,10 @@ namespace OvrMangaroll {
 		}
 
 		LocalScanResult ScanDirectory(String dir, const Array<String> &files);
-		void AddComicBook(String file);
+		void AddArchivedManga(String file);
 
-		bool IsComicBook(String ext) {
-			ext = ext.ToLower();
-			return ext == ".cbr" || ext == ".cbz";
+		bool IsArchivedManga(String ext) {
+			return ArchivedManga::IsArchiveFile(ext);
 		}
 	};
 

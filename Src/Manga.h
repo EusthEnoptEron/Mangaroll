@@ -75,18 +75,38 @@ namespace OvrMangaroll {
 		int _Page;
 	};
 
-	class ComicBook : public Manga {
+
+	enum ArchiveType {
+		ARCHIVE_ZIP,
+		ARCHIVE_RAR
+	};
+	class ArchivedManga : public Manga {
 	public:
-		ComicBook(String filePath);
-		virtual ~ComicBook() {}
+		ArchivedManga(String filePath);
+		virtual ~ArchivedManga() {}
 		String GetThumb() {
 			return _Count > 0 ? GetPage(0).GetPath() : "";
 		}
 		bool IsValid() { return _Valid; }
+
+		static bool IsArchiveFile(String ext) {
+			return IsRAR(ext) || IsZIP(ext);
+		}
+		static bool IsRAR(String ext) {
+			return ext.CompareNoCase(".rar") == 0
+				|| ext.CompareNoCase(".cbr") == 0;
+		}
+		static bool IsZIP(String ext) {
+			return ext.CompareNoCase(".zip") == 0
+				|| ext.CompareNoCase(".cbz") == 0
+				|| ext.CompareNoCase(".epub") == 0;
+		}
 	private:
-		void PopulateFileList();
+		
+		void Populate();
 		String _Path;
 		bool _Valid;
+		ArchiveType _ArchiveType;
 
 	};
 

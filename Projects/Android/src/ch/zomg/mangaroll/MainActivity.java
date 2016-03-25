@@ -17,26 +17,11 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.oculus.vrappframework.VrActivity;
-import junrar.Archive;
-import junrar.exception.RarException;
-import junrar.impl.FileVolumeManager;
-import junrar.rarfile.FileHeader;
 
-import org.apache.commons.io.IOUtils;
-
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
 import java.util.regex.Pattern;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 public class MainActivity extends VrActivity {
 	public static final String TAG = "Mangaroll";
@@ -141,124 +126,51 @@ public class MainActivity extends VrActivity {
 	}
 
 	/**
-	 * Gets the list of image files within an archive.
-	 *
+	 * Loads the content of an archived file.
+	 * Format: /^(rar|zip)://.+?[|].+$/
 	 * @param path
 	 * @return
 	 */
-	public static String[] GetArchiveFileList(String path) {
-
-		if (path.endsWith(".cbz")) {
-			return GetZipFileList(path);
-		} else if (path.endsWith(".cbr")) {
-			return GetRarFileList(path);
-		}
-		return null;
-	}
-
 	public static byte[] LoadArchivedFile(String path) {
 		String type = path.substring(0, 3);
-		int splitPos = path.indexOf(type.equals("rar") ? ".cbr" : ".cbz");
+		int splitPos = path.indexOf("|");
 		if(splitPos >= 0) {
-			splitPos += 4;
 			String archiveFile = path.substring(6, splitPos);
-			String relativePath = path.substring(splitPos+1); // +1 because of slash
+			String relativePath = path.substring(splitPos+1); // +1 skip pipe
 
+			AbstractArchive archive;
 			if(type.equals("rar")) {
-				return unrar(archiveFile, relativePath);
-			} else {
-				return unzip(archiveFile, relativePath);
+				archive = new RarArchive(archiveFile);
 			}
+			else {
+				archive = new ZipArchive(archiveFile);
+			}
+			return archive.getContent(relativePath);
 		} else {
 			return new byte[0];
 		}
 	}
 
-	private static byte[] unzip(String archiveFile, String relativePath) {
-		Log.i(TAG,"Unpacking "+ relativePath);
-		try(ZipFile zipFile = new ZipFile(archiveFile)) {
-			ZipEntry entry = zipFile.getEntry(relativePath);
+	public static String[] GetZipFileList(String path) {
+		AbstractArchive archive = new ZipArchive(path);
+		return archive.getImageList();
+	}
 
-			try(InputStream stream = zipFile.getInputStream(entry)) {
-				byte[] file = IOUtils.toByteArray(stream);
-				Log.i(TAG, "File is " + file.length + " bytes long!");
-				return file;
-			}
-		} catch (IOException e) {
-			Log.e(TAG, e.getMessage());
-			return new byte[0];
-		}
+	public static String[] GetRarFileList(String path) {
+		AbstractArchive archive = new RarArchive(path);
+		return archive.getImageList();
 	}
 
 
-	private static byte[] unrar(String archiveFile, String relativePath) {
-		File f = new File(archiveFile);
-
-		try(Archive a = new Archive(new FileVolumeManager(f));
-				ByteArrayOutputStream output = new ByteArrayOutputStream() ) {
-			FileHeader fh = a.nextFileHeader();
-			while (fh != null) {
-				String name = fh.getFileNameString().trim();
-				if (name.equals(relativePath)) {
-					a.extractFile(fh, output);
-					return  output.toByteArray();
-				}
-				fh = a.nextFileHeader();
-			}
-		} catch (RarException e) {
-			Log.e(TAG, e.getMessage());
-		} catch (IOException e) {
-			Log.e(TAG, e.getMessage());
-		}
-		return null;
+	public static String GetZipName(String path) {
+		AbstractArchive archive = new ZipArchive(path);
+		return archive.getName();
 	}
 
-
-	private static String[] GetZipFileList(String path) {
-		List<String> fileList = new ArrayList<String>();
-		try(ZipFile zipFile = new ZipFile(path)) {
-			Enumeration<? extends ZipEntry> entries = zipFile.entries();
-			while (entries.hasMoreElements()) {
-				ZipEntry zipEntry = entries.nextElement();
-				if(!zipEntry.isDirectory()) {
-					String imgPath = zipEntry.getName();
-					if(imgPath.toLowerCase().endsWith(".jpg") || imgPath.toLowerCase().endsWith(".png")) {
-						fileList.add(imgPath);
-					}
-				}
-			}
-		} catch (IOException e) {
-			Log.e(TAG, e.getMessage());
-			return null;
-		}
-		return fileList.toArray(new String[fileList.size()]);
+	public static String GetRarName(String path) {
+		AbstractArchive archive = new RarArchive(path);
+		return archive.getName();
 	}
-
-	private static String[] GetRarFileList(String path) {
-		List<String> fileList = new ArrayList<String>();
-
-		File f = new File(path);
-		try(Archive a = new Archive(new FileVolumeManager(f))) {
-			FileHeader fh = a.nextFileHeader();
-			while(fh != null) {
-				String name = fh.getFileNameString().trim();
-
-				if(name.toLowerCase().endsWith(".jpg") || name.toLowerCase().endsWith(".png")) {
-					fileList.add(fh.getFileNameString().trim());
-				}
-
-				fh = a.nextFileHeader();
-			}
-			return fileList.toArray(new String[fileList.size()]);
-		} catch (RarException e) {
-			Log.e(TAG, e.getMessage());
-			return null;
-		} catch (IOException e) {
-			Log.e(TAG, e.getMessage());
-			return null;
-		}
-	}
-
 
 
 	@Override

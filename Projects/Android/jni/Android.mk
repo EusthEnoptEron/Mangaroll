@@ -38,6 +38,7 @@ LOCAL_STATIC_LIBRARIES  += vrcapture
 
 include $(BUILD_SHARED_LIBRARY)
 
+#$(call import-module,3rdParty/stb/build/android/jni)
 $(call import-module,LibOVRKernel/Projects/AndroidPrebuilt/jni)
 $(call import-module,VrApi/Projects/AndroidPrebuilt/jni)
 $(call import-module,VrAppSupport/SystemUtils/Projects/AndroidPrebuilt/jni)
@@ -46,6 +47,7 @@ $(call import-module,VrAppFramework/Projects/AndroidPrebuilt/jni)
 $(call import-module,VrAppSupport/VrLocale/Projects/AndroidPrebuilt/jni)
 $(call import-module,VrAppSupport/VrModel/Projects/AndroidPrebuilt/jni)
 $(call import-module,VrAppSupport/VrSound/Projects/AndroidPrebuilt/jni)
+
 
 include ../../../../../VrCapture/Projects/Android/jni/Android.mk
 include ../../../../../VrAppSupport/VrGUI/Projects/Android/jni/Android.mk

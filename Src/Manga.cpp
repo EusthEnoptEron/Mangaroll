@@ -269,35 +269,40 @@ namespace OvrMangaroll {
 		self->_Loading = false;
 	}
 
-	// ################# COMIC BOOK ##############
-	ComicBook::ComicBook(String filePath)
+	// ################# ArchivedManga ##############
+	ArchivedManga::ArchivedManga(String filePath)
 		: Manga()
 		, _Path(filePath)
 		, _Valid(true)
 	{
-		Name = ExtractFileBase(filePath);
-		PopulateFileList();
+		Populate();
 	}
 
-	void ComicBook::PopulateFileList() {
+
+	void ArchivedManga::Populate() {
+		_ArchiveType = IsZIP(_Path.GetExtension()) ? ARCHIVE_ZIP : ARCHIVE_RAR;
+		String protocol = _ArchiveType == ARCHIVE_ZIP ? "zip" : "rar";
+
 		const ovrJava *java = AppState::Instance->GetJava();
 		JNIEnv* env = java->Env;
 
 		JavaClass clazz(env, env->GetObjectClass(java->ActivityObject));
 		JavaString pathArg(env, _Path.ToCStr());
 
-		jmethodID getFileList = env->GetStaticMethodID(clazz.GetJClass(), "GetArchiveFileList", "(Ljava/lang/String;)[Ljava/lang/String;");
+		jmethodID getFileList = env->GetStaticMethodID(clazz.GetJClass(), _ArchiveType == ARCHIVE_ZIP ? "GetZipFileList" : "GetRarFileList", "(Ljava/lang/String;)[Ljava/lang/String;");
+		jmethodID getName = env->GetStaticMethodID(clazz.GetJClass(), _ArchiveType == ARCHIVE_ZIP ? "GetZipName" : "GetRarName", "(Ljava/lang/String;)Ljava/lang/String;");
 		jobjectArray fileList = (jobjectArray)(env->CallStaticObjectMethod(clazz.GetJClass(), getFileList, pathArg.GetJString()));
-		
+
 		if (fileList != NULL) {
+			JavaUTFChars name = JavaUTFChars(env, (jstring)(env->CallStaticObjectMethod(clazz.GetJClass(), getName, pathArg.GetJString())));
+			Name = name.ToStr();
 
 			int length = env->GetArrayLength(fileList);
 			for (int i = 0; i < length; i++) {
 				JavaUTFChars file(env, (jstring)env->GetObjectArrayElement(fileList, i));
 
 				// Build page with custom protocol
-				String protocol = _Path.Right(3).ToLower() == "cbr" ? "rar" : "zip";
-				Page *page = new Page(protocol + "://" + _Path + "/" + file);
+				Page *page = new Page(protocol + "://" + _Path + "|" + file);
 				AddPage(page);
 			}
 
@@ -308,9 +313,6 @@ namespace OvrMangaroll {
 			_Valid = false;
 		}
 	}
-
-
-
 
 	MangaWrapper::MangaWrapper(MangaProvider *provider)
 		: _Manga(NULL)

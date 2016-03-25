@@ -49,9 +49,9 @@ namespace OvrMangaroll {
 					mangaPath = GetFullPath(SearchPaths, it->Second);
 					ExploreDirectory(mangaPath);
 				}
-				else if(IsComicBook(it->Second.GetExtension())) {
+				else if (IsArchivedManga(it->Second.GetExtension())) {
 					LOG("Found comic book: %s", it->Second.ToCStr());
-					AddComicBook(GetFullPath(SearchPaths, it->Second));
+					AddArchivedManga(GetFullPath(SearchPaths, it->Second));
 				}
 			}
 			LOG("Done looking.");
@@ -68,8 +68,8 @@ namespace OvrMangaroll {
 		}
 	}
 
-	void LocalMangaProvider::AddComicBook(String file) {
-		ComicBook *manga = new ComicBook(file);
+	void LocalMangaProvider::AddArchivedManga(String file) {
+		ArchivedManga *manga = new ArchivedManga(file);
 		manga->UID = BuildUID(manga->Name);
 
 		LOG("Add comic book: %s", manga->Name.ToCStr());
@@ -91,11 +91,11 @@ namespace OvrMangaroll {
 		
 		LocalScanResult scan = ScanDirectory(dir, files);
 
-		LOG("Has Images: %d, Has Folders: %d, #Comic Books: %d", scan.HasImages, scan.HasFolders, scan.ComicBooks.GetSizeI());
+		LOG("Has Images: %d, Has Folders: %d, #Comic Books: %d", scan.HasImages, scan.HasFolders, scan.Archives.GetSizeI());
 
 		// Read comic books
-		for (int i = 0; i < scan.ComicBooks.GetSizeI(); i++) {
-			AddComicBook(scan.ComicBooks[i]);
+		for (int i = 0; i < scan.Archives.GetSizeI(); i++) {
+			AddArchivedManga(scan.Archives[i]);
 		}
 
 		bool isManga = scan.HasImages && !scan.HasFolders;
@@ -159,8 +159,8 @@ namespace OvrMangaroll {
 				result.HasImages = true;
 			}
 
-			if (IsComicBook(files[i].GetExtension())) {
-				result.ComicBooks.PushBack(files[i]);
+			if (IsArchivedManga(files[i].GetExtension())) {
+				result.Archives.PushBack(files[i]);
 			}
 		}
 
