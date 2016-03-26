@@ -13,6 +13,8 @@
 #include "GazeUpdateComponent.h"
 #include "UI\UIButton.h"
 #include "Fader.h"
+#include "Config.h"
+#include "MangaSettingsView.h"
 
 using namespace OVR;
 namespace OvrMangaroll {
@@ -48,21 +50,26 @@ namespace OvrMangaroll {
 		void SetManga(MangaWrapper *manga);
 		MangaWrapper *GetManga();
 		void Update();
+		bool IsTitleVisible() { return _Title->GetVisible(); }
+		void UpdateProgress();
+
+	public:
 		float Position;
 		int Index;
 		int Width;
 		int Height;
 		int Border;
-		bool IsTitleVisible() { return _Title->GetVisible(); }
+	private:
+		void Init(void);
+		void UpdateCoverAspectRatio();
 	private:
 		MangaSelectorComponent *_Selector;
 		MangaWrapper *_Manga;
-		void Init(void);
-		void UpdateCoverAspectRatio();
 		UIImage *_Background;
 		UILabel *_Title;
 		UIImage *_Cover;
 		UIImage *_Preloader;
+		UIScrubBar *_Progressbar;
 
 		UITexture *_CoverTexture;
 		ClickableComponent *_Component;
@@ -95,6 +102,8 @@ namespace OvrMangaroll {
 			SetProvider(*(_Providers.Pop()), true);
 			_FadeDir = -1;
 		}
+
+		void UpdateGUI();
 
 		// Constants because I'm lazy
 		static int const COLS = 10;

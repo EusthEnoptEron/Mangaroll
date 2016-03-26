@@ -188,6 +188,7 @@ namespace OvrMangaroll {
 
 		_Fader.StartFadeIn();
 		_AngleOnOpen = _Mangaroll.Carousel.GetAngle();
+		_Selector->UpdateGUI();
 	}
 
 	void MangaSelectionView::OnClose() {
@@ -315,6 +316,7 @@ namespace OvrMangaroll {
 			this->GetMenuObject()->SetText(manga->Name.ToCStr());
 		}
 
+		UpdateProgress();
 		/*VRMenuSurface & surf = _Cover->GetMenuObject()->GetSurface(0);
 		surf.SetClipUVs();*/
 		//_Cover->SetLocalPosition( Vector3f(25,-25,0) );
@@ -349,6 +351,21 @@ namespace OvrMangaroll {
 		}
 	}
 
+	void MangaPanel::UpdateProgress() {
+		if (_Manga == NULL || _Manga->IsContainer()) {
+			// Remove progress bar
+			_Progressbar->SetVisible(false);
+		}
+		else {
+			// Manga is a manga
+			MangaInfo info = AppState::Conf->GetProgress(_Manga->GetManga());
+			float progress = Alg::Clamp(info.PagesTotal <= 0 ? 0 : float(info.PagesRead) / float(info.PagesTotal), 0.0f, 1.0f);
+
+			_Progressbar->SetVisible(true);
+			_Progressbar->GetComponent().SetProgress(progress);
+		}
+	}
+
 	void MangaPanel::Init(void) {
 		this->AddFlags(VRMENUOBJECT_RENDER_HIERARCHY_ORDER);
 
@@ -375,6 +392,13 @@ namespace OvrMangaroll {
 		_Title->SetFontParms(VRMenuFontParms(true, true, false, false, true, 0.5f, 0.4f, 0.3));
 		_Title->AddFlags(VRMENUOBJECT_DONT_HIT_ALL);
 		_Title->SetVisible(false);
+
+		_Progressbar = new UIScrubBar(GuiSys, Width - Border * 2, 10.0f);
+		_Progressbar->AddToMenu(Menu, this);
+		_Progressbar->SetFillColor(Vector4f(0.6f, 1.0f, 0.6f, 1.0f));
+		_Progressbar->SetLocalPosition(Vector3f(0, -Height * 0.3f * VRMenuObject::DEFAULT_TEXEL_SCALE, 0.05f));
+		_Progressbar->SetFlags(VRMENUOBJECT_DONT_HIT_ALL);
+		_Progressbar->SetVisible(false);
 
 
 		_Cover = new UIImage(GuiSys);
@@ -582,6 +606,11 @@ namespace OvrMangaroll {
 	void MangaSelectorComponent::SelectManga(Manga *manga) {
 		if (_Callback != NULL) {
 			_Callback(manga, _CallbackObject);
+		}
+	}
+	void MangaSelectorComponent::UpdateGUI() {
+		for (int i = 0; i < _PanelSets[_Front].GetSizeI(); i++) {
+			_PanelSets[_Front][i]->UpdateProgress();
 		}
 	}
 
