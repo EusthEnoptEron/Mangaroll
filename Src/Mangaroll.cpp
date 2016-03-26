@@ -119,7 +119,7 @@ void Mangaroll::OneTimeInit( const char * fromPackage, const char * launchIntent
 	String fontName;
 	GetLocale().GetString( "@string/font_name", "efigs.fnt", fontName );
 	GuiSys->Init( this->app, *SoundEffectPlayer, fontName.ToCStr(), &app->GetDebugLines() );
-	GuiSys->GetDefaultFont().Load("", "assets/SNsanafonkaku.fnt");
+	GuiSys->GetDefaultFont().Load("", "assets/mangaroll.fnt");
 
 	Carousel.OneTimeInit(launchIntentURI);
 	MangaSettingsMenu.OneTimeInit(launchIntentURI);
