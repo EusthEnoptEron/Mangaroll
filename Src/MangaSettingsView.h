@@ -77,8 +77,6 @@ namespace OvrMangaroll {
 		int _Height;
 		ScrubBarComponent _ProgressComponent;
 		void Init(void);
-		UITexture _BGTexture;
-		UITexture _FGTexture;
 
 		UIImage *_BGImage;
 		UIImage *_FGImage;

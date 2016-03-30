@@ -60,7 +60,8 @@ namespace OvrMangaroll {
 		UITexture Preloader;
 		UITexture Panel;
 		UITexture Fill;
-		
+		UITexture ProgressBG;
+
 		static Assets &Instance() {
 			if (_Instance == NULL) {
 				_Instance = new Assets();
@@ -75,6 +76,7 @@ namespace OvrMangaroll {
 			Preloader.LoadTextureFromApplicationPackage("assets/preloader.png");
 			Panel.LoadTextureFromApplicationPackage("assets/container.png");
 			Fill.LoadTextureFromApplicationPackage("assets/fill.png");
+			ProgressBG.LoadTextureFromApplicationPackage("assets/progress_bg.png");
 		}
 		static Assets *_Instance;
 	};

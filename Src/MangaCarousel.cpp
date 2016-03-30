@@ -62,6 +62,7 @@ namespace OvrMangaroll {
 		materialParms.UseSrgbTextureFormats = false;
 		Scene.LoadWorldModelFromApplicationPackage(scenePath, materialParms);
 	}
+
 	void MangaCarousel::OneTimeShutdown(){
 	}
 
@@ -169,6 +170,7 @@ namespace OvrMangaroll {
 		}
 		CurrentManga = manga; 
 		manga->Init();
+		
 		CurrentManga->Update(_Angle, true);
 		CurrentManga->SetProgress(AppState::Conf->GetProgress(manga).PagesRead);
 		LOG("Loaded manga: %s at p%d", manga->Name.ToCStr(), AppState::Conf->GetProgress(manga).PagesRead);

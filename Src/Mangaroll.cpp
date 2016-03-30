@@ -90,7 +90,7 @@ Mangaroll::~Mangaroll()
 void Mangaroll::Configure( ovrSettings & settings )
 {
 	settings.PerformanceParms.CpuLevel = 0;
-	settings.PerformanceParms.GpuLevel = 2;
+	settings.PerformanceParms.GpuLevel = 3;
 
 	settings.EyeBufferParms.colorFormat = COLOR_8888;
 	settings.EyeBufferParms.multisamples = 2;

@@ -106,9 +106,9 @@ namespace OvrMangaroll {
 		void UpdateGUI();
 
 		// Constants because I'm lazy
-		static int const COLS = 10;
+		static int const COLS = 8;
 		static int const ROWS = 2;
-		static int const ANGLE = 120; // Degrees
+		static int const ANGLE = 100; // Degrees
 		static int const MARGIN = 20;
 
 		// Number of visible panels on either side

@@ -438,8 +438,6 @@ namespace OvrMangaroll {
 		, _Width(width)
 		, _Height(height)
 		, _ProgressComponent()
-		, _BGTexture()
-		, _FGTexture()
 		, _BGImage(NULL)
 		, _FGImage(NULL)
 	{
@@ -465,13 +463,9 @@ namespace OvrMangaroll {
 	}
 
 	void UIScrubBar::Init(void) {
-
-		_BGTexture.LoadTextureFromApplicationPackage("assets/progress_bg.png");
-		_FGTexture.LoadTextureFromApplicationPackage("assets/fill.png");
-
 		_BGImage = new UIImage(GuiSys);
 		_BGImage->AddToMenu(Menu, this);
-		_BGImage->SetImage(0, eSurfaceTextureType::SURFACE_TEXTURE_DIFFUSE, _BGTexture, _Width, _Height);
+		_BGImage->SetImage(0, eSurfaceTextureType::SURFACE_TEXTURE_DIFFUSE, Assets::Instance().ProgressBG, _Width, _Height);
 		_BGImage->SetLocalPosition(Vector3f(0, -0.05f, 0));
 		_BGImage->AddComponent(&_ProgressComponent);
 		_BGImage->GetMenuObject()->AddFlags(VRMENUOBJECT_RENDER_HIERARCHY_ORDER);
@@ -479,7 +473,7 @@ namespace OvrMangaroll {
 		_FGImage = new UIImage(GuiSys);
 		_FGImage->AddToMenu(Menu, _BGImage);
 		_FGImage->SetLocalPosition(PixelPos(-3, 0, 1));
-		_FGImage->SetImage(0, SURFACE_TEXTURE_ADDITIVE, _FGTexture, 0, 0);
+		_FGImage->SetImage(0, SURFACE_TEXTURE_ADDITIVE, Assets::Instance().Fill, 0, 0);
 		_FGImage->GetMenuObject()->AddFlags(VRMenuObjectFlags_t(VRMENUOBJECT_DONT_HIT_ALL));
 
 		_ProgressComponent.SetWidgets(Menu, _BGImage, _FGImage, NULL, NULL, _Width - 5, _Height - 5);
@@ -497,8 +491,6 @@ namespace OvrMangaroll {
 	void UIScrubBar::SetIndicators(UILabel *valueIndicator, UILabel *seekIndicator) {
 		_ProgressComponent.SetWidgets(Menu, _BGImage, _FGImage, valueIndicator, seekIndicator, _Width, _Height);
 	}
-
-
 
 	ScrubBarComponent::ScrubBarComponent() :
 		VRMenuComponent(VRMenuEventFlags_t(VRMENU_EVENT_TOUCH_DOWN) |
