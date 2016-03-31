@@ -49,4 +49,9 @@ public class MangaFetcher extends Fetcher {
             return new String[0];
         }
     }
+
+    @Override
+    public boolean isContainerProvider() {
+        return false;
+    }
 }

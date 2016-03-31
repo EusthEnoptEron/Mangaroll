@@ -66,4 +66,9 @@ public class ContainerFetcher extends Fetcher {
             return new Fetcher[0];
         }
     }
+
+    @Override
+    public boolean isContainerProvider() {
+        return true;
+    }
 }

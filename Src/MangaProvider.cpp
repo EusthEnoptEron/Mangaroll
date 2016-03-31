@@ -207,10 +207,24 @@ namespace OvrMangaroll {
 						while (!serviceReader.IsEndOfArray()) {
 							JsonReader elementReader(serviceReader.GetNextArrayElement());
 							if (elementReader.IsValid() && elementReader.IsObject()) {
-								RemoteMangaProvider *provider = new RemoteMangaProvider(
-									elementReader.GetChildStringByName("browseUrl"),
-									elementReader.GetChildStringByName("showUrl")
+								AbstractRemoteMangaProvider *provider = NULL;
+								const JSON *dynamic = elementReader.GetChildByName("dynamic");
+
+								if (dynamic != NULL) {
+									// Get fetcher
+									provider = new DynamicMangaProvider(
+										AppState::Instance->GetJava()->Env,
+										JSON2Fetcher(dynamic)
 									);
+								}
+								else {
+
+									provider = new RemoteMangaProvider(
+										elementReader.GetChildStringByName("browseUrl"),
+										elementReader.GetChildStringByName("showUrl")
+										);
+								}
+
 								provider->Name = elementReader.GetChildStringByName("name");
 								provider->UID = BuildUID(provider->Name);
 								MangaWrapper *wrapper = new MangaWrapper(provider);
@@ -228,21 +242,26 @@ namespace OvrMangaroll {
 		}
 	}
 
-	// ############## REMOTE PROVIDER IMPLEMENTATION ###########
+	jobject MangaServiceProvider::JSON2Fetcher(const JSON *json) {
+		JNIEnv *env = AppState::Instance->GetJava()->Env;
+		JavaClass clazz(env, env->FindClass("ch/zomg/mangaroll/query/Fetcher"));
+		jmethodID parse = env->GetStaticMethodID(clazz.GetJClass, "getInitialFetcher", "(Ljava/lang/String;)Lch/zomg/mangaroll/query/Fetcher;");
+		JavaString jsonString(env, ((JSON *)json)->PrintValue(10, false));
+		return env->CallStaticObjectMethod(clazz.GetJClass(), parse, jsonString.GetJString());
+	}
 
-	RemoteMangaProvider::RemoteMangaProvider(String browseUrl, String showUrl)
+	AbstractRemoteMangaProvider::AbstractRemoteMangaProvider()
 		: MangaProvider()
 		, _Loading(false)
 		, _HasMore(true)
 		, _Page(0)
-		, _BrowseUrl(browseUrl)
-		, _ShowUrl(showUrl)
 		, _Mangas()
 	{
+
 	}
 
 	// Acts as update function
-	bool RemoteMangaProvider::IsLoading() {
+	bool AbstractRemoteMangaProvider::IsLoading() {
 		if (_Loading && _DoneReading) {//_Thread->IsFinished()) {
 			_Loading = false;
 			_DoneReading = false;
@@ -256,17 +275,32 @@ namespace OvrMangaroll {
 	}
 
 
-	void RemoteMangaProvider::LoadMore() {
+	void AbstractRemoteMangaProvider::LoadMore() {
+		this->OnLoadMore();
+
+		_Loading = true;
+		_DoneReading = false;
+		// In case thread fails. Isn't used while loading.
+		_HasMore = false;
+	}
+
+	// ############## REMOTE PROVIDER IMPLEMENTATION ###########
+
+	RemoteMangaProvider::RemoteMangaProvider(String browseUrl, String showUrl)
+		: AbstractRemoteMangaProvider()
+		, _BrowseUrl(browseUrl)
+		, _ShowUrl(showUrl)
+	{
+	}
+
+
+	void RemoteMangaProvider::OnLoadMore() {
 		String url = ParamString::InsertParam(_BrowseUrl.ToCStr(), ParamString::PARAM_PAGE, _Page);
 		url = ParamString::InsertParam(url.ToCStr(), ParamString::PARAM_ID, Id.ToCStr());
 
 		Web::Download(url,
 			RemoteMangaProvider::FetchFn
 			, this);
-		_Loading = true;
-		_DoneReading = false;
-		// In case thread fails. Isn't used while loading.
-		_HasMore = false;
 	}
 
 
@@ -326,5 +360,71 @@ namespace OvrMangaroll {
 
 		provider->_DoneReading = true;
 	}
-	
+
+	// ############## DYNAMIC PROVIDER IMPLEMENTATION ###########
+	DynamicMangaProvider::DynamicMangaProvider(JNIEnv *env,jobject fetcher)
+		: AbstractRemoteMangaProvider()
+		, _Fetcher(env, fetcher)
+	{
+		JavaClass clazz(env, env->GetObjectClass(fetcher));
+		jmethodID getIdMethod = env->GetMethodID(clazz.GetJClass(), "getID", "()Ljava/lang/String;");
+		JavaUTFChars idResult(env, (jstring)env->CallObjectMethod(_Fetcher.GetJObject(), getIdMethod));
+
+		this->Id = idResult.ToStr();
+	}
+
+	void DynamicMangaProvider::OnLoadMore() {
+		_Thread = Thread(FetchFn, this);
+		_Thread.Start();
+	}
+
+	void *DynamicMangaProvider::FetchFn(Thread *thread, void *p) {
+		// Prepare
+		DynamicMangaProvider *self = (DynamicMangaProvider *)p;
+		const ovrJava *java = AppState::Instance->GetJava();
+		JNIEnv *env = java->Env;
+		ovr_AttachCurrentThread(java->Vm, &env, NULL);
+
+		JavaClass clazz(env, env->GetObjectClass(self->_Fetcher.GetJObject()));
+		jmethodID isContainerProviderMethod = env->GetMethodID(clazz.GetJClass(), "isContainerProvider", "()Z");
+		jmethodID fetchMethod = env->GetMethodID(clazz.GetJClass(), "fetch", "()[Lch/zomg/mangaroll/query/Fetcher;");
+		jmethodID getNameMethod = env->GetMethodID(clazz.GetJClass(), "getName", "()Ljava/lang/String;");
+		jmethodID getThumbMethod = env->GetMethodID(clazz.GetJClass(), "getThumb", "()Ljava/lang/String;");
+		jmethodID hasMoreMethod = env->GetMethodID(clazz.GetJClass(), "hasMore", "()Z");
+
+
+		// Do work
+		jobjectArray list = (jobjectArray)(env, env->CallObjectMethod(self->_Fetcher.GetJObject(), fetchMethod));
+		if (list != NULL) {
+			// List is OK, let's collect those fetchers then!
+			int length = env->GetArrayLength(list);
+			for (int i = 0; i < length; i++) {
+				JavaObject childFetcher(env, env->GetObjectArrayElement(list, i));
+				bool containerType = env->CallBooleanMethod(childFetcher.GetJObject(), isContainerProviderMethod);
+				MangaWrapper * wrapper = NULL;
+				if (containerType) {
+					DynamicMangaProvider *child = new DynamicMangaProvider(env, childFetcher.GetJObject());
+					wrapper = new MangaWrapper(child);
+					child->UID = self->BuildUID(child->Id);
+					wrapper->Name = JavaUTFChars(env, (jstring)env->CallObjectMethod(child->_Fetcher.GetJObject(), getNameMethod)).ToStr();
+					//child->Name = wrapper->Name;
+					wrapper->SetThumb(JavaUTFChars(env, (jstring)env->CallObjectMethod(child->_Fetcher.GetJObject(), getThumbMethod)).ToStr());
+					self->_MangasBuffer.PushBack(wrapper);
+				}
+				else {
+					// ... TODO
+				}
+
+			}
+			
+			self->_HasMore = env->CallBooleanMethod(self->_Fetcher.GetJObject(), hasMoreMethod);
+
+			env->DeleteLocalRef(list);
+		}
+
+
+		// Clean up
+		ovr_DetachCurrentThread(java->Vm);
+		self->_DoneReading = true;
+	}
 }

@@ -93,39 +93,64 @@ namespace OvrMangaroll {
 		virtual void LoadMore();
 	private:
 		MangaServiceProvider(const MangaServiceProvider &);
-
+		jobject JSON2Fetcher(const JSON*);
 		bool _Initialized;
 		Array<MangaWrapper *> _Services;
 	};
 
-	class RemoteMangaProvider : public MangaProvider {
+	class AbstractRemoteMangaProvider : public MangaProvider {
 	public:
-		RemoteMangaProvider(String browseUrl, String showUrl);
-		virtual ~RemoteMangaProvider() {}
-
-		// Implement
 		virtual bool HasMore() { return _HasMore; }
 		virtual MangaWrapper *At(int i) { return _Mangas.At(i); }
 		virtual int GetCurrentSize() { return _Mangas.GetSizeI(); }
-
 		virtual bool IsLoading();
 		virtual void LoadMore();
 		String Name;
-	private:
-		RemoteMangaProvider(const RemoteMangaProvider &);
 
+	protected:
+		AbstractRemoteMangaProvider();
 
 		bool _Loading;
 		bool _HasMore;
 		int _Page;
-		String _BrowseUrl;
-		String _ShowUrl;
+
+		// Do your work in a thread, fill _MangasBuffer, set _HasMore accordingly and, finally, set _DoneLoading to true.
+		virtual void OnLoadMore() = 0;
+
 		bool _DoneReading;
 		Array<MangaWrapper *> _Mangas;
 		Array<MangaWrapper *> _MangasBuffer;
+	};
 
-		
+	class RemoteMangaProvider : public AbstractRemoteMangaProvider {
+	public:
+		RemoteMangaProvider(String browseUrl, String showUrl);
+		virtual ~RemoteMangaProvider() {}
+
+	protected:
+		virtual void OnLoadMore();
+
+	private:
+		RemoteMangaProvider(const RemoteMangaProvider &);
+
+		String _BrowseUrl;
+		String _ShowUrl;
+
 		static void FetchFn(void *buffer, int length, void *target);
+	};
+
+	class DynamicMangaProvider : public AbstractRemoteMangaProvider {
+	public:
+		DynamicMangaProvider(JNIEnv *, jobject _Fetcher);
+		virtual ~DynamicMangaProvider() {}
+	protected:
+		virtual void OnLoadMore();
+	private:
+		JavaGlobalObject _Fetcher;
+		Thread _Thread;
+		DynamicMangaProvider(const DynamicMangaProvider &);
+
+		static void *FetchFn(Thread *thread, void *p);
 	};
 
 }

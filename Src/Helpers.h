@@ -97,4 +97,52 @@ namespace OvrMangaroll {
 			return InsertParam(source, paramName, String::Format("%d", value).ToCStr());
 		}
 	};
+
+
+	//==============================================================
+	// JavaObject
+	//
+	// Releases a java object global reference on destruction.
+	//==============================================================
+	class JavaGlobalObject
+	{
+	public:
+		JavaGlobalObject(JNIEnv * jni_, jobject const object_) :
+			Jni(jni_),
+			Object(object_)
+		{
+			OVR_ASSERT(Jni != NULL);
+			Object = jni_->NewGlobalRef(object_);
+		}
+		~JavaGlobalObject()
+		{
+#if defined( OVR_OS_ANDROID )
+			if (Jni->ExceptionOccurred())
+			{
+				LOG("JNI exception before DeleteLocalRef!");
+				Jni->ExceptionClear();
+			}
+			OVR_ASSERT(Jni != NULL && Object != NULL);
+			Jni->DeleteGlobalRef(Object);
+			if (Jni->ExceptionOccurred())
+			{
+				LOG("JNI exception occured calling DeleteLocalRef!");
+				Jni->ExceptionClear();
+			}
+#endif
+			Jni = NULL;
+			Object = NULL;
+		}
+
+		jobject			GetJObject() const { return Object; }
+
+		JNIEnv *		GetJNI() const { return Jni; }
+
+	protected:
+		void			SetJObject(jobject const & obj) { Object = obj; }
+
+	private:
+		JNIEnv *		Jni;
+		jobject			Object;
+	};
 }
