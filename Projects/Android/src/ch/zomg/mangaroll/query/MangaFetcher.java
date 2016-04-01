@@ -60,7 +60,7 @@ public class MangaFetcher extends Fetcher {
                 setHasMore(false);
             } else if(descriptor.getNextPageSelector() != null) {
                 Elements nextPageLink = doc.select(descriptor.getNextPageSelector());
-                setHasMore(nextPageLink.size() > 0);
+                setHasMore(nextPageLink.size() > 0 && !nextPageLink.get(0).attr("href").isEmpty());
                 if(hasMore()) {
                     descriptor.setUrl(uri.resolve(nextPageLink.get(0).attr("href")).toString());
                 }
