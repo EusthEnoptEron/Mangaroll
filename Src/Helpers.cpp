@@ -21,7 +21,13 @@ namespace OvrMangaroll {
 	float HMD::VerticalAngle = 0;
 
 	App *AppState::Instance = NULL;
+	jclass AppState::FetcherClass = NULL;
+	jclass AppState::ContainerFetcherClass = NULL;
+	jclass AppState::MangaFetcherClass = NULL;
+	jclass AppState::ActivityClass = NULL;
 	Config *AppState::Conf = NULL;
+	ThreadPool *AppState::Scheduler = NULL;
+
 	Assets *Assets::_Instance = NULL;
 
 

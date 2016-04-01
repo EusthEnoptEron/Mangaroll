@@ -18,6 +18,7 @@ Copyright   :   Copyright 2014 Oculus VR, LLC. All Rights reserved.
 #include <OVR_Capture.h>
 #include "AsyncTexture.h"
 #include "Config.h"
+#include "ThreadPool.h"
 
 #if 0
 	#define GL( func )		func; EglCheckErrors();
@@ -36,8 +37,10 @@ jlong Java_ch_zomg_mangaroll_MainActivity_nativeSetAppInterface( JNIEnv * jni, j
 		jstring fromPackageName, jstring commandString, jstring uriString )
 {
 	LOG( "nativeSetAppInterface" );
-	
-	return (new OvrMangaroll::Mangaroll())->SetActivity( jni, clazz, activity, fromPackageName, commandString, uriString );
+	OvrMangaroll::Mangaroll *mangaroll = new OvrMangaroll::Mangaroll();
+	jlong num = mangaroll->SetActivity(jni, clazz, activity, fromPackageName, commandString, uriString);
+	mangaroll->InitJNI(jni);
+	return num;
 }
 
 } // extern "C"
@@ -87,8 +90,14 @@ Mangaroll::~Mangaroll()
 	OvrGuiSys::Destroy( GuiSys );
 }
 
+void Mangaroll::InitJNI(JNIEnv *env) {
+	AppState::FetcherClass = (jclass)env->NewGlobalRef(env->FindClass("ch/zomg/mangaroll/query/Fetcher"));
+	AppState::ContainerFetcherClass = (jclass)env->NewGlobalRef(env->FindClass("ch/zomg/mangaroll/query/ContainerFetcher"));
+	AppState::MangaFetcherClass = (jclass)env->NewGlobalRef(env->FindClass("ch/zomg/mangaroll/query/MangaFetcher"));
+}
 void Mangaroll::Configure( ovrSettings & settings )
 {
+
 	settings.PerformanceParms.CpuLevel = 0;
 	settings.PerformanceParms.GpuLevel = 3;
 
@@ -114,7 +123,7 @@ void Mangaroll::OneTimeInit( const char * fromPackage, const char * launchIntent
 	SoundEffectPlayer = new ovrGuiSoundEffectPlayer(*SoundEffectContext);
 
 	Locale = ovrLocale::Create( *app, "default" );
-	
+	AppState::Scheduler = new ThreadPool(5);
 
 	String fontName;
 	GetLocale().GetString( "@string/font_name", "efigs.fnt", fontName );

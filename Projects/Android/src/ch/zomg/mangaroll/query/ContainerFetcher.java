@@ -1,5 +1,8 @@
 package ch.zomg.mangaroll.query;
 
+import android.net.Uri;
+import android.util.Log;
+
 import com.google.gson.Gson;
 
 import org.jsoup.Jsoup;
@@ -8,6 +11,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,11 +24,14 @@ public class ContainerFetcher extends Fetcher {
     public ContainerFetcher(Descriptor descriptor) {
         this.descriptor = descriptor;
     }
-
+    private static final String TAG = ContainerFetcher.class.getName();
 
     public Fetcher[] fetch() {
         try {
+            Log.i(TAG, descriptor.getUrl());
+            setHasMore(false);
             Document doc = Jsoup.connect(descriptor.getUrl()).get();
+            URI uri = URI.create(descriptor.getUrl());
 
             List<Fetcher> fetchers = new ArrayList<>();
 
@@ -34,20 +41,20 @@ public class ContainerFetcher extends Fetcher {
                 String name = element.select(descriptor.getNameSelector()).text();
 //                String thumb = element.select(descriptor.getThumbSelector()).attr("src");
 
-                Descriptor childDescriptor = descriptor.getHandler().clone();
-                childDescriptor.setUrl(link);
+                if(!link.isEmpty()) {
+                    Descriptor childDescriptor = descriptor.getHandler().clone();
+                    childDescriptor.setUrl(uri.resolve(link).toString());
 
-                if(childDescriptor.getType() == Descriptor.Type.CONTAINER) {
-                    ContainerFetcher fetcher = new ContainerFetcher(childDescriptor);
-                    fetcher.setName(name);
-                    fetchers.add(fetcher);
-                } else {
-                    MangaFetcher fetcher = new MangaFetcher(childDescriptor);
-                    fetcher.setName(name);
-                    fetchers.add(fetcher);
+                    if (childDescriptor.getType() == Descriptor.Type.CONTAINER) {
+                        ContainerFetcher fetcher = new ContainerFetcher(childDescriptor);
+                        fetcher.setName(name);
+                        fetchers.add(fetcher);
+                    } else {
+                        MangaFetcher fetcher = new MangaFetcher(childDescriptor);
+                        fetcher.setName(name);
+                        fetchers.add(fetcher);
+                    }
                 }
-
-                descriptor.getHandler().clone();
             }
 
             // Determine if there is more
@@ -55,7 +62,7 @@ public class ContainerFetcher extends Fetcher {
                 Elements nextPageLink = doc.select(descriptor.getNextPageSelector());
                 setHasMore(nextPageLink.size() > 0);
                 if(hasMore()) {
-                    descriptor.setUrl(nextPageLink.get(0).attr("href"));
+                    descriptor.setUrl(uri.resolve(nextPageLink.get(0).attr("href")).toString());
                 }
             } else {
                 setHasMore(false);

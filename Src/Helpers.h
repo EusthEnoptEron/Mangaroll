@@ -14,6 +14,7 @@
 #include "Android\JniUtils.h"
 #include "UI\UITexture.h"
 #include "UI\UIObject.h"
+#include "ThreadPool.h"
 
 using namespace OVR;
 namespace OvrMangaroll {
@@ -51,8 +52,13 @@ namespace OvrMangaroll {
 	class Config;
 	class AppState {
 	public:
+		static ThreadPool *Scheduler;
 		static Config *Conf;
 		static App *Instance;
+		static jclass FetcherClass;
+		static jclass ContainerFetcherClass;
+		static jclass MangaFetcherClass;
+		static jclass ActivityClass;
 	};
 
 	class Assets {
@@ -145,4 +151,22 @@ namespace OvrMangaroll {
 		JNIEnv *		Jni;
 		jobject			Object;
 	};
+
+
+	//==============================================================
+	// JavaClass
+	//
+	// Releases a java class local reference on destruction.
+	//==============================================================
+	class JavaGlobalClass : public JavaGlobalObject
+	{
+	public:
+		JavaGlobalClass(JNIEnv * jni_, jobject const class_) :
+			JavaGlobalObject(jni_, class_)
+		{
+		}
+
+		jclass			GetJClass() const { return static_cast< jclass >(GetJObject()); }
+	};
+
 }

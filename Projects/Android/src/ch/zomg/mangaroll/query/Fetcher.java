@@ -6,9 +6,9 @@ import com.google.gson.Gson;
  * Created by Simon on 2016/03/30.
  */
 public abstract class Fetcher {
-    private boolean hasMore;
-    private String thumb;
-    private String name;
+    private boolean hasMore = true;
+    private String thumb = "";
+    private String name = "";
 
     public String getName() {
         return name;
@@ -36,17 +36,20 @@ public abstract class Fetcher {
         this.hasMore = hasMore;
     }
 
+    public String getID() {
+        return name == null ? "" : name;
+    }
+
     public static Fetcher getInitialFetcher(String descriptorString) {
         Gson gson = new Gson();
         Descriptor descriptor = gson.fromJson(descriptorString, Descriptor.class);
         if (descriptor != null) {
             if (descriptor.getType() == Descriptor.Type.CONTAINER) {
                 return new ContainerFetcher(descriptor);
-            } else {
+            } else if(descriptor.getType() == Descriptor.Type.MANGA) {
                 return new MangaFetcher(descriptor);
             }
-        } else {
-            return null;
         }
+        return null;
     }
 }

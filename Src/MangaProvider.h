@@ -4,6 +4,7 @@
 #include "Kernel\OVR_JSON.h"
 #include "Manga.h"
 #include "Page.h"
+#include "Helpers.h"
 
 using namespace OVR;
 namespace OvrMangaroll {
@@ -150,7 +151,7 @@ namespace OvrMangaroll {
 		Thread _Thread;
 		DynamicMangaProvider(const DynamicMangaProvider &);
 
-		static void *FetchFn(Thread *thread, void *p);
+		static void FetchFn(JNIThread *thread, void *p);
 	};
 
 }

@@ -1,11 +1,15 @@
 package ch.zomg.mangaroll.query;
 
+import com.google.gson.annotations.SerializedName;
+
 /**
  * Created by Simon on 2016/03/30.
  */
 public class Descriptor implements Cloneable {
     enum Type {
+        @SerializedName("container")
         CONTAINER,
+        @SerializedName("manga")
         MANGA
     }
 

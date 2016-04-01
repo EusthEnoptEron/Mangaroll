@@ -269,6 +269,80 @@ namespace OvrMangaroll {
 		self->_Loading = false;
 	}
 
+	//########### DYNAMIC MANGA ##########
+	DynamicManga::DynamicManga(JNIEnv *env, jobject obj)
+		: Manga()
+		, ID("")
+		, _Payload()
+		, _Loading(false)
+		, _HasMore(true)
+		, _Fetcher(env, obj)
+	{
+
+	}
+
+	void DynamicManga::_Init() {
+		Fetch();
+
+	}
+	void DynamicManga::Fetch() {
+		_Loading = true;
+		_HasMore = false;
+
+		AppState::Scheduler->Schedule(FetchList, this);
+	}
+
+	void DynamicManga::_Update() {
+		// Clear payload
+		if (!_Loading && _Payload.GetSizeI() > 0) {
+			// were we already able to set page?
+			bool setPage = true;
+			if (_Count > _LastSetPage) {
+				setPage = false;
+			}
+
+			for (int i = 0; i < _Payload.GetSizeI(); i++) {
+				AddPage(_Payload[i]);
+			}
+			_Payload.Clear();
+
+			if (setPage && _Count > _LastSetPage) {
+				// We can now set the page!
+				SetProgress(_LastSetPage);
+			}
+		}
+
+		if (!_Loading && _HasMore && _SelectionIndex > _Count - 3) {
+			Fetch();
+		}
+	}
+
+	void DynamicManga::FetchList(JNIThread *t, void *p) {
+
+		DynamicManga *self = (DynamicManga *)p;
+		JavaGlobalObject &fetcher = self->_Fetcher;
+		JNIEnv *env = t->Env;
+
+		jmethodID fetch = env->GetMethodID(AppState::MangaFetcherClass, "fetch", "()[Ljava/lang/String;");
+		jmethodID hasMore = env->GetMethodID(AppState::FetcherClass, "hasMore", "()Z");
+
+		jobjectArray resultArray = (jobjectArray)(env->CallObjectMethod(fetcher.GetJObject(), fetch));
+
+		if (resultArray != NULL) {
+			int count = env->GetArrayLength(resultArray);
+			for (int i = 0; i < count; i++) {
+				String imgUrl = JavaUTFChars(env, (jstring)env->GetObjectArrayElement(resultArray, i)).ToStr();
+				Page *p = new Page(imgUrl);
+				self->_Payload.PushBack(p);
+			}
+			env->DeleteLocalRef(resultArray);
+			
+			self->_HasMore = env->CallBooleanMethod(fetcher.GetJObject(), hasMore);
+		}
+
+		self->_Loading = false;
+	}
+
 	// ################# ArchivedManga ##############
 	ArchivedManga::ArchivedManga(String filePath)
 		: Manga()

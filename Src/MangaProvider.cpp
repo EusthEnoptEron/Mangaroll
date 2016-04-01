@@ -244,10 +244,9 @@ namespace OvrMangaroll {
 
 	jobject MangaServiceProvider::JSON2Fetcher(const JSON *json) {
 		JNIEnv *env = AppState::Instance->GetJava()->Env;
-		JavaClass clazz(env, env->FindClass("ch/zomg/mangaroll/query/Fetcher"));
-		jmethodID parse = env->GetStaticMethodID(clazz.GetJClass, "getInitialFetcher", "(Ljava/lang/String;)Lch/zomg/mangaroll/query/Fetcher;");
+		jmethodID parse = env->GetStaticMethodID(AppState::FetcherClass, "getInitialFetcher", "(Ljava/lang/String;)Lch/zomg/mangaroll/query/Fetcher;");
 		JavaString jsonString(env, ((JSON *)json)->PrintValue(10, false));
-		return env->CallStaticObjectMethod(clazz.GetJClass(), parse, jsonString.GetJString());
+		return env->CallStaticObjectMethod(AppState::FetcherClass, parse, jsonString.GetJString());
 	}
 
 	AbstractRemoteMangaProvider::AbstractRemoteMangaProvider()
@@ -366,43 +365,41 @@ namespace OvrMangaroll {
 		: AbstractRemoteMangaProvider()
 		, _Fetcher(env, fetcher)
 	{
-		JavaClass clazz(env, env->GetObjectClass(fetcher));
-		jmethodID getIdMethod = env->GetMethodID(clazz.GetJClass(), "getID", "()Ljava/lang/String;");
+		jmethodID getIdMethod = env->GetMethodID(AppState::FetcherClass, "getID", "()Ljava/lang/String;");
 		JavaUTFChars idResult(env, (jstring)env->CallObjectMethod(_Fetcher.GetJObject(), getIdMethod));
 
 		this->Id = idResult.ToStr();
 	}
 
 	void DynamicMangaProvider::OnLoadMore() {
-		_Thread = Thread(FetchFn, this);
-		_Thread.Start();
+		AppState::Scheduler->Schedule(FetchFn, this);
 	}
 
-	void *DynamicMangaProvider::FetchFn(Thread *thread, void *p) {
+	void DynamicMangaProvider::FetchFn(JNIThread *thread, void *p) {
 		// Prepare
 		DynamicMangaProvider *self = (DynamicMangaProvider *)p;
-		const ovrJava *java = AppState::Instance->GetJava();
-		JNIEnv *env = java->Env;
-		ovr_AttachCurrentThread(java->Vm, &env, NULL);
+		JNIEnv *env = thread->Env;
 
 		JavaClass clazz(env, env->GetObjectClass(self->_Fetcher.GetJObject()));
-		jmethodID isContainerProviderMethod = env->GetMethodID(clazz.GetJClass(), "isContainerProvider", "()Z");
-		jmethodID fetchMethod = env->GetMethodID(clazz.GetJClass(), "fetch", "()[Lch/zomg/mangaroll/query/Fetcher;");
-		jmethodID getNameMethod = env->GetMethodID(clazz.GetJClass(), "getName", "()Ljava/lang/String;");
-		jmethodID getThumbMethod = env->GetMethodID(clazz.GetJClass(), "getThumb", "()Ljava/lang/String;");
-		jmethodID hasMoreMethod = env->GetMethodID(clazz.GetJClass(), "hasMore", "()Z");
+		jmethodID isContainerProviderMethod = env->GetMethodID(AppState::FetcherClass, "isContainerProvider", "()Z");
+		jmethodID getNameMethod = env->GetMethodID(AppState::FetcherClass, "getName", "()Ljava/lang/String;");
+		jmethodID getThumbMethod = env->GetMethodID(AppState::FetcherClass, "getThumb", "()Ljava/lang/String;");
+		jmethodID hasMoreMethod = env->GetMethodID(AppState::FetcherClass, "hasMore", "()Z");
+		jmethodID fetchMethod = env->GetMethodID(AppState::ContainerFetcherClass, "fetch", "()[Lch/zomg/mangaroll/query/Fetcher;");
 
 
 		// Do work
-		jobjectArray list = (jobjectArray)(env, env->CallObjectMethod(self->_Fetcher.GetJObject(), fetchMethod));
+		jobjectArray list = (jobjectArray)env->CallObjectMethod(self->_Fetcher.GetJObject(), fetchMethod);
 		if (list != NULL) {
 			// List is OK, let's collect those fetchers then!
 			int length = env->GetArrayLength(list);
+			LOG("LIST IS OK: %d", length);
 			for (int i = 0; i < length; i++) {
 				JavaObject childFetcher(env, env->GetObjectArrayElement(list, i));
 				bool containerType = env->CallBooleanMethod(childFetcher.GetJObject(), isContainerProviderMethod);
 				MangaWrapper * wrapper = NULL;
 				if (containerType) {
+					LOG("CONTAINER");
 					DynamicMangaProvider *child = new DynamicMangaProvider(env, childFetcher.GetJObject());
 					wrapper = new MangaWrapper(child);
 					child->UID = self->BuildUID(child->Id);
@@ -412,19 +409,34 @@ namespace OvrMangaroll {
 					self->_MangasBuffer.PushBack(wrapper);
 				}
 				else {
-					// ... TODO
+					LOG("MANGA");
+					DynamicManga *child = new DynamicManga(env, childFetcher.GetJObject());
+					child->ID = JavaUTFChars(env, (jstring)env->CallObjectMethod(child->_Fetcher.GetJObject(), getNameMethod)).ToStr();
+					child->Name = child->ID;
+
+					wrapper = new MangaWrapper(child);
+					child->UID = self->BuildUID(child->ID);
+					wrapper->Name = child->Name;
+					//child->Name = wrapper->Name;
+					wrapper->SetThumb(JavaUTFChars(env, (jstring)env->CallObjectMethod(child->_Fetcher.GetJObject(), getThumbMethod)).ToStr());
+					self->_MangasBuffer.PushBack(wrapper);
 				}
 
 			}
-			
+
 			self->_HasMore = env->CallBooleanMethod(self->_Fetcher.GetJObject(), hasMoreMethod);
 
 			env->DeleteLocalRef(list);
 		}
+		else {
+			LOG("LIST AINT OK");
 
+		}
+
+	
 
 		// Clean up
-		ovr_DetachCurrentThread(java->Vm);
+
 		self->_DoneReading = true;
 	}
 }

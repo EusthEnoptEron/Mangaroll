@@ -4,6 +4,7 @@
 #include "GlObject.h"
 #include "Page.h"
 #include "AsyncTexture.h"
+#include "Helpers.h"
 
 using namespace OVR;
 
@@ -73,6 +74,25 @@ namespace OvrMangaroll {
 		bool _Loading;
 		bool _HasMore;
 		int _Page;
+	};
+
+	class DynamicManga : public Manga {
+		friend class DynamicMangaProvider;
+	public:
+		DynamicManga(JNIEnv *, jobject);
+		virtual ~DynamicManga() {}
+		String ID;
+	protected:
+		virtual void _Init();
+		virtual void _Update();
+
+	private:
+		void Fetch();
+		static void FetchList(JNIThread *thread, void *p);
+		Array<Page *> _Payload;
+		bool _Loading;
+		bool _HasMore;
+		JavaGlobalObject _Fetcher;
 	};
 
 

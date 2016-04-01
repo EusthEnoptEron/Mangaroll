@@ -45,6 +45,7 @@ public:
 	virtual bool 		OnKeyEvent( const int keyCode, const int repeatCount, const OVR::KeyEventType eventType );
 	virtual OVR::Matrix4f Frame( const OVR::VrFrame & vrFrame );
 	virtual OVR::Matrix4f DrawEyeView( const int eye, const float fovDegreesX, const float fovDegreesY, ovrFrameParms & frameParms );
+	void InitJNI(JNIEnv *env);
 
 private:
 	OvrGuiSys *		GuiSys;
