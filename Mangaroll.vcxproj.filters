@@ -171,6 +171,9 @@
     <ClInclude Include="Src\Config.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Src\ThreadPool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Mangaroll.cpp">
@@ -291,6 +294,9 @@
       <Filter>Source Files\VrGUI</Filter>
     </ClCompile>
     <ClCompile Include="Src\Config.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\ThreadPool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

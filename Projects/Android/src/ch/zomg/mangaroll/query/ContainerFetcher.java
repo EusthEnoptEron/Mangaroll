@@ -28,6 +28,10 @@ public class ContainerFetcher extends Fetcher {
 
     public Fetcher[] fetch() {
         try {
+            if(descriptor.getLinkSelector() == null || descriptor.getHandler() == null || descriptor.getUrl() == null || descriptor.getNameSelector() == null) {
+                throw new RuntimeException("Not all mandatory fields are provided!");
+            }
+
             Log.i(TAG, descriptor.getUrl());
             setHasMore(false);
             Document doc = Jsoup.connect(descriptor.getUrl()).get();
@@ -35,27 +39,40 @@ public class ContainerFetcher extends Fetcher {
 
             List<Fetcher> fetchers = new ArrayList<>();
 
+            Log.i(TAG, "Item selector: "+descriptor.getItemSelector());
             // Search for items
             for(Element element : doc.select(descriptor.getItemSelector())) {
-                String link = element.select(descriptor.getLinkSelector()).attr("href");
-                String name = element.select(descriptor.getNameSelector()).text();
-//                String thumb = element.select(descriptor.getThumbSelector()).attr("src");
+                Log.i(TAG, "Analyzing item");
+                String link = extractURL(uri, element.select(descriptor.getLinkSelector()));
+                String name = extractName(element.select(descriptor.getNameSelector()));
+                String thumb = "";
+                if(descriptor.getThumbSelector() != null) {
+                    thumb = extractURL(uri, element.select(descriptor.getThumbSelector()));
+                }
 
                 if(!link.isEmpty()) {
+                    Log.i(TAG, "Link OK");
                     Descriptor childDescriptor = descriptor.getHandler().clone();
                     childDescriptor.setUrl(uri.resolve(link).toString());
 
                     if (childDescriptor.getType() == Descriptor.Type.CONTAINER) {
+                        Log.i(TAG, "Is another container");
                         ContainerFetcher fetcher = new ContainerFetcher(childDescriptor);
                         fetcher.setName(name);
+                        fetcher.setThumb(thumb);
                         fetchers.add(fetcher);
                     } else {
+                        Log.i(TAG, "Is a manga");
                         MangaFetcher fetcher = new MangaFetcher(childDescriptor);
                         fetcher.setName(name);
+                        fetcher.setThumb(thumb);
                         fetchers.add(fetcher);
                     }
                 }
+                Log.i(TAG, "Done");
             }
+            Log.i(TAG, "Done with this container");
+
 
             // Determine if there is more
             if(descriptor.getNextPageSelector() != null) {
@@ -64,12 +81,12 @@ public class ContainerFetcher extends Fetcher {
                 if(hasMore()) {
                     descriptor.setUrl(uri.resolve(nextPageLink.get(0).attr("href")).toString());
                 }
-            } else {
-                setHasMore(false);
             }
 
             return fetchers.toArray(new Fetcher[fetchers.size()]);
-        } catch (IOException e) {
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+            setHasMore(false);
             return new Fetcher[0];
         }
     }

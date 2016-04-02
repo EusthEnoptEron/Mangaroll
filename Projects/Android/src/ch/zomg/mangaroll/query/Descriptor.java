@@ -6,6 +6,8 @@ import com.google.gson.annotations.SerializedName;
  * Created by Simon on 2016/03/30.
  */
 public class Descriptor implements Cloneable {
+
+
     enum Type {
         @SerializedName("container")
         CONTAINER,
@@ -17,6 +19,7 @@ public class Descriptor implements Cloneable {
     private String url;
     private String itemSelector;
     private String nameSelector;
+    private String thumbSelector;
     private String linkSelector;
     private String nextPageSelector;
     private Descriptor handler;
@@ -77,7 +80,13 @@ public class Descriptor implements Cloneable {
     public void setNextPageSelector(String nextPageSelector) {
         this.nextPageSelector = nextPageSelector;
     }
+    public String getThumbSelector() {
+        return thumbSelector;
+    }
 
+    public void setThumbSelector(String thumbSelector) {
+        this.thumbSelector = thumbSelector;
+    }
     public Descriptor getHandler() {
         return handler;
     }

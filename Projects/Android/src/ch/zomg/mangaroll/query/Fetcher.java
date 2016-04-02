@@ -2,6 +2,11 @@ package ch.zomg.mangaroll.query;
 
 import com.google.gson.Gson;
 
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
+import java.net.URI;
+
 /**
  * Created by Simon on 2016/03/30.
  */
@@ -51,5 +56,30 @@ public abstract class Fetcher {
             }
         }
         return null;
+    }
+
+    protected String extractURL(URI base, Elements element) {
+        return element.size() > 0 ? extractURL(base, element.get(0)) : "";
+
+    }
+    protected String extractURL(URI base, Element element) {
+        String result = element.attr("href");
+        if(result.isEmpty()) {
+            result = element.attr("src");
+        }
+
+        if(!result.isEmpty()) {
+            return base.resolve(result).toString();
+        }
+
+        return result;
+    }
+
+    protected String extractName(Elements elements) {
+        String result = "";
+        if(elements.size() > 0) {
+            result = elements.get(0).text().trim();
+        }
+        return result;
     }
 }

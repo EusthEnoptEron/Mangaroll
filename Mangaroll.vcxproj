@@ -97,6 +97,7 @@
     <ClCompile Include="Src\MangaSettingsView.cpp" />
     <ClCompile Include="Src\OVR_TurboJpeg.cpp" />
     <ClCompile Include="Src\Page.cpp" />
+    <ClCompile Include="Src\ThreadPool.cpp" />
     <ClCompile Include="Src\ShaderManager.cpp" />
     <ClCompile Include="Src\UICheckbox.cpp" />
     <ClCompile Include="Src\View.cpp" />
@@ -145,6 +146,7 @@
     <ClInclude Include="Src\MangaSettingsView.h" />
     <ClInclude Include="Src\OVR_TurboJpeg.h" />
     <ClInclude Include="Src\Page.h" />
+    <ClInclude Include="Src\ThreadPool.h" />
     <ClInclude Include="Src\ShaderManager.h" />
     <ClInclude Include="Src\turbojpeg.h" />
     <ClInclude Include="Src\UICheckbox.h" />
