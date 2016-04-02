@@ -12,7 +12,7 @@ It's possible to integrate simple online services that will serve manga. To get 
 
 In all directories that are scanned for manga (currently the "Manga" directory) you can place a services.json that contains a list of remote services that may provide manga or comics.
 
-The file is a simple array of objects, and there are two ways of defining a service: by providing a pair of URLs to an API-compliant web server, or by describing how to directly fetch the images through CSS selectors.
+The file is a simple array of objects, and there are two ways of defining a service: by providing a pair of URLs to an API-compliant web server, or by describing how to directly fetch the images through CSS selectors (see [Service Configs](https://github.com/EusthEnoptEron/Mangaroll/wiki/Service-Configs)).
 
 ```javascript
 [
