@@ -1,11 +1,15 @@
 package ch.zomg.mangaroll.query;
 
+import android.util.Log;
+
 import com.google.gson.Gson;
 
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.net.URI;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 /**
  * Created by Simon on 2016/03/30.
@@ -14,6 +18,7 @@ public abstract class Fetcher {
     private boolean hasMore = true;
     private String thumb = "";
     private String name = "";
+    private static Pattern PATTERN_CSS_URL = Pattern.compile("url\\('?(.+?)'?\\)");
 
     public String getName() {
         return name;
@@ -68,6 +73,12 @@ public abstract class Fetcher {
             result = element.attr("src");
         }
 
+        if(result.isEmpty()) {
+            Matcher matcher = PATTERN_CSS_URL.matcher(element.attr("style"));
+            if(matcher.find()) {
+                result = matcher.group(1).trim();
+            }
+        }
         if(!result.isEmpty()) {
             return base.resolve(result).toString();
         }
