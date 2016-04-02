@@ -1,6 +1,6 @@
 # Mangaroll
 
-Uses a cylindrical layout that lets the user progress his reading by turning around in a circle. Thanks to the GearVR being cablefree, there is no risk of getting yourself tangled up! Unless you're wearing a pair of headphones...
+Mangaroll is a Gear VR app that lets you read your comics and manga by turning *yourself* around in a circle, preferably while sitting on an office chair to prevent bumping into walls. Through a more-or-less simple configuration file, you can also add online services to feed you with a (nearly) endless number of manga.
 
 ![](http://www.zomg.ch/mangaroll.jpg)
 
