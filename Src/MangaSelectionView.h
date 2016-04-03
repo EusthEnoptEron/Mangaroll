@@ -20,6 +20,15 @@
 using namespace OVR;
 namespace OvrMangaroll {
 
+	struct ProviderState {
+	public:
+		MangaProvider *Provider;
+		int Offset;
+
+		ProviderState() : Provider(NULL), Offset(0) {}
+		ProviderState(MangaProvider *provider, int offset = 0) : Provider(provider), Offset(offset) {}
+	};
+
 	// Forward declaration
 	class Mangaroll;
 	class Manga;
@@ -100,7 +109,8 @@ namespace OvrMangaroll {
 		}
 		void GoBack() {
 			_Providers.Pop(); // TODO: Garbage
-			SetProvider(*(_Providers.Pop()), true);
+			_NoResultMessage->SetVisible(false);
+			Seek(0);
 			_FadeDir = -1;
 		}
 
@@ -122,6 +132,14 @@ namespace OvrMangaroll {
 		void CleanPanels();
 		void Seek(int dir);
 		void UpdatePanels();
+
+		ProviderState &CurrentState() {
+			return _Providers.Back();
+		}
+		MangaProvider *CurrentProvider() {
+			return CurrentState().Provider;
+		}
+
 		MangaPanel *CreatePanel(int x, int y, UIObject *container);
 		static void OnGoBackward(UIButton *, void *);
 		static void OnGoForward(UIButton *, void *);
@@ -139,14 +157,13 @@ namespace OvrMangaroll {
 		SineFader _Transition;
 		int _FadeDir;
 		int _FillCount;
-		int _Index;
 		float _Speed;
 		float _Gravity;
 		Vector2f _LastTouch;
 		float _TouchStartTime;
 		bool _IsTouching;
 		float _PanelHeight;
-		Array<MangaProvider *> _Providers;
+		Array<ProviderState> _Providers;
 		int _PanelCount;
 		UITexture _Arrow;
 		UITexture _ArrowLeftTexture;

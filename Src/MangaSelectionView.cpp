@@ -433,7 +433,6 @@ namespace OvrMangaroll {
 		, _Front(0)
 		, _Back(1)
 		, _Transition(0)
-		, _Index(0)
 		, _Speed(0)
 		, _Gravity(0.1f)
 		, _Providers()
@@ -457,11 +456,11 @@ namespace OvrMangaroll {
 	}
 
 	bool MangaSelectorComponent::CanSeek() {
-		return _Index + _PanelCount < _Providers.Back()->GetCurrentSize();
+		return CurrentState().Offset + _PanelCount < CurrentProvider()->GetCurrentSize();
 	}
 
 	bool MangaSelectorComponent::CanSeekBack() {
-		return _Index > 0;
+		return CurrentState().Offset > 0;
 	}
 
 
@@ -572,7 +571,7 @@ namespace OvrMangaroll {
 
 	// dir = -1, 0, 1
 	void MangaSelectorComponent::Seek(int dir) {
-		_Index += dir * _PanelCount;
+		CurrentState().Offset += dir * _PanelCount;
 		_FillCount = 0;
 		_Front = (_Front + 1) % 2;
 		_Back = (_Back + 1) % 2;
@@ -582,11 +581,11 @@ namespace OvrMangaroll {
 	}
 	
 	void MangaSelectorComponent::UpdatePanels() {
-		int count = Alg::Min(_Index + _PanelCount, _Providers.Back()->GetCurrentSize());
-		for (int i = _Index + _FillCount; i < count; i++) {
-			MangaPanel *panel = _PanelSets[_Front].At(i - _Index);
+		int count = Alg::Min(CurrentState().Offset + _PanelCount, CurrentProvider()->GetCurrentSize());
+		for (int i = CurrentState().Offset + _FillCount; i < count; i++) {
+			MangaPanel *panel = _PanelSets[_Front].At(i - CurrentState().Offset);
 
-			panel->SetManga(_Providers.Back()->At(i));
+			panel->SetManga(CurrentProvider()->At(i));
 			panel->SetVisible(true);
 			_FillCount++;
 		}
@@ -604,13 +603,12 @@ namespace OvrMangaroll {
 			// Clean up
 			// TODO: Clear memory somehow (be careful when deleting stuff...)
 			_Providers.Clear();
-			
 		}
 		_NoResultMessage->SetVisible(false);
-		_Providers.PushBack(&provider);
+		_Providers.PushBack(ProviderState(&provider, 0));
 		Seek(1);
 		// Lil hack
-		_Index = 0;
+		CurrentState().Offset = 0;
 	}
 
 	void MangaSelectorComponent::SelectManga(Manga *manga) {
@@ -626,17 +624,17 @@ namespace OvrMangaroll {
 
 	void MangaSelectorComponent::Update(VRMenuEvent const & evt) {
 		// Update index
-		if (!_Providers.Back()->IsLoading()) {
-			if (_Providers.Back()->HasMore()) {
-				if (_Providers.Back()->GetCurrentSize() <= _Index + _PanelCount * 2) {
-					_Providers.Back()->LoadMore();
+		if (!CurrentProvider()->IsLoading()) {
+			if (CurrentProvider()->HasMore()) {
+				if (CurrentProvider()->GetCurrentSize() <= CurrentState().Offset + _PanelCount * 2) {
+					CurrentProvider()->LoadMore();
 				}
 			}
 			else {
 				// Outloaded
-				if ( _Providers.Back()->GetCurrentSize() == 0 && !_NoResultMessage->GetVisible()) {
+				if ( CurrentProvider()->GetCurrentSize() == 0 && !_NoResultMessage->GetVisible()) {
 					_NoResultMessage->SetVisible(true);
-					_NoResultMessage->SetTextWordWrapped(_Providers.Back()->GetNoResultMessage().ToCStr(), _Gui.GetDefaultFont(), 0.8f);
+					_NoResultMessage->SetTextWordWrapped(CurrentProvider()->GetNoResultMessage().ToCStr(), _Gui.GetDefaultFont(), 0.8f);
 				}
 			}
 		}
@@ -687,7 +685,7 @@ namespace OvrMangaroll {
 	}
 
 	bool MangaSelectorComponent::ProviderCaughtUp() {
-		return _Index < _Providers.Back()->GetCurrentSize() || (!_Providers.Back()->HasMore() && !_Providers.Back()->IsLoading());
+		return CurrentState().Offset < CurrentProvider()->GetCurrentSize() || (!CurrentProvider()->HasMore() && !CurrentProvider()->IsLoading());
 	}
 	
 	eMsgStatus MangaSelectorComponent::OnEvent_Impl(OvrGuiSys & guiSys, VrFrame const & vrFrame,
