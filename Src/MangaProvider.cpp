@@ -34,15 +34,15 @@ namespace OvrMangaroll {
 			const OvrStoragePaths & paths = AppState::Instance->GetStoragePaths();
 
 			Array<String> SearchPaths;
-			paths.PushBackSearchPathIfValid(EST_SECONDARY_EXTERNAL_STORAGE, EFT_ROOT, "RetailMedia/Pictures/Manga", SearchPaths);
-			paths.PushBackSearchPathIfValid(EST_SECONDARY_EXTERNAL_STORAGE, EFT_ROOT, "Pictures/Manga", SearchPaths);
-			paths.PushBackSearchPathIfValid(EST_PRIMARY_EXTERNAL_STORAGE, EFT_ROOT, "RetailMedia/Pictures/Manga", SearchPaths);
-			paths.PushBackSearchPathIfValid(EST_PRIMARY_EXTERNAL_STORAGE, EFT_ROOT, "Pictures/Manga", SearchPaths);
+			paths.PushBackSearchPathIfValid(EST_SECONDARY_EXTERNAL_STORAGE, EFT_ROOT, "RetailMedia/Manga", SearchPaths);
+			paths.PushBackSearchPathIfValid(EST_SECONDARY_EXTERNAL_STORAGE, EFT_ROOT, "Manga", SearchPaths);
+			paths.PushBackSearchPathIfValid(EST_PRIMARY_EXTERNAL_STORAGE, EFT_ROOT, "RetailMedia/Manga", SearchPaths);
+			paths.PushBackSearchPathIfValid(EST_PRIMARY_EXTERNAL_STORAGE, EFT_ROOT, "Manga", SearchPaths);
 			
-			paths.PushBackSearchPathIfValid(EST_SECONDARY_EXTERNAL_STORAGE, EFT_ROOT, "RetailMedia/Pictures/Comics", SearchPaths);
-			paths.PushBackSearchPathIfValid(EST_SECONDARY_EXTERNAL_STORAGE, EFT_ROOT, "Pictures/Comics", SearchPaths);
-			paths.PushBackSearchPathIfValid(EST_PRIMARY_EXTERNAL_STORAGE, EFT_ROOT, "RetailMedia/Pictures/Comics", SearchPaths);
-			paths.PushBackSearchPathIfValid(EST_PRIMARY_EXTERNAL_STORAGE, EFT_ROOT, "Pictures/Comics", SearchPaths);
+			paths.PushBackSearchPathIfValid(EST_SECONDARY_EXTERNAL_STORAGE, EFT_ROOT, "RetailMedia/Comics", SearchPaths);
+			paths.PushBackSearchPathIfValid(EST_SECONDARY_EXTERNAL_STORAGE, EFT_ROOT, "Comics", SearchPaths);
+			paths.PushBackSearchPathIfValid(EST_PRIMARY_EXTERNAL_STORAGE, EFT_ROOT, "RetailMedia/Comics", SearchPaths);
+			paths.PushBackSearchPathIfValid(EST_PRIMARY_EXTERNAL_STORAGE, EFT_ROOT, "Comics", SearchPaths);
 
 
 			StringHash<String> results = RelativeDirectoryFileList(SearchPaths, "/");
