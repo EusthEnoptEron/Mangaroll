@@ -95,6 +95,7 @@ namespace OvrMangaroll {
 		static ovrMessageQueue *S_Queue;
 		static Thread *S_WorkerThread;
 		static Thread *S_WorkerThread2;
+		static Thread *S_WorkerThread3;
 		static void *S_WorkerFn(Thread *, void *);
 
 	};

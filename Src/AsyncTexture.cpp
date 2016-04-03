@@ -45,6 +45,7 @@ namespace OvrMangaroll {
 	ovrMessageQueue *AsyncTexture::S_Queue = new ovrMessageQueue(100);
 	Thread *AsyncTexture::S_WorkerThread = new Thread(Thread::CreateParams(AsyncTexture::S_WorkerFn, NULL, 128 * 1024, -1, Thread::ThreadState::Running, Thread::BelowNormalPriority));
 	Thread *AsyncTexture::S_WorkerThread2 = new Thread(Thread::CreateParams(AsyncTexture::S_WorkerFn, NULL, 128 * 1024, -1, Thread::ThreadState::Running, Thread::BelowNormalPriority));
+	Thread *AsyncTexture::S_WorkerThread3 = new Thread(Thread::CreateParams(AsyncTexture::S_WorkerFn, NULL, 128 * 1024, -1, Thread::ThreadState::Running, Thread::BelowNormalPriority));
 
 
 	// #################### BUFFER MANAGER #######################
