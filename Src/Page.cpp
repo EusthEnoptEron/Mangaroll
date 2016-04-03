@@ -144,11 +144,12 @@ namespace OvrMangaroll {
 
 					float verticalShift = fmax(-1, fmin(1, verticalAngle / maxAngle));
 
-					targetPos += (-verticalShift * (HEIGHT / 3) * Vector3f(0, 1, 0));
+					targetPos += (-verticalShift * (HEIGHT * PAGE_LOOK_SENSITIVIY) * Vector3f(0, 1, 0));
 				}
 
-				LOG("Target Position: %.2f/%.2f/%.2f", targetPos.x, targetPos.y, targetPos.z);
+				/*LOG("Target Position: %.2f/%.2f/%.2f", targetPos.x, targetPos.y, targetPos.z);
 				LOG("Current Position: %.2f/%.2f/%.2f", Position.x, Position.y, Position.z);
+				*/
 				Position = Position.Lerp(targetPos, Time::Delta * 10);
 
 				Touch();
