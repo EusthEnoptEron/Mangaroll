@@ -10,6 +10,7 @@ namespace OvrMangaroll {
 
 	const float PIXELS_PER_DEGREE = 20.0f;
 	const float REFERENCE_HEIGHT = 1000.0f;
+	const float REFERENCE_MAX_WIDTH = 180.0f * PIXELS_PER_DEGREE;
 
 	enum DisplayState { VISIBLE, INVISIBLE, LIMBO };
 	enum PlacingOrigin { PLACING_NONE, PLACING_BOTTOM, PLACING_TOP };

@@ -172,7 +172,7 @@ namespace OvrMangaroll {
 			_Loaded = true;
 
 			// Calculate real width
-			_Width = REFERENCE_HEIGHT / _ATexture->GetHeight() * _ATexture->GetWidth();
+			_Width = Alg::Min(REFERENCE_MAX_WIDTH, REFERENCE_HEIGHT / _ATexture->GetHeight() * _ATexture->GetWidth());
 			_AngularWidth  = _Width / PIXELS_PER_DEGREE;
 			_ChordLength = 2 * RADIUS * sinf(_AngularWidth * Mathf::DegreeToRadFactor / 2);
 
