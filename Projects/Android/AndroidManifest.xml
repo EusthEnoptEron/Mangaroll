@@ -27,11 +27,12 @@
 				android:label="@string/app_name"
 				android:launchMode="singleTask"
 				android:screenOrientation="landscape"
+				android:excludeFromRecents="true"
 				android:configChanges="orientation|screenSize|keyboard|keyboardHidden"> 
 			<!-- This filter lets the apk show up as a launchable icon -->
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN" />
-				<category android:name="android.intent.category.LAUNCHER" />
+				<category android:name="android.intent.category.INFO" />
 			</intent-filter>
 		</activity>
 	</application>
