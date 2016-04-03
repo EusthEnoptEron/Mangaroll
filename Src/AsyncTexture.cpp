@@ -9,6 +9,11 @@
 #include "Kernel\OVR_String_Utils.h"
 #include "Helpers.h"
 #include "Web.h"
+#include "stb_image_resize.h"
+#include "malloc.h"
+
+#define USE_PBO 0
+#define MIPMAP_ON_GPU 1
 
 using namespace OVR;
 
@@ -51,7 +56,7 @@ namespace OvrMangaroll {
 		S_Buffers = new Array<GLuint>();
 		S_Buffers_Arr = new GLuint[5];
 
-#ifdef USE_PBO
+#if USE_PBO == 1
 		// Create buffers
 		glGenBuffers(5, S_Buffers_Arr);
 		int bufferLength = 2000 * 4000 * 4;
@@ -173,7 +178,7 @@ namespace OvrMangaroll {
 			_State = TEXTURE_LOADED;
 		}
 
-#ifdef USE_PBO
+#if USE_PBO == 1
 		if (_ThreadEvents & TEXTURE_UPLOADED) {
 			// Not currently used
 			OVR_CAPTURE_CPU_ZONE(Texture_Upload);
@@ -236,8 +241,7 @@ namespace OvrMangaroll {
 
 		_State = TEXTURE_APPLYING;
 
-		if (_Valid) {
-#ifdef USE_PBO
+#if USE_PBO == 1
 			// Make buffers
 			_BID = BufferManager::Instance().GetBuffer();
 			glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _BID);
@@ -250,6 +254,7 @@ namespace OvrMangaroll {
 
 			S_Queue->PostPrintf("call %p %p", UploadTexture, this);
 #else
+		if (_Valid) {
 			glBindTexture(GL_TEXTURE_2D, _TID);
 
 			// Unpack
@@ -261,6 +266,9 @@ namespace OvrMangaroll {
 				mipmapWidth = Alg::Max(1, mipmapWidth >> 1);
 				mipmapHeight = Alg::Max(1, mipmapHeight >> 1);
 			}
+#if MIPMAP_ON_GPU == 1
+			glGenerateMipmap(GL_TEXTURE_2D);
+#endif
 		}
 
 		_State = TEXTURE_APPLIED;
@@ -319,6 +327,7 @@ namespace OvrMangaroll {
 		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glHint(GL_GENERATE_MIPMAP_HINT, GL_NICEST); // Mipmaps are important here
 
 		_TextureGenerated = true;
 	}
@@ -398,6 +407,18 @@ namespace OvrMangaroll {
 		tex->_ThreadEvents |= TEXTURE_UPLOADED;
 	}
 
+	unsigned char * Resize(const unsigned char *input, int width, int height, int targetWidth, int targetHeight) {
+		unsigned char *output = (unsigned char *)malloc(width * height * 4);
+		stbir_resize_uint8(input, width, height, 0, output, targetWidth, targetHeight, 0, 4);
+
+		return output;
+	}
+
+	unsigned char * Quarter(const unsigned char *input, int width, int height) {
+		return Resize(input, width, height, Alg::Max(1, width >> 1), Alg::Max(1, height >> 1));
+	}
+
+
 	void AsyncTexture::ConsumeBuffer(unsigned char *buffer, int length) {
 		WARN("%s CONSUME", this->_Path.ToCStr());
 		OVR_CAPTURE_CPU_ZONE(ConsumeBuffer);
@@ -431,6 +452,7 @@ namespace OvrMangaroll {
 		_BufferOffsets.PushBack(0);
 		_BufferLengths.PushBack(_BufferLength);
 
+#if MIPMAP_ON_GPU == 0
 		// Create mipmaps
 		if (_MipmapCount > 1 && Buffer != NULL && length > 0) {
 			int mipmapWidth = _InternalWidth;
@@ -438,8 +460,8 @@ namespace OvrMangaroll {
 
 			for (int i = 1; i < _MipmapCount; i++) {
 				_Buffers.PushBack(
-					QuarterImageSize(_Buffers[_Buffers.GetSizeI() - 1],
-					mipmapWidth, mipmapHeight, false)
+					Quarter(_Buffers[_Buffers.GetSizeI() - 1],
+					mipmapWidth, mipmapHeight)
 					);
 
 				mipmapWidth = Alg::Max(1, mipmapWidth >> 1);
@@ -452,5 +474,6 @@ namespace OvrMangaroll {
 				_BufferLength += length;
 			}
 		}
+#endif
 	}
 }
