@@ -15,23 +15,61 @@ namespace OvrMangaroll {
 	enum DisplayState { VISIBLE, INVISIBLE, LIMBO };
 	enum PlacingOrigin { PLACING_NONE, PLACING_BOTTOM, PLACING_TOP };
 
+	const float RANGE_UNDEFINED = FLT_MIN;
+
+	class Range {
+	public:
+		Range() : _Start(RANGE_UNDEFINED), _End(RANGE_UNDEFINED), _Length(RANGE_UNDEFINED) {}
+
+		Range(float start) : _Start(start), _End(RANGE_UNDEFINED), _Length(RANGE_UNDEFINED) {
+		}
+		Range(float start, float end) : _Start(start), _End(end), _Length(RANGE_UNDEFINED) {
+			Calculate();
+		}
+
+		float GetStart() { return _Start; }
+		float GetEnd() { return _End; }
+		float GetLength() { return _Length; }
+
+		void SetStart(float val) { _Start = val; Calculate(); }
+		void SetEnd(float val) { _End = val; Calculate(); }
+		void SetLength(float length) {
+			_Length = length;
+			Calculate();
+		}
+
+		void Reset() { _Start = RANGE_UNDEFINED; _End = RANGE_UNDEFINED; _Length = RANGE_UNDEFINED; }
+	private:
+		void Calculate() { 
+			if (_Start != RANGE_UNDEFINED && _End != RANGE_UNDEFINED) {
+				_Length = _End - _Start;
+			}
+			else if (_Length != RANGE_UNDEFINED && _Start != RANGE_UNDEFINED && _End == RANGE_UNDEFINED) {
+				_End = _Start + _Length;
+			}
+			else if (_Length != RANGE_UNDEFINED && _Start == RANGE_UNDEFINED && _End != RANGE_UNDEFINED) {
+				_Start = _End - _Length;
+			}
+		}
+		float _Start;
+		float _End;
+		float _Length;
+	};
+
 	class Page : public GlObject {
 	public:
 		Page(String _path) :
 			GlObject(),
 			_Path(_path),
-			_Offset(0),
 			_DisplayState(INVISIBLE),
 			_Next(NULL),
 			_Prev(NULL),
 			_Geometry(),
-			_Width(0),
-			_Positionable(false),
 			_Selected(false),
 			_Model(ovrMatrix4f_CreateIdentity()),
-			_HighOffset(0),
-			_Origin(PLACING_NONE),
 			_DisplayTime(0),
+			_AngularRange(),
+			_PixelRange(),
 			_Progs(),
 			_uDisplayTime(),
 			_Loaded(false),
@@ -54,33 +92,43 @@ namespace OvrMangaroll {
 		Page *GetNext(void);
 		void Load(void);
 		void Draw(const Matrix4f &m);
-		void SetOffset(int offset);
-		void SetHighOffset(int offset);
 		String GetPath() { return _Path; }
 		bool IsVisible();
 		bool IsLoaded();
 		bool IsTarget(float angle);
+		// Does this page appear before the given angle?
+		bool IsBefore(float angle);
+		// Does this page appear after the given angle?
+		bool IsAfter(float angle);
 		void SetSelected(bool state);
 		void Reset(void);
 		bool IsValid() { return _ATexture->IsValid(); }
+
+		void SetRangeStart(float pxls) {
+			_PixelRange.SetStart(pxls);
+			_AngularRange.SetStart(pxls / PIXELS_PER_DEGREE);
+		}
+		void SetRangeEnd(float pxls) {
+			_PixelRange.SetEnd(pxls);
+			_AngularRange.SetEnd(pxls / PIXELS_PER_DEGREE);
+		}
 	protected:
 		String _Path;
-		int _Offset;
 		DisplayState _DisplayState;
 		Page *_Next;
 		Page *_Prev;
 		GlGeometry _Geometry;
-		int _Width;
-		bool _Positionable;
 		bool _Selected;
 		double _SelectionStart;
 		Matrix4f _Model;
-		float _AngularOffset;
-		float _AngularWidth;
 		float _ChordLength;
-		int _HighOffset;
-		PlacingOrigin _Origin;
 		float _DisplayTime;
+		Range _AngularRange;
+		Range _PixelRange;
+		bool IsPositionable() {
+			return _PixelRange.GetStart() != RANGE_UNDEFINED ||
+				_PixelRange.GetEnd() != RANGE_UNDEFINED;
+		}
 	private:
 		void UpdateStates(float);
 

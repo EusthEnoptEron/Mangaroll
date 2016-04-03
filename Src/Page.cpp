@@ -29,7 +29,8 @@ namespace OvrMangaroll {
 		_Prev = p;
 
 		if (_ATexture->GetState() >= TEXTURE_LOADED) {
-			p->SetHighOffset(_Offset);
+			p->_PixelRange.SetEnd(_PixelRange.GetStart());
+			p->_AngularRange.SetEnd(_AngularRange.GetStart());
 		}
 	}
 
@@ -46,27 +47,21 @@ namespace OvrMangaroll {
 			Vector3f pos = Position;
 			pos.y = 0;
 			float zoom = pos.Length(); // 0/0/0 is default. Moves toward the camera when selected
-			float margin = zoom * _AngularWidth * 0.5f;
-			float angularOffset = _AngularOffset - margin;
-			float angularEnd = _AngularOffset + _AngularWidth + margin;
-
-			//// Calculate the angle of the isosceles triangle
-			//float x = Alg::Clamp(-(_ChordLength * _ChordLength) / (2 * distance * distance), -1.0f, 1.0f);
-			//float angularWidth = acosf(x) * Mathf::RadToDegreeFactor;
-			//if (_Selected) {
-			//	LOG("Distance: %.2f Angular Width: %.2f Chord: %.2f, Cos: %.2f", distance, angularWidth, _ChordLength, 1 - (_ChordLength * _ChordLength) / (2 * distance * distance));
-			//}
-
-			//if (angularWidth == NAN) return true;
-
-			//float angularOffset = _AngularOffset - (angularWidth - _AngularWidth) / 2;
-			//float angleEnd = angularOffset + angularWidth;
+			float margin = zoom * _AngularRange.GetLength() * 0.5f;
+			float angularOffset = _AngularRange.GetStart() - margin;
+			float angularEnd = _AngularRange.GetEnd() + margin;
 
 			return angle > angularOffset && angle < angularEnd;
 		}
 		return false;
 	}
 
+	bool Page::IsBefore(float angle) {
+		return (_AngularRange.GetEnd() != RANGE_UNDEFINED && _AngularRange.GetEnd() < angle);
+	}
+	bool Page::IsAfter(float angle) {
+		return (_AngularRange.GetStart() != RANGE_UNDEFINED && _AngularRange.GetStart() > angle);
+	}
 
 	void Page::SetSelected(bool state) {
 		_Selected = state;
@@ -80,18 +75,16 @@ namespace OvrMangaroll {
 		float pixelEnd   = angle * PIXELS_PER_DEGREE + 90 * PIXELS_PER_DEGREE;
 		bool textureLoaded = _ATexture->GetState() >= TEXTURE_LOADED;
 
-		if(_Positionable) {
-			int left = (_Offset + _Width);
-
-			bool initialIsVisible = (_Origin == PLACING_BOTTOM || textureLoaded)
-				? _Offset > pixelStart && _Offset < pixelEnd // Right end within view
-				: _HighOffset > pixelStart && _HighOffset < pixelEnd; // left end within view
+		if(IsPositionable()) {
+			bool initialIsVisible = (_PixelRange.GetStart() != RANGE_UNDEFINED || textureLoaded)
+				? _PixelRange.GetStart() > pixelStart && _PixelRange.GetStart() < pixelEnd // Right end within view
+				: _PixelRange.GetEnd() > pixelStart && _PixelRange.GetEnd() < pixelEnd; // left end within view
 
 			// "On-Load" if unloaded
 			Load();
 
 			// If user's view is inside the valid range...
-			if (initialIsVisible || (textureLoaded && left > pixelStart && left < pixelEnd)) {
+			if (initialIsVisible || (textureLoaded && _PixelRange.GetEnd() > pixelStart && _PixelRange.GetEnd() < pixelEnd)) {
 
 			
 				_DisplayState = DisplayState::VISIBLE;
@@ -109,8 +102,7 @@ namespace OvrMangaroll {
 				_ATexture->Hide();
 
 				if (_ATexture->GetFutureState() != TEXTURE_UNLOADED) {
-					float degreeStart = _Offset / PIXELS_PER_DEGREE;
-					if (abs(angle - degreeStart) > 720) {
+					if (abs(angle - _AngularRange.GetStart()) > 720) {
 						_ATexture->Unload();
 						_Geometry.Free();
 						_Loaded = false;
@@ -131,8 +123,8 @@ namespace OvrMangaroll {
 		if(_DisplayState == DisplayState::VISIBLE) {
 			if(_Selected) {
 				float radianOffset = Mathf::Pi / 2;// - widthInRadians / 2; // Makes sure this thing is centered
-				radianOffset += DegreeToRad(_AngularOffset);
-				radianOffset += DegreeToRad(_AngularWidth) / 2.0f;
+				radianOffset += DegreeToRad(_AngularRange.GetStart());
+				radianOffset += DegreeToRad(_AngularRange.GetLength()) / 2.0f;
 
 				float x = cos(radianOffset) * RADIUS;
 				float z = -sin(radianOffset) * RADIUS;
@@ -172,22 +164,17 @@ namespace OvrMangaroll {
 			_Loaded = true;
 
 			// Calculate real width
-			_Width = Alg::Min(REFERENCE_MAX_WIDTH, REFERENCE_HEIGHT / _ATexture->GetHeight() * _ATexture->GetWidth());
-			_AngularWidth  = _Width / PIXELS_PER_DEGREE;
-			_ChordLength = 2 * RADIUS * sinf(_AngularWidth * Mathf::DegreeToRadFactor / 2);
-
-			if (_Origin == PLACING_TOP) {
-				// Coming from the top!
-				_Offset = _HighOffset - _Width;
-				_AngularOffset = _Offset / PIXELS_PER_DEGREE;
-			}
+			_PixelRange.SetLength(Alg::Min(REFERENCE_MAX_WIDTH, REFERENCE_HEIGHT / _ATexture->GetHeight() * _ATexture->GetWidth()));
+			_AngularRange.SetLength(_PixelRange.GetLength() / PIXELS_PER_DEGREE);
 
 			if(_Next != NULL) {
-				_Next->SetOffset(_Offset + _Width);
+				_Next->_PixelRange.SetStart(_PixelRange.GetEnd());
+				_Next->_AngularRange.SetStart(_AngularRange.GetEnd());
 			}
 
 			if (_Prev != NULL) {
-				_Prev->SetHighOffset(_Offset);
+				_Prev->_PixelRange.SetEnd(_PixelRange.GetStart());
+				_Prev->_AngularRange.SetEnd(_AngularRange.GetStart());
 			}
 
 			LOG("LOADED %s", _Path.ToCStr());
@@ -210,11 +197,15 @@ namespace OvrMangaroll {
 	}
 
 	void Page::Reset(void) {
-		_Positionable = false;
-		_Origin = PLACING_NONE;
-		_Offset = 0;
-		_AngularOffset = 0;
-		_HighOffset = 0;
+		float width = _PixelRange.GetLength();
+		float aWidth = _AngularRange.GetLength();
+		_AngularRange.Reset();
+		_PixelRange.Reset();
+		_AngularRange.SetLength(aWidth);
+		_PixelRange.SetLength(width);
+
+
+
 		_Loaded = false;
 
 		if (_ATexture->GetState() > TEXTURE_LOADED) {
@@ -225,23 +216,6 @@ namespace OvrMangaroll {
 		_DisplayState = DisplayState::INVISIBLE;
 	}
 
-	void Page::SetOffset(int offset) {
-		if (_Origin == PLACING_NONE) {
-			_Offset = offset;
-			_AngularOffset = _Offset / PIXELS_PER_DEGREE;
-			_Positionable = true;
-			_Origin = PLACING_BOTTOM;
-		}
-	}
-
-	void Page::SetHighOffset(int offset) {
-		if (_Origin == PLACING_NONE) {
-			_HighOffset = offset;
-			_Positionable = true;
-			_Origin = PLACING_TOP;
-		}
-		
-	}
 
 	void Page::Draw(const Matrix4f &m) {
 		if(this->_DisplayState == DisplayState::VISIBLE && _ATexture->GetState() == TEXTURE_APPLIED) {
@@ -265,7 +239,8 @@ namespace OvrMangaroll {
 		_Next = next;
 
 		if (_ATexture->GetState() >= TEXTURE_LOADED) {
-			next->SetOffset(_Offset + _Width);
+			next->_PixelRange.SetStart(_PixelRange.GetEnd());
+			next->_AngularRange.SetStart(_AngularRange.GetEnd());
 		}
 	}
 
@@ -284,9 +259,9 @@ namespace OvrMangaroll {
 		attribs.uv0.Resize( Page::SEGMENTS * 2 );
 		indices.Resize( (Page::SEGMENTS - 1) * 2 * 3 ); // Number of faces * triangles per face * vertices per triangle
 
-		float widthInRadians = DegreeToRad(_AngularWidth);
+		float widthInRadians = DegreeToRad(_AngularRange.GetLength());
 		float radianOffset = Mathf::Pi / 2;// - widthInRadians / 2; // Makes sure this thing is centered
-		radianOffset += DegreeToRad(_AngularOffset);
+		radianOffset += DegreeToRad(_AngularRange.GetStart());
 
 		float y0 = -Page::HEIGHT / 2.0f;
 		float y1 = +Page::HEIGHT / 2.0f;

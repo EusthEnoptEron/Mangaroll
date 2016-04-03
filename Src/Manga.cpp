@@ -48,7 +48,7 @@ namespace OvrMangaroll {
 			// First page
 			_First = page;
 			_Last  = page;
-			page->SetOffset(0);
+			page->SetRangeStart(0);
 		} else {
 
 			_Last->SetNext(page);
@@ -91,7 +91,7 @@ namespace OvrMangaroll {
 		ApplyAngleOffset();
 
 		if (activePage != NULL) {
-			activePage->SetOffset(0);
+			activePage->SetRangeStart(0);
 		}
 	}
 
@@ -139,12 +139,26 @@ namespace OvrMangaroll {
 		bool electionFinished = false;
 		Page *selectionCandidate = NULL;
 		int selectionIndex = 0;
+		
+		Page *lowest = NULL;
+		Page *highest = NULL;
 
 		int i = 0;
+		int progressIndex = 0;
 		if(_First != NULL) {
 			do {
 				ref->Update(angle, onlyVisual);
 				if (Selectionable && !electionFinished) {
+					if (!electionFinished) {
+						if (ref->IsBefore(angle)) {
+							selectionIndex = i;
+						}
+						else if (ref->IsAfter(angle) && selectionIndex > i && i > 0) {
+							selectionIndex = i - 1;
+						}
+					}
+					
+
 					if (ref->IsTarget(angle)) {
 						selectionCandidate = ref;
 						selectionIndex = i;
@@ -152,7 +166,6 @@ namespace OvrMangaroll {
 						if (_Selection == ref) {
 							electionFinished = true; // Prioritize
 						}
-						
 					}
 				}
 
