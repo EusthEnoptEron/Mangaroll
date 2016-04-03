@@ -19,6 +19,9 @@ namespace OvrMangaroll {
 		virtual void LoadMore() = 0;
 		virtual bool IsLoading() = 0;
 		virtual MangaWrapper *At(int i) = 0;
+		virtual String GetNoResultMessage() {
+			return "The search yielded no results.";
+		}
 	protected:
 		MangaProvider() : Id("") {}
 		MangaProvider(const MangaProvider &);
@@ -55,6 +58,11 @@ namespace OvrMangaroll {
 		virtual int GetCurrentSize() { return _Mangas.GetSizeI(); }
 
 		virtual void LoadMore();
+		virtual String GetNoResultMessage() {
+			return String("No manga found on system.\n"
+				"Create a folder called \"Manga\" or \"Comics\" in the root folder "
+				"of your SD card and place your files there.");
+		}
 	private:
 		LocalMangaProvider(const LocalMangaProvider &);
 		void ExploreDirectory(String dir);
@@ -92,6 +100,10 @@ namespace OvrMangaroll {
 		virtual int GetCurrentSize() { return _Services.GetSizeI(); }
 
 		virtual void LoadMore();
+		virtual String GetNoResultMessage() {
+			return String("No services found.\n"
+			"Please see github.com/EusthEnoptEron/Mangaroll for instructions.");
+		}
 	private:
 		MangaServiceProvider(const MangaServiceProvider &);
 		jobject JSON2Fetcher(const JSON*);

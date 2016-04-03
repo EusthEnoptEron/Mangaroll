@@ -512,6 +512,15 @@ namespace OvrMangaroll {
 		_ArrowRight->SetLocalScale(Vector3f(0.2f, 0.2f, 0.2f));
 		_ArrowRight->SetLocalPosition(Vector3f(0.3f, 0.45f, 0.1f));
 		_ArrowRight->SetVisible(false);
+
+		_NoResultMessage = new UILabel(_Gui);
+		_NoResultMessage->AddToMenu(_Menu, _Parent);
+		_NoResultMessage->SetTextOffset(Vector3f(0, 0, 0.1f));
+		_NoResultMessage->SetFontParms(VRMenuFontParms(true, true, false, false, true, 0.5f, 0.4f, 0.3));
+		_NoResultMessage->AddFlags(VRMENUOBJECT_DONT_HIT_ALL);
+		_NoResultMessage->SetVisible(false);
+		_NoResultMessage->SetLocalPosition(Vector3f(0, 0.25f, 0));
+
 		//_ArrowRight->GetMenuObject()->SetHilightScale(1.1f);
 
 		// Create panels
@@ -597,6 +606,7 @@ namespace OvrMangaroll {
 			_Providers.Clear();
 			
 		}
+		_NoResultMessage->SetVisible(false);
 		_Providers.PushBack(&provider);
 		Seek(1);
 		// Lil hack
@@ -616,9 +626,18 @@ namespace OvrMangaroll {
 
 	void MangaSelectorComponent::Update(VRMenuEvent const & evt) {
 		// Update index
-		if (!_Providers.Back()->IsLoading() && _Providers.Back()->HasMore()) {
-			if (_Providers.Back()->GetCurrentSize() <= _Index + _PanelCount) {
-				_Providers.Back()->LoadMore();
+		if (!_Providers.Back()->IsLoading()) {
+			if (_Providers.Back()->HasMore()) {
+				if (_Providers.Back()->GetCurrentSize() <= _Index + _PanelCount * 2) {
+					_Providers.Back()->LoadMore();
+				}
+			}
+			else {
+				// Outloaded
+				if ( _Providers.Back()->GetCurrentSize() == 0 && !_NoResultMessage->GetVisible()) {
+					_NoResultMessage->SetVisible(true);
+					_NoResultMessage->SetTextWordWrapped(_Providers.Back()->GetNoResultMessage().ToCStr(), _Gui.GetDefaultFont(), 0.8f);
+				}
 			}
 		}
 
@@ -649,7 +668,6 @@ namespace OvrMangaroll {
 		}
 
 		// ### Process Transition ###
-
 		if (_Transition.GetFadeState() == Fader::FADE_IN) {
 			_Transition.Update(ProviderCaughtUp() ? 1.0f : 0.1f, Time::Delta);
 

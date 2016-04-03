@@ -15,6 +15,7 @@
 #include "Fader.h"
 #include "Config.h"
 #include "MangaSettingsView.h"
+#include "Lerp.h"
 
 using namespace OVR;
 namespace OvrMangaroll {
@@ -150,6 +151,7 @@ namespace OvrMangaroll {
 		UITexture _Arrow;
 		UITexture _ArrowLeftTexture;
 		UITexture _Fill;
+		UILabel *_NoResultMessage;
 
 		UILabel *_Title;
 		UIButton *_ArrowRight;
