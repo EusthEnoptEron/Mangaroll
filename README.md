@@ -12,7 +12,7 @@ Just create a folder called either "Manga" or "Comics" in the SD card root and d
 
 It's possible to fetch manga/comics from online sources. In order to get this to work, you will need to create a file called `services.json`.
 
-In all directories that are scanned for manga (currently the "Manga" and the "Comics" directory) you can place a `services.json` that contains a list of remote services that may provide manga or comics.
+Currently, you can place a file called `services.json` in your "Manga" folder that contains a list of remote services that may provide manga or comics.
 
 The file is a simple array of objects, and there are two ways of defining a service: either by providing a pair of URLs to a compliant web server, or by describing how to directly fetch the images through CSS selectors (see [Service Configs](https://github.com/EusthEnoptEron/Mangaroll/wiki/Service-Configs)).
 
