@@ -13,7 +13,8 @@
 #include "malloc.h"
 
 #define USE_PBO 0
-#define MIPMAP_ON_GPU 1
+#define MIPMAP_ON_GPU 0
+#define USE_STB_RESIZE 1
 
 using namespace OVR;
 
@@ -461,9 +462,14 @@ namespace OvrMangaroll {
 
 			for (int i = 1; i < _MipmapCount; i++) {
 				_Buffers.PushBack(
+#if USE_STB_RESIZE == 1
 					Quarter(_Buffers[_Buffers.GetSizeI() - 1],
-					mipmapWidth, mipmapHeight)
-					);
+						mipmapWidth, mipmapHeight)
+#else
+					QuarterImageSize(_Buffers[], 
+						mipmapWidth, mipmapHeight)
+#endif
+				);
 
 				mipmapWidth = Alg::Max(1, mipmapWidth >> 1);
 				mipmapHeight = Alg::Max(1, mipmapHeight >> 1);
