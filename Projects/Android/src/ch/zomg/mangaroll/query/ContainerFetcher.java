@@ -15,6 +15,8 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import ch.zomg.mangaroll.MainActivity;
+
 /**
  * Created by Simon on 2016/03/30.
  */
@@ -34,7 +36,7 @@ public class ContainerFetcher extends Fetcher {
 
             Log.i(TAG, descriptor.getUrl());
             setHasMore(false);
-            Document doc = Jsoup.connect(descriptor.getUrl()).get();
+            Document doc = Jsoup.connect(descriptor.getUrl()).userAgent(MainActivity.USER_AGENT).get();
             URI uri = URI.create(descriptor.getUrl());
 
             List<Fetcher> fetchers = new ArrayList<>();
@@ -73,7 +75,6 @@ public class ContainerFetcher extends Fetcher {
             }
             Log.i(TAG, "Done with this container");
 
-
             // Determine if there is more
             if(descriptor.getNextPageSelector() != null) {
                 Elements nextPageLink = doc.select(descriptor.getNextPageSelector());
@@ -81,6 +82,9 @@ public class ContainerFetcher extends Fetcher {
                 if(hasMore()) {
                     descriptor.setUrl(uri.resolve(nextPageLink.get(0).attr("href")).toString());
                 }
+            }
+            if(fetchers.size() == 0) {
+                setHasMore(false);
             }
 
             return fetchers.toArray(new Fetcher[fetchers.size()]);

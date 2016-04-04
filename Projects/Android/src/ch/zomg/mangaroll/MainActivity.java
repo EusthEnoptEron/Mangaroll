@@ -25,6 +25,8 @@ import java.util.regex.Pattern;
 
 public class MainActivity extends VrActivity {
 	public static final String TAG = "Mangaroll";
+	public static final String USER_AGENT = "Mangaroll/1.0";
+
 	private static final String[] ALLOWED_IMG_EXTS = new String[]{".jpg", ".png"};
 	/** Load jni .so on initialization */
 	static {
@@ -94,7 +96,7 @@ public class MainActivity extends VrActivity {
 		try {
 			URL aURL = new URL(str);
 			HttpURLConnection conn = (HttpURLConnection) aURL.openConnection();
-			conn.setRequestProperty("User-Agent", "Mangaroll/1.0");
+			conn.setRequestProperty("User-Agent", USER_AGENT);
 			conn.connect();
 
 			InputStream is = conn.getInputStream();

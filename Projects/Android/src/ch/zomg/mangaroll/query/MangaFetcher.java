@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import ch.zomg.mangaroll.MainActivity;
+
 /**
  * Created by Simon on 2016/03/30.
  */
@@ -30,7 +32,7 @@ public class MangaFetcher extends Fetcher {
             setHasMore(false);
 
             Log.i(TAG, descriptor.getUrl());
-            Document doc = Jsoup.connect(descriptor.getUrl()).get();
+            Document doc = Jsoup.connect(descriptor.getUrl()).userAgent(MainActivity.USER_AGENT).get();
             URI uri = URI.create(descriptor.getUrl());
 
             List<String> links = new ArrayList<>();
