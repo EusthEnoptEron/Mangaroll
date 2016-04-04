@@ -54,7 +54,7 @@ The contents of the file may e.g. look like so:
 
 ### Web Service
 
-When defining a web service, you will need two URLs that return either categories (containers) or manga/comics. The format is as follows.
+When defining a web service, you will need two URLs that return either categories (containers) or manga/comics. [An example for a server can be found here.](https://gist.github.com/EusthEnoptEron/4e032a5bd8ee4049654b1d828816d9e1) The format is as follows.
 
 #### browseUrl
 
