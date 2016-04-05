@@ -59,7 +59,11 @@ public:
 	MangaSettingsView MangaSettingsMenu;
 	MangaSelectionView MangaSelectionMenu;
 	AnimationManager Animator;
+	Array<String> &GetMangaPaths() {
+		return _MangaPaths;
+	}
 private:
+	void FillStorageLocations();
 	ovrSoundEffectContext * SoundEffectContext;
 	OvrGuiSys::SoundEffectPlayer * SoundEffectPlayer;
 	class OVR::ovrLocale *	Locale;
@@ -69,6 +73,7 @@ private:
 	bool _MenuOpen;
 	Config *_Config;
 	float _LastConfSync;
+	Array<String> _MangaPaths;
 };
 
 } // namespace OvrTemplateApp

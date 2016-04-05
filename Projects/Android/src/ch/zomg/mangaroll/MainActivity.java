@@ -14,13 +14,17 @@ package ch.zomg.mangaroll;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 
 import com.oculus.vrappframework.VrActivity;
 
+import java.io.File;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 public class MainActivity extends VrActivity {
@@ -69,6 +73,7 @@ public class MainActivity extends VrActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
 
 		Intent intent = getIntent();
 		String commandString = VrActivity.getCommandStringFromIntent(intent);
@@ -172,6 +177,35 @@ public class MainActivity extends VrActivity {
 	public static String GetRarName(String path) {
 		AbstractArchive archive = new RarArchive(path);
 		return archive.getName();
+	}
+
+	public static String[] getAllStorageDirectories() {
+		final String state = Environment.getExternalStorageState();
+		final List<String> dirList = new ArrayList<>();
+
+		if ( Environment.MEDIA_MOUNTED.equals(state) || Environment.MEDIA_MOUNTED_READ_ONLY.equals(state) ) {  // we can read the External Storage...
+			//Retrieve the primary External Storage:
+			final File primaryExternalStorage = Environment.getExternalStorageDirectory();
+					//Retrieve the External Storages root directory:
+			final String externalStorageRootDir;
+			if ( (externalStorageRootDir = primaryExternalStorage.getParent()) == null ) {  // no parent...
+				dirList.add(primaryExternalStorage.getAbsolutePath() + "/");
+				Log.d(TAG, "External Storage: " + primaryExternalStorage + "\n");
+			}
+			else {
+				final File externalStorageRoot = new File( externalStorageRootDir );
+				final File[] files = externalStorageRoot.listFiles();
+
+				for ( final File file : files ) {
+					// Filter out legacy folder to prevent duplicate files
+					if ( file.isDirectory() && file.canRead() && !file.getAbsolutePath().endsWith("/legacy") && (file.listFiles().length > 0) ) {  // it is a real directory (not a USB drive)...
+						dirList.add(primaryExternalStorage.getAbsolutePath() + "/");
+						Log.d(TAG, "External Storage: " + file.getAbsolutePath() + "\n");
+					}
+				}
+			}
+		}
+		return dirList.toArray(new String[dirList.size()]);
 	}
 
 

@@ -18,6 +18,7 @@
 
 using namespace OVR;
 namespace OvrMangaroll {
+	class Mangaroll;
 
 	// Holder for time information
 	class Time {
@@ -55,6 +56,7 @@ namespace OvrMangaroll {
 		static ThreadPool *Scheduler;
 		static Config *Conf;
 		static App *Instance;
+		static Mangaroll *Reader;
 		static jclass FetcherClass;
 		static jclass ContainerFetcherClass;
 		static jclass MangaFetcherClass;

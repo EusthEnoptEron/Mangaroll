@@ -92,6 +92,7 @@ Mangaroll::~Mangaroll()
 
 void Mangaroll::InitJNI(JNIEnv *env) {
 	AppState::FetcherClass = (jclass)env->NewGlobalRef(env->FindClass("ch/zomg/mangaroll/query/Fetcher"));
+	AppState::ActivityClass = (jclass)env->NewGlobalRef(env->FindClass("ch/zomg/mangaroll/MainActivity"));
 	AppState::ContainerFetcherClass = (jclass)env->NewGlobalRef(env->FindClass("ch/zomg/mangaroll/query/ContainerFetcher"));
 	AppState::MangaFetcherClass = (jclass)env->NewGlobalRef(env->FindClass("ch/zomg/mangaroll/query/MangaFetcher"));
 }
@@ -110,6 +111,7 @@ void Mangaroll::OneTimeInit( const char * fromPackage, const char * launchIntent
 	OVR::Capture::InitForRemoteCapture();
 
 	AppState::Instance = app;
+	AppState::Reader = this;
 	_Config = Config::Load(app);
 	AppState::Conf = _Config;
 
@@ -124,6 +126,10 @@ void Mangaroll::OneTimeInit( const char * fromPackage, const char * launchIntent
 
 	Locale = ovrLocale::Create( *app, "default" );
 	AppState::Scheduler = new ThreadPool(5);
+
+	// Build paths
+	FillStorageLocations();
+
 
 	String fontName;
 	GetLocale().GetString( "@string/font_name", "efigs.fnt", fontName );
@@ -142,6 +148,25 @@ void Mangaroll::OneTimeInit( const char * fromPackage, const char * launchIntent
 
 	ViewMgr.OpenView(MangaSelectionMenu);
 
+}
+
+void Mangaroll::FillStorageLocations() {
+	JNIEnv* env = app->GetJava()->Env;
+	jmethodID getDirsMethod = env->GetStaticMethodID(AppState::ActivityClass, "getAllStorageDirectories", "()[Ljava/lang/String;");
+	jobjectArray dirList = (jobjectArray)env->CallStaticObjectMethod(AppState::ActivityClass, getDirsMethod);
+	if (dirList != NULL) {
+		int count = env->GetArrayLength(dirList);
+		for (int i = 0; i < count; i++) {
+			String path = JavaUTFChars(env, (jstring)env->GetObjectArrayElement(dirList, i)).ToStr();
+			
+			if (HasPermission(path.ToCStr(), PERMISSION_READ)) {
+				_MangaPaths.PushBack(path + "RetailMedia/Manga/");
+				_MangaPaths.PushBack(path + "Manga/");
+				_MangaPaths.PushBack(path + "RetailMedia/Comics/");
+				_MangaPaths.PushBack(path + "Comics/");
+			}
+		}
+	}
 }
 
 void Mangaroll::SelectManga() {

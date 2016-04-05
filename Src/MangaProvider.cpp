@@ -31,20 +31,7 @@ namespace OvrMangaroll {
 		if (_BasePath.IsEmpty()) {
 			// SEARCH FOR MANGA
 			LOG("Looking for manga...");
-			const OvrStoragePaths & paths = AppState::Instance->GetStoragePaths();
-
-			Array<String> SearchPaths;
-			paths.PushBackSearchPathIfValid(EST_SECONDARY_EXTERNAL_STORAGE, EFT_ROOT, "RetailMedia/Manga", SearchPaths);
-			paths.PushBackSearchPathIfValid(EST_SECONDARY_EXTERNAL_STORAGE, EFT_ROOT, "Manga", SearchPaths);
-			paths.PushBackSearchPathIfValid(EST_PRIMARY_EXTERNAL_STORAGE, EFT_ROOT, "RetailMedia/Manga", SearchPaths);
-			paths.PushBackSearchPathIfValid(EST_PRIMARY_EXTERNAL_STORAGE, EFT_ROOT, "Manga", SearchPaths);
-			
-			paths.PushBackSearchPathIfValid(EST_SECONDARY_EXTERNAL_STORAGE, EFT_ROOT, "RetailMedia/Comics", SearchPaths);
-			paths.PushBackSearchPathIfValid(EST_SECONDARY_EXTERNAL_STORAGE, EFT_ROOT, "Comics", SearchPaths);
-			paths.PushBackSearchPathIfValid(EST_PRIMARY_EXTERNAL_STORAGE, EFT_ROOT, "RetailMedia/Comics", SearchPaths);
-			paths.PushBackSearchPathIfValid(EST_PRIMARY_EXTERNAL_STORAGE, EFT_ROOT, "Comics", SearchPaths);
-
-
+			Array<String> &SearchPaths = AppState::Reader->GetMangaPaths();
 			StringHash<String> results = RelativeDirectoryFileList(SearchPaths, "/");
 			String mangaPath;
 			LOG("Found %d manga folders", results.GetSize());
@@ -197,15 +184,12 @@ namespace OvrMangaroll {
 		// LOAD CONFIGURED REMOTE SITES
 		const OvrStoragePaths & paths = AppState::Instance->GetStoragePaths();
 
-		Array<String> SearchPaths;
-		paths.PushBackSearchPathIfValid(EST_SECONDARY_EXTERNAL_STORAGE, EFT_ROOT, "RetailMedia/", SearchPaths);
-		paths.PushBackSearchPathIfValid(EST_SECONDARY_EXTERNAL_STORAGE, EFT_ROOT, "", SearchPaths);
-		paths.PushBackSearchPathIfValid(EST_PRIMARY_EXTERNAL_STORAGE, EFT_ROOT, "RetailMedia/", SearchPaths);
-		paths.PushBackSearchPathIfValid(EST_PRIMARY_EXTERNAL_STORAGE, EFT_ROOT, "", SearchPaths);
+		Array<String> &SearchPaths = AppState::Reader->GetMangaPaths();
 
 		for (int i = 0; i < SearchPaths.GetSizeI(); i++) {
-			const char *path = (SearchPaths[i] + "Manga/services.json").ToCStr();
+			const char *path = (SearchPaths[i] + "services.json").ToCStr();
 			if (FileExists(path)) {
+				LOG("FOUND AT %s", path);
 				JSON *jsonFile = JSON::Load(path);
 				if (jsonFile != NULL) {
 					JsonReader serviceReader(jsonFile);

@@ -5,6 +5,7 @@
 #include "Kernel\OVR_Threads.h"
 #include "App.h"
 #include "Kernel\OVR_Math.h"
+#include "Mangaroll.h"
 
 using namespace OVR;
 namespace OvrMangaroll {
@@ -26,6 +27,7 @@ namespace OvrMangaroll {
 	jclass AppState::MangaFetcherClass = NULL;
 	jclass AppState::ActivityClass = NULL;
 	Config *AppState::Conf = NULL;
+	Mangaroll *AppState::Reader = NULL;
 	ThreadPool *AppState::Scheduler = NULL;
 
 	Assets *Assets::_Instance = NULL;
