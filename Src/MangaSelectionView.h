@@ -108,10 +108,16 @@ namespace OvrMangaroll {
 			return _Providers.GetSizeI() > 1;
 		}
 		void GoBack() {
-			_Providers.Pop(); // TODO: Garbage
-			_NoResultMessage->SetVisible(false);
-			Seek(0);
-			_FadeDir = -1;
+			//if (IsOperatable()) {
+				_Providers.Pop(); // TODO: Garbage
+				_NoResultMessage->SetVisible(false);
+				Seek(0);
+				_FadeDir = -1;
+			//}
+		}
+
+		bool IsOperatable() {
+			return _Transition.GetFadeState() == Fader::FADE_NONE;
 		}
 
 		void UpdateGUI();

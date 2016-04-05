@@ -573,11 +573,29 @@ namespace OvrMangaroll {
 	void MangaSelectorComponent::Seek(int dir) {
 		CurrentState().Offset += dir * _PanelCount;
 		_FillCount = 0;
+
+		// Switch Back <-> Front
 		_Front = (_Front + 1) % 2;
 		_Back = (_Back + 1) % 2;
+
+		// If we aren't already transitioninng, initiate!
+		if (_Transition.GetFadeState() == Fader::FADE_NONE) {
+
+			_Transition.SetFadeAlpha(0);
+			_Transition.StartFadeIn();
+		}
+		else {
+			// Already animating - just clear the front buffer
+			CleanPanels();
+
+			// Switch back, because the back buffer is still moving away
+			_Front = (_Front + 1) % 2;
+			_Back = (_Back + 1) % 2;
+		}
+
+
 		_FadeDir = dir;
-		_Transition.SetFadeAlpha(0);
-		_Transition.StartFadeIn();
+		
 	}
 	
 	void MangaSelectorComponent::UpdatePanels() {
@@ -599,6 +617,9 @@ namespace OvrMangaroll {
 
 
 	void MangaSelectorComponent::SetProvider(MangaProvider &provider, bool stack) {
+		//if (!IsOperatable())
+		//	return;
+
 		if (!stack) {
 			// Clean up
 			// TODO: Clear memory somehow (be careful when deleting stuff...)
