@@ -56,7 +56,8 @@ namespace OvrMangaroll {
 		_uBrightness[0] = glGetUniformLocation(_Progs[0]->program, "Brightness");
 		_uBrightness[1] = glGetUniformLocation(_Progs[1]->program, "Brightness");
 
-		const char * scenePath = "assets/default.ovrscene";
+		//const char * scenePath = "assets/default.ovrscene";
+		const char * scenePath = "assets/stars.ovrscene";
 
 		MaterialParms materialParms;
 		materialParms.UseSrgbTextureFormats = false;
