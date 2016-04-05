@@ -81,7 +81,7 @@ public abstract class Fetcher {
 
             // Get items
             Document doc = Jsoup.connect(descriptor.getUrl()).userAgent(MainActivity.USER_AGENT).get();
-            currentElements = new LinkedList(Arrays.asList(doc.select(descriptor.getItemSelector()).toArray(new Element[0])));
+            currentElements = new LinkedList<>(Arrays.asList(doc.select(descriptor.getItemSelector()).toArray(new Element[0])));
 
             Log.i(TAG, "Loaded " + currentElements.size() + " elements");
 
