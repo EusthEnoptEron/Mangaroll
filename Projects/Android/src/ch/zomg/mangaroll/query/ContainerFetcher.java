@@ -21,41 +21,39 @@ import ch.zomg.mangaroll.MainActivity;
  * Created by Simon on 2016/03/30.
  */
 public class ContainerFetcher extends Fetcher {
-    private Descriptor descriptor;
+    private static final String TAG = ContainerFetcher.class.getName();
 
     public ContainerFetcher(Descriptor descriptor) {
-        this.descriptor = descriptor;
+        super(descriptor);
     }
-    private static final String TAG = ContainerFetcher.class.getName();
+
+    @Override
+    protected boolean isDescriptorValid() {
+        return descriptor.getItemSelector() != null && descriptor.getLinkSelector() != null && descriptor.getHandler() != null && descriptor.getUrl() != null && descriptor.getNameSelector() != null;
+    }
 
     public Fetcher[] fetch() {
         try {
-            if(descriptor.getLinkSelector() == null || descriptor.getHandler() == null || descriptor.getUrl() == null || descriptor.getNameSelector() == null) {
-                throw new RuntimeException("Not all mandatory fields are provided!");
-            }
-
             Log.i(TAG, descriptor.getUrl());
-            setHasMore(false);
-            Document doc = Jsoup.connect(descriptor.getUrl()).userAgent(MainActivity.USER_AGENT).get();
-            URI uri = URI.create(descriptor.getUrl());
 
             List<Fetcher> fetchers = new ArrayList<>();
 
             Log.i(TAG, "Item selector: "+descriptor.getItemSelector());
+
             // Search for items
-            for(Element element : doc.select(descriptor.getItemSelector())) {
+            for(Element element : next()) {
                 Log.i(TAG, "Analyzing item");
-                String link = extractURL(uri, element.select(descriptor.getLinkSelector()));
+                String link = extractURL(element.select(descriptor.getLinkSelector()));
                 String name = extractName(element.select(descriptor.getNameSelector()));
                 String thumb = "";
                 if(descriptor.getThumbSelector() != null) {
-                    thumb = extractURL(uri, element.select(descriptor.getThumbSelector()));
+                    thumb = extractURL(element.select(descriptor.getThumbSelector()));
                 }
 
                 if(!link.isEmpty()) {
                     Log.i(TAG, "Link OK");
                     Descriptor childDescriptor = descriptor.getHandler().clone();
-                    childDescriptor.setUrl(uri.resolve(link).toString());
+                    childDescriptor.setUrl(base.resolve(link).toString());
 
                     if (childDescriptor.getType() == Descriptor.Type.CONTAINER) {
                         Log.i(TAG, "Is another container");
@@ -73,24 +71,10 @@ public class ContainerFetcher extends Fetcher {
                 }
                 Log.i(TAG, "Done");
             }
-            Log.i(TAG, "Done with this container");
-
-            // Determine if there is more
-            if(descriptor.getNextPageSelector() != null) {
-                Elements nextPageLink = doc.select(descriptor.getNextPageSelector());
-                setHasMore(nextPageLink.size() > 0 && !nextPageLink.get(0).attr("href").isEmpty());
-                if(hasMore()) {
-                    descriptor.setUrl(uri.resolve(nextPageLink.get(0).attr("href")).toString());
-                }
-            }
-            if(fetchers.size() == 0) {
-                setHasMore(false);
-            }
 
             return fetchers.toArray(new Fetcher[fetchers.size()]);
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
-            setHasMore(false);
             return new Fetcher[0];
         }
     }

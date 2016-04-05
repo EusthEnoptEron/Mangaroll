@@ -8,6 +8,8 @@ import com.google.gson.annotations.SerializedName;
 public class Descriptor implements Cloneable {
 
 
+
+
     enum Type {
         @SerializedName("container")
         CONTAINER,
@@ -15,17 +17,17 @@ public class Descriptor implements Cloneable {
         MANGA
     }
 
-    private Type type;
+    private Type type = Type.CONTAINER;
     private String url;
     private String itemSelector;
     private String nameSelector;
     private String thumbSelector;
     private String linkSelector;
     private String nextPageSelector;
+    private int fetchSize = Integer.MAX_VALUE;
     private Descriptor handler;
 
     public Descriptor() {
-
     }
 
     public Descriptor.Type getType() {
@@ -94,7 +96,13 @@ public class Descriptor implements Cloneable {
     public void setHandler(Descriptor handler) {
         this.handler = handler;
     }
+    public int getFetchSize() {
+        return fetchSize;
+    }
 
+    public void setFetchSize(int fetchSize) {
+        this.fetchSize = fetchSize;
+    }
     @Override
     public Descriptor clone() {
         Descriptor clone = new Descriptor();
@@ -105,6 +113,7 @@ public class Descriptor implements Cloneable {
         clone.nextPageSelector = nextPageSelector;
         clone.handler = handler;
         clone.type = type;
+        clone.fetchSize = fetchSize;
         return clone;
     }
 }
