@@ -43,6 +43,13 @@ namespace OvrMangaroll {
 		bool Selectionable;
 		void Unload();
 		void IncreaseAngleOffset(float deg);
+		float GetAngleOffset() {
+			return _AngleOffset;
+		}
+		void SetAngleOffset(float value) {
+			_AngleOffset = value;
+			ApplyAngleOffset();
+		}
 	protected:
 		virtual void _Init() { }
 		virtual void _Update() { }

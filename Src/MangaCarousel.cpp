@@ -40,7 +40,7 @@ namespace OvrMangaroll {
 		, _Operatable(true)
 		, _Scaling(false)
 		, _ForwardAngle(0)
-		, _AnglePayload(0)
+		, _AngleAnimator(Interpol::CubicEaseInOut)
 	{
 	}
 
@@ -113,7 +113,7 @@ namespace OvrMangaroll {
 
 			// ---- HANDLE SWIPE ----
 
-			if (_AnglePayload == 0 && (vrFrame.Input.buttonState & BUTTON_SWIPE_FORWARD || vrFrame.Input.buttonState & BUTTON_SWIPE_BACK)) {
+			if (!_AngleAnimator.IsActive() && (vrFrame.Input.buttonState & BUTTON_SWIPE_FORWARD || vrFrame.Input.buttonState & BUTTON_SWIPE_BACK)) {
 				bool goForward = vrFrame.Input.buttonState & BUTTON_SWIPE_FORWARD;
 				Page *currentPage = CurrentManga->GetCurrentPage();
 				if (currentPage != NULL && currentPage->GetAngle() != RANGE_UNDEFINED) {
@@ -121,10 +121,11 @@ namespace OvrMangaroll {
 					if (otherPage != NULL && otherPage->GetAngle() != RANGE_UNDEFINED) {
 						float angleRange = (currentPage->GetAngle() + otherPage->GetAngle()) * 0.5f;
 						if (angleRange != RANGE_UNDEFINED) {
-
-							_AnglePayload = goForward
+							_AngleAnimator.Start(Time::Elapsed, 0.2f,
+								CurrentManga->GetAngleOffset(),
+								CurrentManga->GetAngleOffset() + (goForward
 								? angleRange
-								: -angleRange;
+								: -angleRange));
 						}
 					}
 				}
@@ -138,15 +139,9 @@ namespace OvrMangaroll {
 
 		if (CurrentManga != NULL) {
 			// Handle swipe
-			if (_AnglePayload != 0) {
-				bool negative = _AnglePayload < 0;
-				float diff = SCROLL_SPEED_MAX * Time::Delta * (negative ? -1 : 1);
-				_AnglePayload -= diff;
-				CurrentManga->IncreaseAngleOffset(diff);
-
-				if ((_AnglePayload < 0) != negative) {
-					_AnglePayload = 0;
-				}
+			if (_AngleAnimator.IsActive()) {
+				_AngleAnimator.Update(Time::Elapsed);
+				CurrentManga->SetAngleOffset(_AngleAnimator.Value());
 			}
 
 			CurrentManga->Selectionable = _Operatable;
