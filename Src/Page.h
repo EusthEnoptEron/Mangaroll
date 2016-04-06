@@ -89,7 +89,8 @@ namespace OvrMangaroll {
 		void Update(float angle, bool onlyVisual = false);
 		void SetNext(Page *next);
 		void SetPrev(Page *prev);
-		Page *GetNext(void);
+		Page *GetNext();
+		Page *GetPrev();
 		void Load(void);
 		void Draw(const Matrix4f &m);
 		String GetPath() { return _Path; }
@@ -111,6 +112,10 @@ namespace OvrMangaroll {
 		void SetRangeEnd(float pxls) {
 			_PixelRange.SetEnd(pxls);
 			_AngularRange.SetEnd(pxls / PIXELS_PER_DEGREE);
+		}
+
+		float GetAngle() {
+			return _AngularRange.GetLength();
 		}
 	protected:
 		String _Path;

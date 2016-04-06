@@ -13,7 +13,7 @@ namespace OvrMangaroll {
 	const float MangaCarousel::SCROLL_ANGLE_MIN = 5.0f;
 	const float MangaCarousel::SCROLL_ANGLE_MAX = 90.0f;
 	const float MangaCarousel::SCROLL_SPEED_MIN = 0.0f;
-	const float MangaCarousel::SCROLL_SPEED_MAX = 60.0f;
+	const float MangaCarousel::SCROLL_SPEED_MAX = 100.0f;
 
 
 	float deltaAngle(float angle1, float angle2) {
@@ -40,6 +40,7 @@ namespace OvrMangaroll {
 		, _Operatable(true)
 		, _Scaling(false)
 		, _ForwardAngle(0)
+		, _AnglePayload(0)
 	{
 	}
 
@@ -84,6 +85,8 @@ namespace OvrMangaroll {
 				AppState::Guide = (GuideType)((AppState::Guide + 1) % 3);
 				_LastPress = Time::Elapsed;
 			}*/
+
+			// ---- HANDLE ZOOM ----
 			if (vrFrame.Input.buttonPressed & BUTTON_TOUCH) {
 				_Scaling = true;
 				_StartZoom = AppState::Conf->Zoom;
@@ -91,7 +94,10 @@ namespace OvrMangaroll {
 			if (_Scaling) {
 				AppState::Conf->Zoom = Alg::Clamp(_StartZoom + (vrFrame.Input.touchRelative.y / 500.0f), 0.0f, 1.0f);
 			}
+			// ---------------------
 			
+
+			// ---- HANDLE AUTO-ROTATE ----
 			if (CurrentManga != NULL && AppState::Conf->AutoRotate) {
 				// We might have to auto-rotate
 				float deltaAngle = _ForwardAngle - _Angle;
@@ -103,15 +109,50 @@ namespace OvrMangaroll {
 					CurrentManga->IncreaseAngleOffset(speed * Time::Delta);
 				}
 			}
+			// -----------------------------
+
+			// ---- HANDLE SWIPE ----
+
+			if (_AnglePayload == 0 && (vrFrame.Input.buttonState & BUTTON_SWIPE_FORWARD || vrFrame.Input.buttonState & BUTTON_SWIPE_BACK)) {
+				bool goForward = vrFrame.Input.buttonState & BUTTON_SWIPE_FORWARD;
+				Page *currentPage = CurrentManga->GetCurrentPage();
+				if (currentPage != NULL && currentPage->GetAngle() != RANGE_UNDEFINED) {
+					Page *otherPage = goForward ? currentPage->GetNext() : currentPage->GetPrev();
+					if (otherPage != NULL && otherPage->GetAngle() != RANGE_UNDEFINED) {
+						float angleRange = (currentPage->GetAngle() + otherPage->GetAngle()) * 0.5f;
+						if (angleRange != RANGE_UNDEFINED) {
+
+							_AnglePayload = goForward
+								? angleRange
+								: -angleRange;
+						}
+					}
+				}
+			}
+
+			// ----------------------
 		}
 		if (vrFrame.Input.buttonReleased & BUTTON_TOUCH) {
 			_Scaling = false;
 		}
 
 		if (CurrentManga != NULL) {
+			// Handle swipe
+			if (_AnglePayload != 0) {
+				bool negative = _AnglePayload < 0;
+				float diff = SCROLL_SPEED_MAX * Time::Delta * (negative ? -1 : 1);
+				_AnglePayload -= diff;
+				CurrentManga->IncreaseAngleOffset(diff);
+
+				if ((_AnglePayload < 0) != negative) {
+					_AnglePayload = 0;
+				}
+			}
+
 			CurrentManga->Selectionable = _Operatable;
 			CurrentManga->Update(_Angle, false);
 		}
+
 
 		Scene.Frame(vrFrame, _Mangaroll->app->GetHeadModelParms());
 		_Fader.Update(3, Time::Delta);

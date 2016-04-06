@@ -25,6 +25,10 @@ namespace OvrMangaroll {
 		return _Next;
 	}
 
+	Page *Page::GetPrev() {
+		return _Prev;
+	}
+
 	void Page::SetPrev(Page *p) {
 		_Prev = p;
 

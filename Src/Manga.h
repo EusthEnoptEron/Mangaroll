@@ -32,9 +32,12 @@ namespace OvrMangaroll {
 		void Draw(const Matrix4f&);
 		void AddPage(Page *page);
 		void Update(float angle, bool onlyVisual = false);
-		int GetProgress(void);
+		int GetProgress();
+		Page *GetCurrentPage() {
+			return _Selection;
+		}
 		void SetProgress(int page, float angleToAppear = FLT_MAX);
-		int GetCount(void);
+		int GetCount();
 		Page &GetPage(int);
 		String Name;
 		bool Selectionable;

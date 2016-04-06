@@ -54,6 +54,8 @@ namespace OvrMangaroll {
 		float _StartZoom;
 		// The current forward angle
 		float _ForwardAngle;
+		// Angle that has to be added to the current angle, only processed bit by bit
+		float _AnglePayload;
 
 		// Deg
 		static const float SCROLL_ANGLE_MIN;
