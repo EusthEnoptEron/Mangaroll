@@ -1,0 +1,40 @@
+[{
+    "name": "mangareader.net",
+    "dynamic": {
+        "url": "http://www.mangareader.net/popular",
+        "type": "container",
+        "itemSelector": ".mangaresultitem",
+        "nameSelector": ".manga_name h3",
+        "linkSelector": ".manga_name h3 a",
+        "thumbSelector": ".imgsearchresults",
+        "nextPageSelector": "#sp strong + a",
+        "handler": {
+            "type": "container",
+            "itemSelector": "#listing tr",
+            "linkSelector": "a",
+            "nameSelector": "a",
+            "handler": {
+                "type": "manga",
+                "itemSelector": "#imgholder img",
+                "nextPageSelector": "#navi .next a"
+            }
+        }
+    }
+},
+{
+    "name": "/c/",
+    "dynamic": {
+        "url": "http://boards.4chan.org/c/",
+        "type": "container",
+        "itemSelector": ".thread .opContainer",
+        "nameSelector": ".subject",
+        "linkSelector": ".replylink",
+        "thumbSelector": ".fileThumb img",
+        "nextPageSelector": ".pages strong + a",
+        "handler": {
+            "type": "manga",
+            "itemSelector": ".fileThumb"
+        }
+
+    }
+}]
