@@ -50,6 +50,9 @@ namespace OvrMangaroll {
 			_AngleOffset = value;
 			ApplyAngleOffset();
 		}
+		float GetAngle() {
+			return _Angle + _AngleOffset;
+		}
 	protected:
 		virtual void _Init() { }
 		virtual void _Update() { }

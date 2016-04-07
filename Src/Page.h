@@ -104,7 +104,9 @@ namespace OvrMangaroll {
 		void SetSelected(bool state);
 		void Reset(void);
 		bool IsValid() { return _ATexture->IsValid(); }
-
+		float GetStartAngle() {
+			return _AngularRange.GetStart();
+		}
 		void SetRangeStart(float pxls) {
 			_PixelRange.SetStart(pxls);
 			_AngularRange.SetStart(pxls / PIXELS_PER_DEGREE);

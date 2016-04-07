@@ -119,14 +119,15 @@ namespace OvrMangaroll {
 				if (currentPage != NULL && currentPage->GetAngle() != RANGE_UNDEFINED) {
 					Page *otherPage = goForward ? currentPage->GetNext() : currentPage->GetPrev();
 					if (otherPage != NULL && otherPage->GetAngle() != RANGE_UNDEFINED) {
-						float angleRange = (currentPage->GetAngle() + otherPage->GetAngle()) * 0.5f;
-						if (angleRange != RANGE_UNDEFINED) {
-							_AngleAnimator.Start(Time::Elapsed, 0.2f,
-								CurrentManga->GetAngleOffset(),
-								CurrentManga->GetAngleOffset() + (goForward
-								? angleRange
-								: -angleRange));
-						}
+						float currentAngle = CurrentManga->GetAngle();
+						float progress = Alg::Clamp((currentAngle  - currentPage->GetStartAngle()) / currentPage->GetAngle(), 0.0f, 1.0f);
+						float angleRange = (currentPage->GetAngle() + currentPage->GetAngle()) * 0.5f;
+
+						_AngleAnimator.Start(Time::Elapsed, 0.2f,
+							CurrentManga->GetAngleOffset(),
+							CurrentManga->GetAngleOffset() + (goForward
+							? (   currentPage->GetAngle() * (1 - progress) + otherPage->GetAngle() * 0.5f)
+							: (- (currentPage->GetAngle() * progress) - otherPage->GetAngle() * 0.5f)));
 					}
 				}
 			}
