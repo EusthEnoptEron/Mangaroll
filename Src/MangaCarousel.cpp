@@ -122,10 +122,11 @@ namespace OvrMangaroll {
 						float currentAngle = CurrentManga->GetAngle();
 						float progress = Alg::Clamp((currentAngle  - currentPage->GetStartAngle()) / currentPage->GetAngle(), 0.0f, 1.0f);
 						float angleRange = (currentPage->GetAngle() + currentPage->GetAngle()) * 0.5f;
+						float dir = AppState::Conf->LeftToRight ? -1 : 1;
 
 						_AngleAnimator.Start(Time::Elapsed, 0.2f,
 							CurrentManga->GetAngleOffset(),
-							CurrentManga->GetAngleOffset() + (goForward
+							CurrentManga->GetAngleOffset() + dir * (goForward
 							? (   currentPage->GetAngle() * (1 - progress) + otherPage->GetAngle() * 0.5f)
 							: (- (currentPage->GetAngle() * progress) - otherPage->GetAngle() * 0.5f)));
 					}
