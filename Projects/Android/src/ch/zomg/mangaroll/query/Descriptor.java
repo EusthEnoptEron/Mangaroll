@@ -2,14 +2,12 @@ package ch.zomg.mangaroll.query;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Map;
+
 /**
  * Created by Simon on 2016/03/30.
  */
 public class Descriptor implements Cloneable {
-
-
-
-
     enum Type {
         @SerializedName("container")
         CONTAINER,
@@ -24,6 +22,7 @@ public class Descriptor implements Cloneable {
     private String thumbSelector;
     private String linkSelector;
     private String nextPageSelector;
+    private Map<String, String> cookies;
     private int fetchSize = Integer.MAX_VALUE;
     private Descriptor handler;
 
@@ -103,6 +102,16 @@ public class Descriptor implements Cloneable {
     public void setFetchSize(int fetchSize) {
         this.fetchSize = fetchSize;
     }
+
+
+    public Map<String, String> getCookies() {
+        return cookies;
+    }
+
+    public void setCookies(Map<String, String> cookies) {
+        this.cookies = cookies;
+    }
+
     @Override
     public Descriptor clone() {
         Descriptor clone = new Descriptor();

@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -80,7 +81,13 @@ public abstract class Fetcher {
             Log.i(TAG, "Fetch new document from " + descriptor.getUrl());
 
             // Get items
-            Document doc = Jsoup.connect(descriptor.getUrl()).userAgent(MainActivity.USER_AGENT).get();
+            Connection jsoupConnection = Jsoup.connect(descriptor.getUrl());
+            jsoupConnection.userAgent(MainActivity.USER_AGENT);
+            if(descriptor.getCookies() != null) {
+                jsoupConnection.cookies(descriptor.getCookies());
+            }
+            Document doc = jsoupConnection.get();
+
             currentElements = new LinkedList<>(Arrays.asList(doc.select(descriptor.getItemSelector()).toArray(new Element[0])));
 
             Log.i(TAG, "Loaded " + currentElements.size() + " elements");
