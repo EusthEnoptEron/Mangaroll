@@ -40,7 +40,7 @@
     <NMakeCleanCommandLine>cd Projects\Android &amp; build.bat clean</NMakeCleanCommandLine>
     <NMakeReBuildCommandLine>cd Projects\Android &amp; build.bat</NMakeReBuildCommandLine>
     <NMakePreprocessorDefinitions>WIN32;_DEBUG;$(NMakePreprocessorDefinitions)</NMakePreprocessorDefinitions>
-    <IncludePath>E:\Dev\Oculus\Mobile\LibOVRKernel\Src;E:\Dev\Oculus\Mobile\VrApi\Include;E:\Dev\Oculus\Mobile\VrAppFramework\Include;E:\Dev\Oculus\Mobile\VrAppSupport\VrSound\Include;E:\Dev\Oculus\Mobile\VrAppSupport\VrGUI\Src;E:\Dev\Oculus\Mobile\VrAppSupport\VrLocale\Src;E:\Dev\Oculus\Mobile\VrCapture\Include;E:\Dev\Oculus\Mobile\VrAppSupport\SystemUtils\Include;E:\Dev\Oculus\Mobile\VrAppSupport\MediaSurfacePlugin\Src;E:\Dev\Oculus\Mobile\VrAppSupport\VrModel\Src;E:\Dev\Oculus\Mobile\1stParty\OpenGL_Loader\Include;E:\Dev\Oculus\Mobile\3rdParty\stb\src;C:\Program Files\Java\jdk1.8.0_65\include;E:\Dev\Android\android-ndk-r10e\platforms\android-21\arch-arm64\usr\include;E:\Dev\Oculus\Mobile\VrSamples\Native\Mangaroll\Lib\freetype-2.6\freetype\include\freetype2</IncludePath>
+    <IncludePath>E:\Dev\Oculus\Mobile\LibOVRKernel\Src;E:\Dev\Oculus\Mobile\VrApi\Include;E:\Dev\Oculus\Mobile\VrAppFramework\Include;E:\Dev\Oculus\Mobile\VrAppSupport\VrSound\Include;E:\Dev\Oculus\Mobile\VrAppSupport\VrGUI\Src;E:\Dev\Oculus\Mobile\VrAppSupport\VrLocale\Src;E:\Dev\Oculus\Mobile\VrCapture\Include;E:\Dev\Oculus\Mobile\VrAppSupport\SystemUtils\Include;E:\Dev\Oculus\Mobile\VrAppSupport\MediaSurfacePlugin\Src;E:\Dev\Oculus\Mobile\VrAppSupport\VrModel\Src;E:\Dev\Oculus\Mobile\1stParty\OpenGL_Loader\Include;E:\Dev\Oculus\Mobile\3rdParty\stb\src;C:\Program Files\Java\jdk1.8.0_65\include;E:\Dev\Android\android-ndk-r10e\platforms\android-21\arch-arm64\usr\include;E:\Dev\Oculus\Mobile\VrSamples\Native\Mangaroll\Lib\freetype-2.6\freetype\include\freetype2;E:\Dev\libs\libstdc++\include\std;E:\Dev\libs\libstdc++\include</IncludePath>
     <LibraryPath>$(VC_LibraryPath_x86);E:\Dev\Android\android-ndk-r10e\platforms\android-21\arch-arm64\usr\include;E:\Dev\Oculus\Mobile\LibOVRKernel\Src;E:\Dev\Oculus\Mobile\VrApi\Include;E:\Dev\Oculus\Mobile\VrAppFramework\Include;E:\Dev\Oculus\Mobile\VrAppSupport\VrSound\Include;E:\Dev\Oculus\Mobile\VrAppSupport\VrGUI\Src;E:\Dev\Oculus\Mobile\VrAppSupport\VrLocale\Src;E:\Dev\Oculus\Mobile\VrCapture\Include;E:\Dev\Oculus\Mobile\VrAppSupport\SystemUtils\Include;E:\Dev\Oculus\Mobile\VrAppSupport\MediaSurfacePlugin\Src;E:\Dev\Oculus\Mobile\1stParty\OpenGL_Loader\Include</LibraryPath>
     <NMakeIncludeSearchPath>E:\Dev\Oculus\Mobile\LibOVRKernel\Src;E:\Dev\Oculus\Mobile\VrApi\Include;E:\Dev\Oculus\Mobile\VrAppFramework\Include;E:\Dev\Oculus\Mobile\VrAppSupport\VrSound\Include;E:\Dev\Oculus\Mobile\VrAppSupport\VrGUI\Src;E:\Dev\Oculus\Mobile\VrAppSupport\VrLocale\Src;E:\Dev\Oculus\Mobile\VrCapture\Include;E:\Dev\Oculus\Mobile\VrAppSupport\SystemUtils\Include;E:\Dev\Oculus\Mobile\VrAppSupport\MediaSurfacePlugin\Src;$(IncludePath);E:\Dev\Oculus\Mobile\1stParty\OpenGL_Loader\Include;E:\Dev\Oculus\Mobile\3rdParty\stb\src</NMakeIncludeSearchPath>
     <NMakeForcedIncludes>E:\Dev\Oculus\Mobile\1stParty\OpenGL_Loader\Include</NMakeForcedIncludes>
@@ -89,6 +89,7 @@
     <ClCompile Include="Src\AsyncTexture.cpp" />
     <ClCompile Include="Src\Config.cpp" />
     <ClCompile Include="Src\Helpers.cpp" />
+    <ClCompile Include="Src\Interpolation.cpp" />
     <ClCompile Include="Src\Manga.cpp" />
     <ClCompile Include="Src\MangaCarousel.cpp" />
     <ClCompile Include="Src\MangaProvider.cpp" />
@@ -135,9 +136,11 @@
     <ClInclude Include="Src\AnimationManager.h" />
     <ClInclude Include="Src\AsyncTexture.h" />
     <ClInclude Include="Src\Config.h" />
+    <ClInclude Include="Src\DBTweener\dbtweener.h" />
     <ClInclude Include="Src\GazeUpdateComponent.h" />
     <ClInclude Include="Src\GlObject.h" />
     <ClInclude Include="Src\Helpers.h" />
+    <ClInclude Include="Src\Interpolation.h" />
     <ClInclude Include="Src\Manga.h" />
     <ClInclude Include="Src\MangaCarousel.h" />
     <ClInclude Include="Src\MangaProvider.h" />
