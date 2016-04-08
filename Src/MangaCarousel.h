@@ -7,6 +7,7 @@
 #include "Manga.h"
 #include "Interpolation.h"
 #include "Fader.h"
+#include "IScene.h"
 
 using namespace OVR;
 namespace OvrMangaroll {
@@ -57,7 +58,9 @@ namespace OvrMangaroll {
 		float _ForwardAngle;
 		// Angle that has to be added to the current angle, only processed bit by bit
 		Tween _AngleAnimator;
-
+		//ViewManager _SceneManager;
+		Array<IScene*> _Scenes;
+		IScene *_CurrentScene;
 		// Deg
 		static const float SCROLL_ANGLE_MIN;
 		static const float SCROLL_ANGLE_MAX;

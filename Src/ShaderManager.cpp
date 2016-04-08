@@ -4,7 +4,9 @@
 #include "App.h"
 using namespace OVR;
 namespace OvrMangaroll {
-	ShaderManager::ShaderManager() {
+	ShaderManager::ShaderManager()
+		: _LoadedPrograms()
+	{
 		
 	}
 
@@ -24,22 +26,22 @@ namespace OvrMangaroll {
 		}
 		const String key = vertPath + fragPath;
 
-		GlProgram *program = _LoadedPrograms.Get(key);
-		if (program == NULL) {
+		if (_LoadedPrograms.find(key) == _LoadedPrograms.end()) {
 			// Add new program
-			
+			LOG("Load %s & %s", vertPath.ToCStr(), fragPath.ToCStr());
 			String vertexShader = LoadShader(vertPath);
 			String fragShader = LoadShader(fragPath);
 			GlProgram prog = BuildProgram(vertexShader.ToCStr(), fragShader.ToCStr());
+			LOG("Program that was built: %p", &prog);
+			_LoadedPrograms[key] = new GlProgram(prog);
 
-			_LoadedPrograms.Add(key, prog);
-			program = _LoadedPrograms.Get(key);
 		}
 		else {
 			WARN("FOUND SHADER: %s", vertPath.ToCStr());
+			//LOG("%s -> %d %d", vertPath.ToCStr(), program->program, program->fragmentShader);
 		}
-
-		return program;
+		
+		return _LoadedPrograms[key];
 	}
 
 	String ShaderManager::LoadShader(String nameInZip) {

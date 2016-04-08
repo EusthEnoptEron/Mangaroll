@@ -5,7 +5,7 @@
 
 #include "GLES3\gl3_loader.h"
 #include "Config.h"
-
+#include "HexagonScene.h"
 
 
 namespace OvrMangaroll {
@@ -41,6 +41,7 @@ namespace OvrMangaroll {
 		, _Scaling(false)
 		, _ForwardAngle(0)
 		, _AngleAnimator(Interpol::CubicEaseInOut)
+		//, _SceneManager()
 	{
 	}
 
@@ -51,6 +52,8 @@ namespace OvrMangaroll {
 	void MangaCarousel::OneTimeInit(const char * launchIntent) {
 		_Progs[0] = ShaderManager::Instance()->Get(PAGE_SHADER_NAME);
 		_Progs[1] = ShaderManager::Instance()->Get(PAGE_SHADER_NAME, PAGE_TRANSPARENT_FRAG_NAME);
+		LOG("my shader: %p", _Progs[0]);
+		LOG("my shader 2: %p", _Progs[1]);
 
 		_uContrast[0] = glGetUniformLocation(_Progs[0]->program, "Contrast");
 		_uContrast[1] = glGetUniformLocation(_Progs[1]->program, "Contrast");
@@ -62,10 +65,25 @@ namespace OvrMangaroll {
 
 		MaterialParms materialParms;
 		materialParms.UseSrgbTextureFormats = false;
-		Scene.LoadWorldModelFromApplicationPackage(scenePath, materialParms);
+
+		//Scene.LoadWorldModelFromApplicationPackage(scenePath, materialParms);
+		
+		// Fill scenes
+		_Scenes.PushBack(new HexagonScene());
+
+		for (int i = 0; i < _Scenes.GetSizeI(); i++) {
+			_Scenes[i]->OneTimeInit();
+			//_SceneManager.AddView(_Scenes[i]);
+		}
+
+		_CurrentScene = _Scenes.Front();
+		_CurrentScene->OnOpen();
 	}
 
 	void MangaCarousel::OneTimeShutdown(){
+		for (int i = 0; i < _Scenes.GetSizeI(); i++) {
+			_Scenes[i]->OneTimeShutdown();
+		}
 	}
 
 	Matrix4f MangaCarousel::Frame(const VrFrame & vrFrame){
@@ -152,6 +170,7 @@ namespace OvrMangaroll {
 
 
 		Scene.Frame(vrFrame, _Mangaroll->app->GetHeadModelParms());
+		_CurrentScene->Frame(vrFrame);
 		_Fader.Update(3, Time::Delta);
 
 		return _CenterEyeViewMatrix;
@@ -178,11 +197,18 @@ namespace OvrMangaroll {
 		const Matrix4f eyeProjectionMatrix = GetEyeProjectionMatrix(eye, fovDegreesX, fovDegreesY);
 		const Matrix4f eyeViewProjection = Scene.DrawEyeView(eye, fovDegreesX, fovDegreesY);
 
+		glClearColor(0, 0, 0, 1);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+
 		int idx = AppState::Conf->Transparent ? 1 : 0;
 		_Prog = _Progs[idx];
 
 		if (CurrentManga != NULL) {
 			glUseProgram(_Prog->program);
+			//LOG("my shader: %d (%d, %d)", _Prog->program, _Prog->fragmentShader, _Prog->vertexShader);
+			LOG("my shader: %p", _Prog);
+
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glUniformMatrix4fv(_Prog->uView, 1, GL_TRUE, eyeViewMatrix.M[0]);
@@ -195,6 +221,9 @@ namespace OvrMangaroll {
 
 		glBindVertexArray(0);
 		glUseProgram(0);
+
+		_CurrentScene->DrawEyeView(eyeViewMatrix, eyeProjectionMatrix, eye);
+
 
 		frameParms.ExternalVelocity = Scene.GetExternalVelocity();
 		frameParms.Layers[VRAPI_FRAME_LAYER_TYPE_WORLD].Flags |= VRAPI_FRAME_LAYER_FLAG_CHROMATIC_ABERRATION_CORRECTION;
