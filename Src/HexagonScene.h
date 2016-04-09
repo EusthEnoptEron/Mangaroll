@@ -104,13 +104,15 @@ namespace OvrMangaroll {
 	private:
 		void SpawnParticle(int i) {
 			Particle p;
-			p.pos = Vector3f(rand() % 1000 * 0.01f - 5, rand() % 100 * 0.01f - 1.0f, rand() % 1000 * 0.01f - 5);
-			p.r = 255;
-			p.g = 0;
-			p.b = 0;
-			p.a = 255;
-			p.life = 5;
-			p.speed = Vector3f(0, 0.1f, 0);
+			p.pos = Vector3f(rand() % 1000 * 0.01f - 5, 
+				rand() % 100 * 0.03f - 1.0f,
+				rand() % 1000 * 0.01f - 5);
+			p.r = i % 255;
+			p.g = i % 50 + 50;
+			p.b = i % 100 + 50;
+			p.a = 1;
+			p.life = 10;
+			p.speed = Vector3f(0, 0.05f, 0);
 			p.size = 0.01f;
 
 			if (p.pos.Length() > 2.0f)

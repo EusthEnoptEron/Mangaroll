@@ -79,7 +79,7 @@ namespace OvrMangaroll {
 						// Simulate simple physics : gravity only, no collisions
 						//p.speed += glm::vec3(0.0f, -9.81f, 0.0f) * (float)delta * 0.5f;
 						p.pos += p.speed * delta;
-						p.cameradistance = p.pos.Length();
+						p.cameradistance = p.pos.LengthSq();
 
 						// Fill the GPU buffer
 						g_particule_position_size_data[4 * _ParticlesCount + 0] = p.pos.x;
@@ -209,7 +209,7 @@ namespace OvrMangaroll {
 		int _LastUsedParticle;
 		int _ParticlesCount;
 		float g_particule_position_size_data[MAX_PARTICLES * 4];
-		float g_particule_color_data[MAX_PARTICLES * 4];
+		unsigned char g_particule_color_data[MAX_PARTICLES * 4];
 		GlProgram *_Shader;
 	};
 }

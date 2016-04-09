@@ -1,6 +1,7 @@
 #version 300 es
 
 precision lowp float; 
+
 in vec3 Position;
 in vec4 VertexColor;
 in vec4 Normal; // Center position
