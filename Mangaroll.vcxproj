@@ -132,7 +132,6 @@
     <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\VRMenuEventHandler.h" />
     <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\VRMenuMgr.h" />
     <ClInclude Include="..\..\..\VrAppSupport\VrGUI\Src\VRMenuObject.h" />
-    <ClInclude Include="assets\TransparentMangaPage.frag" />
     <ClInclude Include="Src\AnimationManager.h" />
     <ClInclude Include="Src\AsyncTexture.h" />
     <ClInclude Include="Src\Config.h" />
@@ -140,7 +139,9 @@
     <ClInclude Include="Src\GazeUpdateComponent.h" />
     <ClInclude Include="Src\GlObject.h" />
     <ClInclude Include="Src\Helpers.h" />
+    <ClInclude Include="Src\HexagonScene.h" />
     <ClInclude Include="Src\Interpolation.h" />
+    <ClInclude Include="Src\IScene.h" />
     <ClInclude Include="Src\Manga.h" />
     <ClInclude Include="Src\MangaCarousel.h" />
     <ClInclude Include="Src\MangaProvider.h" />
@@ -149,6 +150,7 @@
     <ClInclude Include="Src\MangaSettingsView.h" />
     <ClInclude Include="Src\OVR_TurboJpeg.h" />
     <ClInclude Include="Src\Page.h" />
+    <ClInclude Include="Src\Sparkle.h" />
     <ClInclude Include="Src\ThreadPool.h" />
     <ClInclude Include="Src\ShaderManager.h" />
     <ClInclude Include="Src\turbojpeg.h" />
@@ -158,8 +160,13 @@
     <ClInclude Include="Src\Web.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\MangaPage.frag" />
-    <None Include="assets\MangaPage.vert" />
+    <None Include="assets\shaders\floor_lol.frag" />
+    <None Include="assets\shaders\floor_lol.vert" />
+    <None Include="assets\shaders\MangaPage.frag" />
+    <None Include="assets\shaders\MangaPage.vert" />
+    <None Include="assets\shaders\particle.frag" />
+    <None Include="assets\shaders\particle.vert" />
+    <None Include="assets\shaders\TransparentMangaPage.frag" />
     <None Include="projects\android\build\outputs\lint-results-release-fatal.html" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

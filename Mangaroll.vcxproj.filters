@@ -25,10 +25,25 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="projects\android\build\outputs\lint-results-release-fatal.html" />
-    <None Include="assets\MangaPage.vert">
+    <None Include="assets\shaders\MangaPage.frag">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="assets\MangaPage.frag">
+    <None Include="assets\shaders\MangaPage.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="assets\shaders\TransparentMangaPage.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="assets\shaders\floor_lol.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="assets\shaders\floor_lol.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="assets\shaders\particle.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="assets\shaders\particle.frag">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
@@ -77,9 +92,6 @@
     </ClInclude>
     <ClInclude Include="Src\GazeUpdateComponent.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="assets\TransparentMangaPage.frag">
-      <Filter>Resource Files</Filter>
     </ClInclude>
     <ClInclude Include="Src\MangaProvider.h">
       <Filter>Header Files</Filter>
@@ -181,6 +193,15 @@
       <Filter>Header Files\DBTweener</Filter>
     </ClInclude>
     <ClInclude Include="Src\Interpolation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\HexagonScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\IScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Sparkle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
