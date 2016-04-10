@@ -171,4 +171,10 @@ namespace OvrMangaroll {
 		jclass			GetJClass() const { return static_cast< jclass >(GetJObject()); }
 	};
 
+
+	class Color {
+	public:
+		static Vector3f HSL2RGB(const Vector3f &hsl);
+		static Vector3f RGB2HSL(const Vector3f &rgb);
+	};
 }

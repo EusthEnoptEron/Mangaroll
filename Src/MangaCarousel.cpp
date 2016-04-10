@@ -193,16 +193,18 @@ namespace OvrMangaroll {
 	}
 
 	Matrix4f MangaCarousel::DrawEyeView(const int eye, const float fovDegreesX, const float fovDegreesY, ovrFrameParms & frameParms) {
-		const Matrix4f eyeViewMatrix = GetEyeViewMatrix(eye);
-		const Matrix4f eyeProjectionMatrix = GetEyeProjectionMatrix(eye, fovDegreesX, fovDegreesY);
-		const Matrix4f eyeViewProjection = Scene.DrawEyeView(eye, fovDegreesX, fovDegreesY);
 
 		glClearColor(0, 0, 0, 1);
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		const Matrix4f eyeViewMatrix = GetEyeViewMatrix(eye);
+		const Matrix4f eyeProjectionMatrix = GetEyeProjectionMatrix(eye, fovDegreesX, fovDegreesY);
+		const Matrix4f eyeViewProjection = Scene.DrawEyeView(eye, fovDegreesX, fovDegreesY);
 
 		int idx = AppState::Conf->Transparent ? 1 : 0;
 		_Prog = _Progs[idx];
+
+		_CurrentScene->DrawEyeView(eyeViewMatrix, eyeProjectionMatrix, eye);
 
 		if (CurrentManga != NULL) {
 			glUseProgram(_Prog->program);
@@ -217,12 +219,11 @@ namespace OvrMangaroll {
 			glUniform1f(_uBrightness[idx], AppState::Conf->Brightness);
 
 			CurrentManga->Draw(Matrix4f::Scaling((1-_Fader.GetFadeAlpha()) + 1));
+
+			glDisable(GL_BLEND);
+			glUseProgram(0);
 		}
 
-		glBindVertexArray(0);
-		glUseProgram(0);
-
-		_CurrentScene->DrawEyeView(eyeViewMatrix, eyeProjectionMatrix, eye);
 
 
 		frameParms.ExternalVelocity = Scene.GetExternalVelocity();

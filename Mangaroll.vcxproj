@@ -150,6 +150,7 @@
     <ClInclude Include="Src\MangaSettingsView.h" />
     <ClInclude Include="Src\OVR_TurboJpeg.h" />
     <ClInclude Include="Src\Page.h" />
+    <ClInclude Include="Src\ParticleSystem.h" />
     <ClInclude Include="Src\Sparkle.h" />
     <ClInclude Include="Src\ThreadPool.h" />
     <ClInclude Include="Src\ShaderManager.h" />
@@ -166,6 +167,8 @@
     <None Include="assets\shaders\MangaPage.vert" />
     <None Include="assets\shaders\particle.frag" />
     <None Include="assets\shaders\particle.vert" />
+    <None Include="assets\shaders\particle2.frag" />
+    <None Include="assets\shaders\particle2.vert" />
     <None Include="assets\shaders\TransparentMangaPage.frag" />
     <None Include="projects\android\build\outputs\lint-results-release-fatal.html" />
   </ItemGroup>

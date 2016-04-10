@@ -99,7 +99,7 @@ void Mangaroll::InitJNI(JNIEnv *env) {
 void Mangaroll::Configure( ovrSettings & settings )
 {
 
-	settings.PerformanceParms.CpuLevel = 0;
+	settings.PerformanceParms.CpuLevel = 1;
 	settings.PerformanceParms.GpuLevel = 3;
 
 	settings.EyeBufferParms.colorFormat = COLOR_8888;
@@ -152,8 +152,8 @@ void Mangaroll::OneTimeInit( const char * fromPackage, const char * launchIntent
 
 void Mangaroll::FillStorageLocations() {
 	JNIEnv* env = app->GetJava()->Env;
-	jmethodID getDirsMethod = env->GetStaticMethodID(AppState::ActivityClass, "getAllStorageDirectories", "()[Ljava/lang/String;");
-	jobjectArray dirList = (jobjectArray)env->CallStaticObjectMethod(AppState::ActivityClass, getDirsMethod);
+	jmethodID getDirsMethod = env->GetMethodID(AppState::ActivityClass, "getAllStorageDirectories", "()[Ljava/lang/String;");
+	jobjectArray dirList = (jobjectArray)env->CallObjectMethod(app->GetJava()->ActivityObject, getDirsMethod);
 	if (dirList != NULL) {
 		int count = env->GetArrayLength(dirList);
 		for (int i = 0; i < count; i++) {

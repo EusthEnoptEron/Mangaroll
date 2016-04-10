@@ -81,6 +81,10 @@ namespace OvrMangaroll {
 						p.pos += p.speed * delta;
 						p.cameradistance = p.pos.LengthSq();
 
+						p.a = p.life > 2.0f
+							? (p.a < 255 ? (p.a + 1) : p.a)
+							: (p.a > 0 ? (p.a - 1) : p.a);
+
 						// Fill the GPU buffer
 						g_particule_position_size_data[4 * _ParticlesCount + 0] = p.pos.x;
 						g_particule_position_size_data[4 * _ParticlesCount + 1] = p.pos.y;
@@ -125,6 +129,9 @@ namespace OvrMangaroll {
 			LOG("%d", _ParticlesCount);
 
 			glUseProgram(_Shader->program);
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 			glUniformMatrix4fv(_Shader->uView, 1, GL_TRUE, viewMat.M[0]);
 			glUniformMatrix4fv(_Shader->uProjection, 1, GL_TRUE, projMat.M[0]);
 
@@ -178,6 +185,10 @@ namespace OvrMangaroll {
 			// for(i in ParticlesCount) : glDrawArrays(GL_TRIANGLE_STRIP, 0, 4),
 			// but faster.
 			glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, _ParticlesCount);
+
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glDisable(GL_BLEND);
+			glUseProgram(0);
 		}
 
 	private:
@@ -201,7 +212,7 @@ namespace OvrMangaroll {
 			return 0; // All particles are taken, override the first one
 		}
 
-		static const int MAX_PARTICLES = 10000;
+		static const int MAX_PARTICLES = 1000;
 		Particle _Particles[MAX_PARTICLES];
 		GLuint _BillboardVBO;
 		GLuint _ParticlePosVBO;
