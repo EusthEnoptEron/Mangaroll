@@ -81,6 +81,7 @@ Mangaroll::Mangaroll()
 	, ViewMgr()
 	, _MenuOpen(false)
 	, _LastConfSync(0)
+	, _Repositioning(false)
 {
 	CenterEyeViewMatrix = ovrMatrix4f_CreateIdentity();
 }
@@ -225,7 +226,12 @@ OvrGuiSys &Mangaroll::GetGuiSys(void) {
 Matrix4f Mangaroll::Frame( const VrFrame & vrFrame )
 {
 	Vector3f v0 = Vector3f(0, 0, -1.0f);
-	Vector3f lookAt = ((Quatf)vrFrame.Tracking.HeadPose.Pose.Orientation) * v0;
+	
+	if (_Repositioning) {
+		AppState::Conf->Orientation = _StartOrientation * (_StartQuatInverted * vrFrame.Tracking.HeadPose.Pose.Orientation);
+	}
+
+	Vector3f lookAt = (AppState::Conf->Orientation.Inverted() * (Quatf)vrFrame.Tracking.HeadPose.Pose.Orientation) * v0;
 
 	// UPDATE GLOBAL HELPERS
 	Time::Delta = vrFrame.DeltaSeconds;
@@ -233,7 +239,6 @@ Matrix4f Mangaroll::Frame( const VrFrame & vrFrame )
 	Frame::Current = &vrFrame;
 	HMD::Direction = lookAt;
 
-	
 	if (Time::Elapsed - _LastConfSync > 60) {
 		_Config->Save();
 		_LastConfSync = Time::Elapsed;
@@ -242,6 +247,20 @@ Matrix4f Mangaroll::Frame( const VrFrame & vrFrame )
 	
 	AsyncTextureManager::Instance().Update();
 	Animator.Progress(Time::Delta);
+
+	if (_Repositioning && vrFrame.Input.buttonReleased & BUTTON_TOUCH) {
+		_Repositioning = false;
+	}
+	else if (!_Repositioning && vrFrame.Input.buttonPressed & BUTTON_TOUCH_LONGPRESS && !LongPressInterrupted) {
+		_Repositioning = true;
+		_StartQuatInverted = Quatf(vrFrame.Tracking.HeadPose.Pose.Orientation).Inverted(); // Save as inverted since we need the relative rotation
+		_StartOrientation = AppState::Conf->Orientation;
+	}
+
+	if (vrFrame.Input.buttonReleased & BUTTON_TOUCH) {
+		LongPressInterrupted = false;
+	}
+
 
 	// FRAME STEPS
 	CenterEyeViewMatrix = ViewMgr.Frame(vrFrame);

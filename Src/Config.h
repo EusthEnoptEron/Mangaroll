@@ -35,6 +35,7 @@ namespace OvrMangaroll {
 		MangaInfo GetProgress(Manga *manga) const;
 		void Persist(Manga *manga);
 		bool HasInfo(Manga *manga) const;
+		void ClearProgress();
 
 	public:
 		// When you add a property, make sure they are properly serialized and deserialized
@@ -45,7 +46,9 @@ namespace OvrMangaroll {
 		float Contrast;
 		float Brightness;
 		float Zoom;
-		void ClearProgress();
+
+		// Not persisted configs
+		Quatf Orientation;
 
 	private:
 		Config(String path);

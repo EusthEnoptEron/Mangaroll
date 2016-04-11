@@ -135,19 +135,23 @@ namespace OvrMangaroll {
 
 		_Menu = new UIMenu(gui);
 		_Menu->Create("MangaMenu");
-		_Menu->SetFlags(VRMenuFlags_t(VRMENU_FLAG_PLACE_ON_HORIZON) | VRMENU_FLAG_SHORT_PRESS_HANDLED_BY_APP);
+		_Menu->SetFlags(VRMenuFlags_t(VRMENU_FLAG_SHORT_PRESS_HANDLED_BY_APP));
+
+		_OrientationContainer = new UIContainer(gui);
+		_OrientationContainer->AddToMenu(_Menu);
+		_OrientationContainer->SetLocalRotation(AppState::Conf->Orientation);
 
 		_CenterContainer = new UIContainer(gui);
-		_CenterContainer->AddToMenu(_Menu);
+		_CenterContainer->AddToMenu(_Menu, _OrientationContainer);
 		//_CenterContainer->AddFlags(VRMENUOBJECT_RENDER_HIERARCHY_ORDER);
 		_CenterContainer->SetLocalPose(forward, Vector3f(0, 0, -.9f));
 
 		_LeftContainer = new UIContainer(gui);
-		_LeftContainer->AddToMenu(_Menu);
+		_LeftContainer->AddToMenu(_Menu, _OrientationContainer);
 		_LeftContainer->SetLocalPose(leftTilt, Vector3f(-.4f, 0, -.7f));
 		
 		_RightContainer = new UIContainer(gui);
-		_RightContainer->AddToMenu(_Menu);
+		_RightContainer->AddToMenu(_Menu, _OrientationContainer);
 		_RightContainer->SetLocalPose(rightTilt, Vector3f(.4f, 0, -.7f));
 
 		// #########  MAIN WINDOW  ###########
@@ -375,11 +379,17 @@ namespace OvrMangaroll {
 			pos = _RightContainer->GetLocalPosition();
 			_RightContainer->SetLocalPosition(Vector3f(pos.x, (1 - _Fader.GetFadeAlpha()) * -0.05f, pos.z));
 		}
+
+		_OrientationContainer->SetLocalRotation(AppState::Conf->Orientation);
+
 	}
 
 	void MangaSettingsView::ShowGUI(void) {
+		Matrix4f orientation;
+		orientation.FromQuat(AppState::Conf->Orientation);
+	
+		_Menu->GetVRMenu()->SetMenuPose(_Menu->GetVRMenu()->CalcMenuPositionOnHorizon(orientation * AppState::Instance->GetLastViewMatrix() * orientation.Inverted()));
 		// Update values
-		_Menu->GetVRMenu()->RepositionMenu(GetEyeViewMatrix(0));
 		if (_Mangaroll->CurrentManga != NULL) {
 			_ProgressComponent.SetMax(_Mangaroll->CurrentManga->GetCount());
 			_ProgressComponent.SetProgress(_Mangaroll->CurrentManga->GetProgress() / (_Mangaroll->CurrentManga->GetCount() - 1.0f));
@@ -613,6 +623,7 @@ namespace OvrMangaroll {
 		case VRMENU_EVENT_TOUCH_DOWN:
 			TouchDown = true;
 			OnClick(guiSys, vrFrame, event);
+			AppState::Reader->LongPressInterrupted = true;
 			return MSG_STATUS_ALIVE;
 
 		case VRMENU_EVENT_FRAME_UPDATE:

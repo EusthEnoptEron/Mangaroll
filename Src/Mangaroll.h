@@ -49,6 +49,7 @@ public:
 
 private:
 	OvrGuiSys *		GuiSys;
+
 public:
 	void SelectManga();
 	void ShowManga(Manga *manga = NULL);
@@ -62,6 +63,8 @@ public:
 	Array<String> &GetMangaPaths() {
 		return _MangaPaths;
 	}
+	bool LongPressInterrupted;
+
 private:
 	void FillStorageLocations();
 	ovrSoundEffectContext * SoundEffectContext;
@@ -74,6 +77,9 @@ private:
 	Config *_Config;
 	float _LastConfSync;
 	Array<String> _MangaPaths;
+	bool _Repositioning;
+	Quatf _StartQuatInverted;
+	Quatf _StartOrientation;
 };
 
 } // namespace OvrTemplateApp

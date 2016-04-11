@@ -13,6 +13,7 @@ namespace OvrMangaroll {
 		, Brightness(0.0f)
 		, Zoom(0.0f)
 		// ----
+		, Orientation()
 		, _Path(path)
 		, _Progress()
 	{

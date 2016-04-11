@@ -208,6 +208,7 @@ namespace OvrMangaroll {
 		Mangaroll &_Mangaroll;
 		UIMenu *_Menu;
 
+		UIContainer *_OrientationContainer;
 		UIContainer *_MainContainer;
 		UIContainer *_LabelContainer;
 		UILabel *_LocalSrcLabel;

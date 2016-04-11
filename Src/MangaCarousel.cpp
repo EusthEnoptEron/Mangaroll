@@ -218,7 +218,10 @@ namespace OvrMangaroll {
 			glUniform1f(_uContrast[idx], AppState::Conf->Contrast);
 			glUniform1f(_uBrightness[idx], AppState::Conf->Brightness);
 
-			CurrentManga->Draw(Matrix4f::Scaling((1-_Fader.GetFadeAlpha()) + 1));
+			Matrix4f rot;
+			rot.FromQuat(AppState::Conf->Orientation);
+
+			CurrentManga->Draw(Matrix4f::Scaling((1 - _Fader.GetFadeAlpha()) + 1) * rot);
 
 			glDisable(GL_BLEND);
 			glUseProgram(0);

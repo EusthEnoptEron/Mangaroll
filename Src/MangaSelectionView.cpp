@@ -49,10 +49,14 @@ namespace OvrMangaroll {
 
 		_Menu = new UIMenu(gui);
 		_Menu->Create("MangaSelectionMenu");
-		_Menu->SetFlags(VRMenuFlags_t(VRMENU_FLAG_PLACE_ON_HORIZON) | VRMENU_FLAG_SHORT_PRESS_HANDLED_BY_APP /*| VRMENU_FLAG_BACK_KEY_EXITS_APP*/);
+		_Menu->SetFlags(VRMenuFlags_t(VRMENU_FLAG_SHORT_PRESS_HANDLED_BY_APP) /*| VRMENU_FLAG_BACK_KEY_EXITS_APP*/);
+
+		_OrientationContainer = new UIContainer(gui);
+		_OrientationContainer->AddToMenu(_Menu);
+		_OrientationContainer->SetLocalRotation(AppState::Conf->Orientation);
 
 		_MainContainer = new UIContainer(gui);
-		_MainContainer->AddToMenu(_Menu);
+		_MainContainer->AddToMenu(_Menu, _OrientationContainer);
 		_MainContainer->SetLocalPosition(Vector3f(0, 0, -1));
 		_MainContainer->AddComponent(gazeComponent);
 		
@@ -178,17 +182,22 @@ namespace OvrMangaroll {
 
 			Vector3f pos = _MainContainer->GetLocalPosition();
 			_MainContainer->SetLocalPosition(Vector3f(pos.x, (1 - _Fader.GetFadeAlpha()) * -0.05f, pos.z));
-
 		}
+
+		_OrientationContainer->SetLocalRotation(AppState::Conf->Orientation);
+
 	}
 
 	void MangaSelectionView::OnOpen() {
 		_CloseRequested = false;
 		CurViewState = eViewState::VIEWSTATE_OPEN;
-
+	
 		_Fader.StartFadeIn();
 		_AngleOnOpen = _Mangaroll.Carousel.GetAngle();
 		_Selector->UpdateGUI();
+
+		Matrix4f orientation;
+		orientation.FromQuat(AppState::Conf->Orientation.Inverted());
 	}
 
 	void MangaSelectionView::OnClose() {

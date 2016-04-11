@@ -114,6 +114,7 @@ namespace OvrMangaroll {
 		bool _CloseRequested;
 
 		UIMenu *_Menu;
+		UIContainer *_OrientationContainer;
 		UIContainer *_CenterContainer;
 		UIContainer *_LeftContainer;
 		UIContainer *_RightContainer;
