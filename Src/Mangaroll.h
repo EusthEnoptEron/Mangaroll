@@ -78,8 +78,7 @@ private:
 	float _LastConfSync;
 	Array<String> _MangaPaths;
 	bool _Repositioning;
-	Quatf _StartQuatInverted;
-	Quatf _StartOrientation;
+	Quatf _OrientationOffset;
 };
 
 } // namespace OvrTemplateApp

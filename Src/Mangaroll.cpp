@@ -225,11 +225,12 @@ OvrGuiSys &Mangaroll::GetGuiSys(void) {
 
 Matrix4f Mangaroll::Frame( const VrFrame & vrFrame )
 {
+	Quatf orientation = (Quatf)vrFrame.Tracking.HeadPose.Pose.Orientation;
 	Vector3f v0 = Vector3f(0, 0, -1.0f);
 	Vector3f v1 = Vector3f(0, 1.0f, 0);
 	
 	if (_Repositioning) {
-		AppState::Conf->Orientation = _StartOrientation * (_StartQuatInverted * vrFrame.Tracking.HeadPose.Pose.Orientation);
+		AppState::Conf->Orientation = orientation * _OrientationOffset;
 	}
 
 	Vector3f lookAt = ((Quatf)vrFrame.Tracking.HeadPose.Pose.Orientation) * v0;
@@ -255,11 +256,13 @@ Matrix4f Mangaroll::Frame( const VrFrame & vrFrame )
 	}
 	else if (!_Repositioning && vrFrame.Input.buttonPressed & BUTTON_TOUCH_LONGPRESS && !LongPressInterrupted) {
 		_Repositioning = true;
-		_StartQuatInverted = Quatf(vrFrame.Tracking.HeadPose.Pose.Orientation).Inverted(); // Save as inverted since we need the relative rotation
-		Vector3f orientationForward = AppState::Conf->Orientation * v0;
-		Vector3f currentUp = ((Quatf)vrFrame.Tracking.HeadPose.Pose.Orientation) * v1;
 
-		_StartOrientation = Quatf(Matrix4f::LookAtRH(Vector3f::ZERO, orientationForward, currentUp)).Inverted();
+		Vector3f currentUp = orientation * v1;
+		Vector3f offsetForward = AppState::Conf->Orientation * v0;
+		
+		Quatf startOrientation = Quatf(Matrix4f::LookAtRH(Vector3f::ZERO, offsetForward, currentUp)).Inverted();
+		_OrientationOffset = (startOrientation.Inverted() * orientation).Inverted();
+
 	}
 
 	if (vrFrame.Input.buttonReleased & BUTTON_TOUCH) {

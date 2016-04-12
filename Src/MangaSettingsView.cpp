@@ -385,10 +385,10 @@ namespace OvrMangaroll {
 	}
 
 	void MangaSettingsView::ShowGUI(void) {
-		Matrix4f orientation;
-		orientation.FromQuat(AppState::Conf->Orientation);
+		Matrix4f offset;
+		offset.FromQuat((Quatf(Frame::Current->Tracking.HeadPose.Pose.Orientation) * AppState::Conf->Orientation.Inverted()).Inverted());
 	
-		_Menu->GetVRMenu()->SetMenuPose(_Menu->GetVRMenu()->CalcMenuPositionOnHorizon(orientation * AppState::Instance->GetLastViewMatrix() * orientation.Inverted()));
+		_Menu->GetVRMenu()->SetMenuPose(_Menu->GetVRMenu()->CalcMenuPositionOnHorizon(offset));
 		// Update values
 		if (_Mangaroll->CurrentManga != NULL) {
 			_ProgressComponent.SetMax(_Mangaroll->CurrentManga->GetCount());
