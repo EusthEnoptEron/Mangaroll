@@ -126,7 +126,7 @@ namespace OvrMangaroll {
 		}
 
 		void Render(const Matrix4f &viewMat, const Matrix4f &projMat) {
-			LOG("%d", _ParticlesCount);
+			//LOG("%d", _ParticlesCount);
 
 			glUseProgram(_Shader->program);
 			glEnable(GL_BLEND);

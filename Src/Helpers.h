@@ -40,6 +40,7 @@ namespace OvrMangaroll {
 	class HMD {
 	public:
 		static Vector3f Direction;
+		static Vector3f NormalizedDirection;
 		static float HorizontalAngle;
 		static float VerticalAngle;
 	/*	static Quatf Orientation;

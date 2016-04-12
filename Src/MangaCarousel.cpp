@@ -90,12 +90,12 @@ namespace OvrMangaroll {
 		_CenterEyeViewMatrix = vrapi_GetCenterEyeViewMatrix(&_Mangaroll->app->GetHeadModelParms(), &vrFrame.Tracking, NULL);
 
 		float angleA = RadToDegree(atan2(_PrevLookAt[0], _PrevLookAt[2]));
-		float angleB = RadToDegree(atan2(HMD::Direction[0], HMD::Direction[2]));
+		float angleB = RadToDegree(atan2(HMD::NormalizedDirection[0], HMD::NormalizedDirection[2]));
 		float angleDiff = deltaAngle(angleA, angleB);
 		//angleDiff *= -1;
 		_Angle -= AppState::Conf->LeftToRight ? -angleDiff : angleDiff;
 
-		_PrevLookAt = HMD::Direction;
+		_PrevLookAt = HMD::NormalizedDirection;
 
 		if (_Operatable) {
 			// Only update this when operatable

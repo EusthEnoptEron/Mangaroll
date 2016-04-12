@@ -142,9 +142,9 @@ namespace OvrMangaroll {
 				Vector3f targetPos = Vector3f(-x, 0.0f, -z) * distance;
 				if (AppState::Conf->Guided) {
 					float maxAngle = atan( (HEIGHT / 2) / RADIUS );
-					float verticalAngle = Acos(HMD::Direction.ProjectToPlane(Vector3f(0.0f, 1.0f, 0.0f)).Length());
+					float verticalAngle = Acos(HMD::NormalizedDirection.ProjectToPlane(Vector3f(0.0f, 1.0f, 0.0f)).Length());
 				
-					if(HMD::Direction.y < 0) verticalAngle *= -1;
+					if (HMD::NormalizedDirection.y < 0) verticalAngle *= -1;
 
 					float verticalShift = fmax(-1, fmin(1, verticalAngle / maxAngle));
 
