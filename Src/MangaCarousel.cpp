@@ -46,9 +46,6 @@ namespace OvrMangaroll {
 	}
 
 	void MangaCarousel::OneTimeInit(const char * launchIntent) {
-		LOG("my shader: %p", _Progs[0]);
-		LOG("my shader 2: %p", _Progs[1]);
-
 		//const char * scenePath = "assets/default.ovrscene";
 		const char * scenePath = "assets/stars.ovrscene";
 
