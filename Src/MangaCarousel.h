@@ -38,12 +38,6 @@ namespace OvrMangaroll {
 		void ChangeDirection();
 
 	private:
-		GlProgram *_Prog;
-		GlProgram *_Progs[2];
-		int _uContrast[2];
-		int _uBrightness[2];
-		
-
 		ovrMatrix4f _CenterEyeViewMatrix;
 		Mangaroll *_Mangaroll;
 		Vector3f _PrevLookAt;

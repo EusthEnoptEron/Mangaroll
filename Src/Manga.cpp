@@ -24,24 +24,50 @@ namespace OvrMangaroll {
 			, _Progress(0)
 			, _AngleOffset(0)
 			, _LastSetPage(0)
+			, _LoaderQuad()
+			, _LoaderRotation()
 	{
-			WARN("YAY 2");
+		_LoaderQuad = BuildTesselatedQuad(1, 1, false);
+		_LoaderShader = ShaderManager::Instance()->Get(SHADER_VERT_SIMPLE);
 	}
 
 		Manga::~Manga(void)
 	{
 	}
 
-	void Manga::Draw(const Matrix4f &m) {
+		void Manga::Draw(const Matrix4f &m, const Matrix4f &proj) {
 		if(_First != NULL) {
+			// Prepare loader
+			
+
+			// Draw pages
 			Matrix4f mat = m * Mat;
 			Page *ref = _First;
 			do {
-				ref->Draw(mat);
+				if (ref->IsVisible() && ref->IsLoading()) {
+					ShowLoader(ref);
+				}
+				ref->Draw(mat, proj);
 			} while( (ref = ref->GetNext()) != NULL);  
 		}
 	}
 
+	void Manga::ShowLoader(Page *page) {
+		// Determine angle to show at
+		//float displayAngle = 0;
+		//if (page->GetAngle() != RANGE_UNDEFINED) {
+		//	displayAngle = page->GetStartAngle() + page->GetAngle() * 0.5f;
+		//}
+		//else if (page->GetStartAngle() != RANGE_UNDEFINED) {
+		//	displayAngle = page->GetStartAngle() + REFERENCE_ANGLE_WIDTH * 0.5f;
+		//}
+		//else if (page->GetEndAngle() != RANGE_UNDEFINED) {
+		//	displayAngle = page->GetEndAngle() - REFERENCE_ANGLE_WIDTH * 0.5f;
+		//}
+
+		//// Show loader
+
+	}
 
 	void Manga::AddPage(Page *page) {
 		if(_First == NULL) {

@@ -11,6 +11,7 @@ namespace OvrMangaroll {
 	const float PIXELS_PER_DEGREE = 20.0f;
 	const float REFERENCE_HEIGHT = 1000.0f;
 	const float REFERENCE_MAX_WIDTH = 180.0f * PIXELS_PER_DEGREE;
+	const float REFERENCE_ANGLE_WIDTH = 80.0f;
 	const float PAGE_LOOK_SENSITIVIY = 0.5f;
 	enum DisplayState { VISIBLE, INVISIBLE, LIMBO };
 	enum PlacingOrigin { PLACING_NONE, PLACING_BOTTOM, PLACING_TOP };
@@ -72,6 +73,8 @@ namespace OvrMangaroll {
 			_PixelRange(),
 			_Progs(),
 			_uDisplayTime(),
+			_uContrast(),
+			_uBrightness(),
 			_Loaded(false),
 			_Initialized(false),
 			_ATexture(NULL)
@@ -92,10 +95,13 @@ namespace OvrMangaroll {
 		Page *GetNext();
 		Page *GetPrev();
 		void Load(void);
-		void Draw(const Matrix4f &m);
+		virtual void Draw(const Matrix4f &m, const Matrix4f &proj);
 		String GetPath() { return _Path; }
 		bool IsVisible();
 		bool IsLoaded();
+		bool IsLoading() {
+			return _ATexture->GetState() == TEXTURE_LOADING;
+		}
 		bool IsTarget(float angle);
 		// Does this page appear before the given angle?
 		bool IsBefore(float angle);
@@ -106,6 +112,9 @@ namespace OvrMangaroll {
 		bool IsValid() { return _ATexture->IsValid(); }
 		float GetStartAngle() {
 			return _AngularRange.GetStart();
+		}
+		float GetEndAngle() {
+			return _AngularRange.GetEnd();
 		}
 		void SetRangeStart(float pxls) {
 			_PixelRange.SetStart(pxls);
@@ -141,9 +150,12 @@ namespace OvrMangaroll {
 
 		GlProgram *_Progs[2];
 		int _uDisplayTime[2];
+		int _uContrast[2];
+		int _uBrightness[2];
 
 		bool _Loaded;
 		bool _Initialized;
+
 	protected:
 
 		void CreateMesh(void);

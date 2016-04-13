@@ -25,7 +25,7 @@ namespace OvrMangaroll {
 			}
 		};
 
-		virtual void Draw(const Matrix4f &m) = 0;
+		virtual void Draw(const Matrix4f &view, const Matrix4f &proj) = 0;
 
 		Vector3f Position;
 		Quatf Rotation;

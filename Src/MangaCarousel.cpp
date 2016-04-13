@@ -27,10 +27,6 @@ namespace OvrMangaroll {
 		: Scene()
 		, CurrentManga(NULL)
 		, NextManga(NULL)
-		, _Prog(NULL)
-		, _Progs()
-		, _uContrast()
-		, _uBrightness()
 		, _CenterEyeViewMatrix()
 		, _Mangaroll(app)
 		, _PrevLookAt(0, 0, -1.0f)
@@ -50,15 +46,8 @@ namespace OvrMangaroll {
 	}
 
 	void MangaCarousel::OneTimeInit(const char * launchIntent) {
-		_Progs[0] = ShaderManager::Instance()->Get(PAGE_SHADER_NAME);
-		_Progs[1] = ShaderManager::Instance()->Get(PAGE_SHADER_NAME, PAGE_TRANSPARENT_FRAG_NAME);
 		LOG("my shader: %p", _Progs[0]);
 		LOG("my shader 2: %p", _Progs[1]);
-
-		_uContrast[0] = glGetUniformLocation(_Progs[0]->program, "Contrast");
-		_uContrast[1] = glGetUniformLocation(_Progs[1]->program, "Contrast");
-		_uBrightness[0] = glGetUniformLocation(_Progs[0]->program, "Brightness");
-		_uBrightness[1] = glGetUniformLocation(_Progs[1]->program, "Brightness");
 
 		//const char * scenePath = "assets/default.ovrscene";
 		const char * scenePath = "assets/stars.ovrscene";
@@ -201,30 +190,20 @@ namespace OvrMangaroll {
 		const Matrix4f eyeProjectionMatrix = GetEyeProjectionMatrix(eye, fovDegreesX, fovDegreesY);
 		const Matrix4f eyeViewProjection = Scene.DrawEyeView(eye, fovDegreesX, fovDegreesY);
 
-		int idx = AppState::Conf->Transparent ? 1 : 0;
-		_Prog = _Progs[idx];
-
 		_CurrentScene->DrawEyeView(eyeViewMatrix, eyeProjectionMatrix, eye);
 
 		if (CurrentManga != NULL) {
-			glUseProgram(_Prog->program);
-			//LOG("my shader: %d (%d, %d)", _Prog->program, _Prog->fragmentShader, _Prog->vertexShader);
-			LOG("my shader: %p", _Prog);
-
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-			glUniformMatrix4fv(_Prog->uView, 1, GL_TRUE, eyeViewMatrix.M[0]);
-			glUniformMatrix4fv(_Prog->uProjection, 1, GL_TRUE, eyeProjectionMatrix.M[0]);
-			glUniform1f(_uContrast[idx], AppState::Conf->Contrast);
-			glUniform1f(_uBrightness[idx], AppState::Conf->Brightness);
 
 			Matrix4f rot;
 			rot.FromQuat(AppState::Conf->Orientation);
 
-			CurrentManga->Draw(Matrix4f::Scaling((1 - _Fader.GetFadeAlpha()) + 1) * rot);
+			CurrentManga->Draw(eyeViewMatrix * Matrix4f::Scaling((1 - _Fader.GetFadeAlpha()) + 1) * rot, eyeProjectionMatrix);
 
 			glDisable(GL_BLEND);
 			glUseProgram(0);
+
 		}
 
 

@@ -29,7 +29,7 @@ namespace OvrMangaroll {
 				_Initialized = true;
 			}
 		}
-		void Draw(const Matrix4f&);
+		virtual void Draw(const Matrix4f&, const Matrix4f &proj);
 		void AddPage(Page *page);
 		void Update(float angle, bool onlyVisual = false);
 		int GetProgress();
@@ -56,6 +56,7 @@ namespace OvrMangaroll {
 	protected:
 		virtual void _Init() { }
 		virtual void _Update() { }
+		void ShowLoader(Page *page);
 		void ApplyAngleOffset();
 		bool _Initialized;
 		GlProgram _Prog;
@@ -68,6 +69,9 @@ namespace OvrMangaroll {
 		int _Progress;
 		float _AngleOffset;
 		int _LastSetPage;
+		GlGeometry _LoaderQuad;
+		float _LoaderRotation;
+		GlProgram *_LoaderShader;
 	};
 
 	class RemoteManga : public Manga {

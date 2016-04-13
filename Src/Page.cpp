@@ -194,6 +194,12 @@ namespace OvrMangaroll {
 				_uDisplayTime[0] = glGetUniformLocation(_Progs[0]->program, "DisplayTime");
 				_uDisplayTime[1] = glGetUniformLocation(_Progs[1]->program, "DisplayTime");
 
+
+				_uContrast[0] = glGetUniformLocation(_Progs[0]->program, "Contrast");
+				_uContrast[1] = glGetUniformLocation(_Progs[1]->program, "Contrast");
+				_uBrightness[0] = glGetUniformLocation(_Progs[0]->program, "Brightness");
+				_uBrightness[1] = glGetUniformLocation(_Progs[1]->program, "Brightness");
+
 				_Initialized = true;
 			}
 
@@ -222,22 +228,33 @@ namespace OvrMangaroll {
 	}
 
 
-	void Page::Draw(const Matrix4f &m) {
-		if(this->_DisplayState == DisplayState::VISIBLE && _ATexture->GetState() == TEXTURE_APPLIED) {
+	void Page::Draw(const Matrix4f &view, const Matrix4f &proj) {
+		if (this->_DisplayState == DisplayState::VISIBLE) {
 			this->UpdateModel();
 
-			int index = AppState::Conf->Transparent ? 1 : 0;
-			// Draw
-			
-			glUniform1f(_uDisplayTime[index], Time::Elapsed - this->_DisplayTime);
-			glUniformMatrix4fv(_Progs[index]->uModel, 1, GL_TRUE, (m * Mat).M[0]);
+			if (_ATexture->GetState() == TEXTURE_APPLIED) {
+				int index = AppState::Conf->Transparent ? 1 : 0;
+				// Draw
+				glUseProgram(_Progs[index]->program);
 
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(_ATexture->GetTarget(), _ATexture->Display());
-			_Geometry.Draw();
-			glBindVertexArray( 0 );
-			glBindTexture(_ATexture->GetTarget(), 0);
+				glUniformMatrix4fv(_Progs[index]->uView, 1, GL_TRUE, view.M[0]);
+				glUniformMatrix4fv(_Progs[index]->uProjection, 1, GL_TRUE, proj.M[0]);
+				glUniform1f(_uContrast[index], AppState::Conf->Contrast);
+				glUniform1f(_uBrightness[index], AppState::Conf->Brightness);
+
+				glUniform1f(_uDisplayTime[index], Time::Elapsed - this->_DisplayTime);
+				glUniformMatrix4fv(_Progs[index]->uModel, 1, GL_TRUE, Mat.M[0]);
+
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(_ATexture->GetTarget(), _ATexture->Display());
+				_Geometry.Draw();
+				glBindVertexArray(0);
+				glBindTexture(_ATexture->GetTarget(), 0);
+
+				glUseProgram(0);
+			}
 		}
+		
 	}
 
 	void Page::SetNext(Page *next) {

@@ -10,6 +10,7 @@ namespace OvrMangaroll {
 	const char * const PAGE_SHADER_NAME = "assets/shaders/MangaPage.vert";
 	const char * const PAGE_TRANSPARENT_FRAG_NAME = "assets/shaders/TransparentMangaPage.frag";
 	const char * const SHADER_VERT_FLOOR = "assets/shaders/floor_lol.vert";
+	const char * const SHADER_VERT_SIMPLE = "assets/shaders/simple.vert";
 
 
 	class ShaderManager {
