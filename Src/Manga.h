@@ -54,7 +54,13 @@ namespace OvrMangaroll {
 			return _Angle + _AngleOffset;
 		}
 	protected:
-		virtual void _Init() { }
+		virtual void _Init() {
+			_LoaderQuad = BuildTesselatedQuad(1, 1, false);
+			_LoaderShader = ShaderManager::Instance()->Get(SHADER_VERT_SIMPLE);
+			glUseProgram(_LoaderShader->program);
+			glUniform4f(_LoaderShader->uColor, 1, 1, 1, 0.4f);
+			glUseProgram(0);
+		}
 		virtual void _Update() { }
 		void ShowLoader(Page *page);
 		void ApplyAngleOffset();

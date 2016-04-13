@@ -27,8 +27,7 @@ namespace OvrMangaroll {
 			, _LoaderQuad()
 			, _LoaderRotation()
 	{
-		_LoaderQuad = BuildTesselatedQuad(1, 1, false);
-		_LoaderShader = ShaderManager::Instance()->Get(SHADER_VERT_SIMPLE);
+
 	}
 
 		Manga::~Manga(void)
@@ -38,7 +37,9 @@ namespace OvrMangaroll {
 		void Manga::Draw(const Matrix4f &m, const Matrix4f &proj) {
 		if(_First != NULL) {
 			// Prepare loader
-			
+			glUseProgram(_LoaderShader->program);
+			glUniformMatrix4fv(_LoaderShader->uView, 1, GL_TRUE, m.M[0]);
+			glUniformMatrix4fv(_LoaderShader->uProjection, 1, GL_TRUE, proj.M[0]);
 
 			// Draw pages
 			Matrix4f mat = m * Mat;
@@ -54,19 +55,36 @@ namespace OvrMangaroll {
 
 	void Manga::ShowLoader(Page *page) {
 		// Determine angle to show at
-		//float displayAngle = 0;
-		//if (page->GetAngle() != RANGE_UNDEFINED) {
-		//	displayAngle = page->GetStartAngle() + page->GetAngle() * 0.5f;
-		//}
-		//else if (page->GetStartAngle() != RANGE_UNDEFINED) {
-		//	displayAngle = page->GetStartAngle() + REFERENCE_ANGLE_WIDTH * 0.5f;
-		//}
-		//else if (page->GetEndAngle() != RANGE_UNDEFINED) {
-		//	displayAngle = page->GetEndAngle() - REFERENCE_ANGLE_WIDTH * 0.5f;
-		//}
+		float displayAngle = 0;
+		if (page->GetAngle() != RANGE_UNDEFINED) {
+			displayAngle = page->GetStartAngle() + page->GetAngle() * 0.5f;
+		}
+		else if (page->GetStartAngle() != RANGE_UNDEFINED) {
+			displayAngle = page->GetStartAngle() + REFERENCE_ANGLE_WIDTH * 0.5f;
+		}
+		else if (page->GetEndAngle() != RANGE_UNDEFINED) {
+			displayAngle = page->GetEndAngle() - REFERENCE_ANGLE_WIDTH * 0.5f;
+		}
 
-		//// Show loader
+		displayAngle -= _AngleOffset;
 
+		// Show loader
+		glUseProgram(_LoaderShader->program);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, Assets::Instance().Preloader.Texture);
+
+		Matrix4f model = 
+			Matrix4f::RotationY(displayAngle * Mathf::DegreeToRadFactor * (AppState::Conf->LeftToRight ? -1 : 1)) *
+			Matrix4f::Translation(0, 0, -1) *
+			Matrix4f::Scaling(0.05f) *
+			Matrix4f::RotationZ(-_LoaderRotation);
+		glUniformMatrix4fv(_LoaderShader->uModel, 1, GL_TRUE, model.M[0]
+		);
+
+		_LoaderQuad.Draw();
+		
+		glBindVertexArray(0);
+		glUseProgram(0);
 	}
 
 	void Manga::AddPage(Page *page) {
@@ -161,6 +179,8 @@ namespace OvrMangaroll {
 		angle += _AngleOffset;
 		UpdateModel();
 
+		_LoaderRotation += Time::Delta * 4;
+
 		Page *ref = _First;
 		bool electionFinished = false;
 		Page *selectionCandidate = NULL;
@@ -242,8 +262,8 @@ namespace OvrMangaroll {
 	}
 
 	void RemoteManga::_Init() {
+		Manga::_Init();
 		Fetch();
-		
 	}
 	void RemoteManga::Fetch() {
 		_Loading = true;
@@ -321,6 +341,7 @@ namespace OvrMangaroll {
 	}
 
 	void DynamicManga::_Init() {
+		Manga::_Init();
 		Fetch();
 
 	}
