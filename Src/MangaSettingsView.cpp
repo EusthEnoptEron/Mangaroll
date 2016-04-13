@@ -58,6 +58,8 @@ namespace OvrMangaroll {
 		, _Mangaroll(app)
 		, _CloseRequested(false)
 		, _Menu(NULL)
+		, _OrientationContainer(NULL)
+		, _OrientationOffset()
 		, _CenterContainer(NULL)
 		, _LeftContainer(NULL)
 		, _RightContainer(NULL)
@@ -136,10 +138,8 @@ namespace OvrMangaroll {
 		_Menu = new UIMenu(gui);
 		_Menu->Create("MangaMenu");
 		_Menu->SetFlags(VRMenuFlags_t(VRMENU_FLAG_SHORT_PRESS_HANDLED_BY_APP));
-
 		_OrientationContainer = new UIContainer(gui);
 		_OrientationContainer->AddToMenu(_Menu);
-		_OrientationContainer->SetLocalRotation(AppState::Conf->Orientation);
 
 		_CenterContainer = new UIContainer(gui);
 		_CenterContainer->AddToMenu(_Menu, _OrientationContainer);
@@ -380,15 +380,13 @@ namespace OvrMangaroll {
 			_RightContainer->SetLocalPosition(Vector3f(pos.x, (1 - _Fader.GetFadeAlpha()) * -0.05f, pos.z));
 		}
 
-		_OrientationContainer->SetLocalRotation(AppState::Conf->Orientation);
+		_OrientationContainer->SetLocalRotation(AppState::Conf->Orientation * MenuOffset);
 
 	}
 
 	void MangaSettingsView::ShowGUI(void) {
-		Matrix4f offset;
-		offset.FromQuat((Quatf(Frame::Current->Tracking.HeadPose.Pose.Orientation) * AppState::Conf->Orientation.Inverted()).Inverted());
-	
-		_Menu->GetVRMenu()->SetMenuPose(_Menu->GetVRMenu()->CalcMenuPositionOnHorizon(offset));
+		//pose.Position = Vector3f::ZERO;
+		CalcMenuOffset();
 		// Update values
 		if (_Mangaroll->CurrentManga != NULL) {
 			_ProgressComponent.SetMax(_Mangaroll->CurrentManga->GetCount());

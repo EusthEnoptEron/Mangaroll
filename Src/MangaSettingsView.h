@@ -115,6 +115,7 @@ namespace OvrMangaroll {
 
 		UIMenu *_Menu;
 		UIContainer *_OrientationContainer;
+		Quatf _OrientationOffset;
 		UIContainer *_CenterContainer;
 		UIContainer *_LeftContainer;
 		UIContainer *_RightContainer;

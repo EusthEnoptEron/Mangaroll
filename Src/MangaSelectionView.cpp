@@ -184,7 +184,7 @@ namespace OvrMangaroll {
 			_MainContainer->SetLocalPosition(Vector3f(pos.x, (1 - _Fader.GetFadeAlpha()) * -0.05f, pos.z));
 		}
 
-		_OrientationContainer->SetLocalRotation(AppState::Conf->Orientation);
+		_OrientationContainer->SetLocalRotation(AppState::Conf->Orientation * MenuOffset);
 
 	}
 
@@ -196,8 +196,7 @@ namespace OvrMangaroll {
 		_AngleOnOpen = _Mangaroll.Carousel.GetAngle();
 		_Selector->UpdateGUI();
 
-		Matrix4f orientation;
-		orientation.FromQuat(AppState::Conf->Orientation.Inverted());
+		CalcMenuOffset();
 	}
 
 	void MangaSelectionView::OnClose() {

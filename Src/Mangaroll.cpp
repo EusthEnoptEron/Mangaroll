@@ -203,13 +203,10 @@ void Mangaroll::OneTimeShutdown()
 
 bool Mangaroll::OnKeyEvent( const int keyCode, const int repeatCount, const KeyEventType eventType )
 {
-#ifdef MR_DEBUG
-	// Crash button
 	if (keyCode == OVR_KEY_ESCAPE && eventType == KeyEventType::KEY_EVENT_LONG_PRESS) {
 		// Crash
-		((Mangaroll *)NULL)->OnKeyEvent(keyCode, repeatCount, eventType);
+		AppState::Conf->Orientation = Quatf();
 	}
-#endif
 
 	if ( GuiSys->OnKeyEvent( keyCode, repeatCount, eventType ) )
 	{

@@ -19,6 +19,8 @@ of patent rights can be found in the PATENTS file in the same directory.
 #include "KeyState.h"
 #include "Kernel/OVR_Math.h"
 #include "Input.h"
+#include "Helpers.h"
+#include "Config.h"
 
 using namespace OVR;
 
@@ -61,6 +63,32 @@ namespace OvrMangaroll {
 	protected:
 		eViewState			CurViewState;		// current view state
 		eViewState			NextViewState;		// state the view should go to on next frame
+		Quatf MenuOffset;
+		void CalcMenuOffset() {
+			// project the forward view onto the horizontal plane
+			Vector3f const glUp(0.0f, 1.0f, 0.0f);
+			Vector3f const glRight(1.0f, 0.0f, 0.0f);
+			Vector3f const up = AppState::Conf->Orientation * glUp;
+			Vector3f const right = AppState::Conf->Orientation * glRight;
+
+			float dot = HMD::Direction.Dot(up);
+			Vector3f horizontalFwd = (dot < -0.99999f || dot > 0.99999f) ? right : HMD::Direction - (up * dot);
+			horizontalFwd.Normalize();
+
+			Matrix4f horizontalViewMatrix = Matrix4f::LookAtRH(Vector3f(0), horizontalFwd, up);
+			horizontalViewMatrix.Transpose();	// transpose because we want the rotation opposite of where we're looking
+
+			// this was only here to test rotation about the local axis
+			//Quatf rotation( -horizontalFwd, 0.0f );
+
+			Quatf viewRot(horizontalViewMatrix);
+			Quatf fullRotation = /*rotation * */viewRot;
+			fullRotation.Normalize();
+
+			//Vector3f position(horizontalFwd * menuDistance);
+
+			MenuOffset = AppState::Conf->Orientation.Inverted() * fullRotation;
+		}
 	};
 
 }

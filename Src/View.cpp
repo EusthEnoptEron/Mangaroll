@@ -21,8 +21,8 @@ namespace OvrMangaroll {
 	View::View(const char *_name) :
 		name(_name),
 		CurViewState(VIEWSTATE_CLOSED),
-		NextViewState(VIEWSTATE_CLOSED)
-
+		NextViewState(VIEWSTATE_CLOSED),
+		MenuOffset()
 	{
 	}
 
