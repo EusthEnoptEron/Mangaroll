@@ -52,6 +52,12 @@
     <None Include="assets\shaders\particle2.vert">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="assets\shaders\simple.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="assets\shaders\simple.frag">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Mangaroll.h">

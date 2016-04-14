@@ -169,6 +169,8 @@
     <None Include="assets\shaders\particle.vert" />
     <None Include="assets\shaders\particle2.frag" />
     <None Include="assets\shaders\particle2.vert" />
+    <None Include="assets\shaders\simple.frag" />
+    <None Include="assets\shaders\simple.vert" />
     <None Include="assets\shaders\TransparentMangaPage.frag" />
     <None Include="projects\android\build\outputs\lint-results-release-fatal.html" />
   </ItemGroup>
