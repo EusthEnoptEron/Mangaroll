@@ -28,6 +28,7 @@ Copyright   :   Copyright 2014 Oculus VR, LLC. All Rights reserved.
 #include "MangaSettingsView.h"
 #include "MangaSelectionView.h"
 #include "AnimationManager.h"
+#include "TranslationManager.h"
 
 using namespace OVR;
 namespace OvrMangaroll

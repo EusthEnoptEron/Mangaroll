@@ -32,6 +32,7 @@ LOCAL_SRC_FILES			:= ../../../Src/Mangaroll.cpp \
                            ../../../Src/Config.cpp \
                            ../../../Src/ThreadPool.cpp \
                            ../../../Src/Interpolation.cpp \
+                           ../../../Src/TranslationManager.cpp \
                            ../../../Src/Web.cpp
 
 LOCAL_STATIC_LIBRARIES	:= vrsound vrmodel vrlocale vrgui vrappframework systemutils libovrkernel jpeg stbs

@@ -20,7 +20,7 @@ namespace OvrMangaroll {
 	}
 
 	void OnText(ScrubBarComponent *button, void *object, UILabel *label, int progress) {
-		label->SetText(String::Format("Page %d", progress + 1));
+		label->SetText(String::Format(AppState::Strings->PageNo.ToCStr(), progress + 1));
 	}
 
 	void OnCloseClick(UIButton *button, void *obj) {
@@ -240,7 +240,7 @@ namespace OvrMangaroll {
 		_ContrastLabel = new UILabel(gui);
 		_ContrastLabel->AddToMenu(_Menu, _LeftContainer);
 		_ContrastLabel->SetFontParms(VRMenuFontParms(true, true, false, false, true, 0.5f, 0.4f, 0.3f));
-		_ContrastLabel->SetText("Contrast");
+		_ContrastLabel->SetText(AppState::Strings->PrefContrast);
 		_ContrastLabel->SetMargin(UIRectf(5));
 		_ContrastLabel->CalculateTextDimensions();
 				
@@ -255,7 +255,7 @@ namespace OvrMangaroll {
 		_BrightnessLabel = new UILabel(gui);
 		_BrightnessLabel->AddToMenu(_Menu, _LeftContainer);
 		_BrightnessLabel->SetFontParms(VRMenuFontParms(true, true, false, false, true, 0.5f, 0.4f, 0.3f));
-		_BrightnessLabel->SetText("Brightness");
+		_BrightnessLabel->SetText(AppState::Strings->PrefBrightness);
 		_BrightnessLabel->SetMargin(UIRectf(3));
 		_BrightnessLabel->CalculateTextDimensions();
 		_BrightnessLabel->SetLocalPosition(Vector3f(0, -.1f, 0));
@@ -281,19 +281,19 @@ namespace OvrMangaroll {
 		_ShaderToggle = new UICheckbox(gui, 120.0f, toggleHeight);
 		_ShaderToggle->AddToMenu(_Menu, _OptionsBG);
 		_ShaderToggle->SetLocalPosition(PixelPos(0, 50, 10)); // Compensate
-		_ShaderToggle->SetText("Show transparent");
+		_ShaderToggle->SetText(AppState::Strings->PrefTransparent);
 		_ShaderToggle->SetOnValueChanged(OnShaderChanged, this);
 
 		_ReadDirToggle = new UICheckbox(gui, 120.0f, toggleHeight);
 		_ReadDirToggle->AddToMenu(_Menu, _OptionsBG);
-		_ReadDirToggle->SetText("Left -> Right");
+		_ReadDirToggle->SetText(AppState::Strings->PrefReadDir);
 		_ReadDirToggle->SetLocalPosition(_ShaderToggle->GetLocalPosition() + Vector3f(0, -PixelScale(toggleHeight + 5), 0));
 		_ReadDirToggle->SetOnValueChanged(OnReadDirChanged, this);
 		//_ReadDirToggle->AlignToMargin(TOP, _ShaderToggle, BOTTOM);
 
 		_AutoToggle = new UICheckbox(gui, 120.0f, toggleHeight);
 		_AutoToggle->AddToMenu(_Menu, _OptionsBG);
-		_AutoToggle->SetText("Auto Progress");
+		_AutoToggle->SetText(AppState::Strings->PrefAutoProgress);
 		_AutoToggle->SetLocalPosition(_ReadDirToggle->GetLocalPosition() - Vector3f(0, PixelScale(toggleHeight + 5), 0));
 		_AutoToggle->SetOnValueChanged(OnAutoRotateChanged, this);
 
@@ -302,7 +302,7 @@ namespace OvrMangaroll {
 
 		_HelperToggle = new UICheckbox(gui, 120.0f, toggleHeight);
 		_HelperToggle->AddToMenu(_Menu, _OptionsBG);
-		_HelperToggle->SetText("Anti-Head motions");
+		_HelperToggle->SetText(AppState::Strings->PrefHeadMotions);
 		_HelperToggle->SetLocalPosition(_AutoToggle->GetLocalPosition() - Vector3f(0, PixelScale(toggleHeight + 5), 0));
 		_HelperToggle->SetOnValueChanged(OnGuideChanged, this);
 
@@ -391,7 +391,7 @@ namespace OvrMangaroll {
 		if (_Mangaroll->CurrentManga != NULL) {
 			_ProgressComponent.SetMax(_Mangaroll->CurrentManga->GetCount());
 			_ProgressComponent.SetProgress(_Mangaroll->CurrentManga->GetProgress() / (_Mangaroll->CurrentManga->GetCount() - 1.0f));
-			_PageLabel->SetText(String::Format("Page %d", _Mangaroll->CurrentManga->GetProgress() + 1));
+			_PageLabel->SetText(String::Format(AppState::Strings->PageNo.ToCStr(), _Mangaroll->CurrentManga->GetProgress() + 1));
 
 			String text = MangaStringUtils::CropToLength(_Mangaroll->CurrentManga->Name, 50);
 			_TitleLabel->SetFontScale((1 - (text.GetLengthI() / 50.0f)) * 0.4f + 0.3f);

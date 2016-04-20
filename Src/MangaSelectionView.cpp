@@ -74,7 +74,7 @@ namespace OvrMangaroll {
 		_LocalSrcLabel = new UILabel(gui);
 		_LocalSrcLabel->AddToMenu(_Menu, _LabelContainer);
 		_LocalSrcLabel->SetLocalPosition(Vector3f(-0.12f, 0, 0));
-		_LocalSrcLabel->SetText("Local");
+		_LocalSrcLabel->SetText(AppState::Strings->LabelLocal);
 		_LocalSrcLabel->SetFontScale(0.5f);
 		_LocalSrcLabel->CalculateTextDimensions();
 		_LocalSrcLabel->SetImage(0, SURFACE_TEXTURE_DIFFUSE, _FillTexture, 100, 50);
@@ -86,7 +86,7 @@ namespace OvrMangaroll {
 		_RemoteSrcLabel = new UILabel(gui);
 		_RemoteSrcLabel->AddToMenu(_Menu, _LabelContainer);
 		_RemoteSrcLabel->SetLocalPosition(Vector3f(0.12f, 0, 0));
-		_RemoteSrcLabel->SetText("Online");
+		_RemoteSrcLabel->SetText(AppState::Strings->LabelOnline);
 		_RemoteSrcLabel->SetFontScale(0.5f);
 		_RemoteSrcLabel->CalculateTextDimensions();
 		_RemoteSrcLabel->SetImage(0, SURFACE_TEXTURE_DIFFUSE, _FillTexture, 100, 50);

@@ -20,7 +20,7 @@ namespace OvrMangaroll {
 		virtual bool IsLoading() = 0;
 		virtual MangaWrapper *At(int i) = 0;
 		virtual String GetNoResultMessage() {
-			return "The search yielded no results.";
+			return AppState::Strings->NoResults;
 		}
 	protected:
 		MangaProvider() : Id("") {}
@@ -59,9 +59,7 @@ namespace OvrMangaroll {
 
 		virtual void LoadMore();
 		virtual String GetNoResultMessage() {
-			return String("No manga found on system.\n"
-				"Create a folder called \"Manga\" or \"Comics\" in the root folder "
-				"of your SD card and place your files there.");
+			return AppState::Strings->NoLocalFiles;
 		}
 	private:
 		LocalMangaProvider(const LocalMangaProvider &);
@@ -101,8 +99,7 @@ namespace OvrMangaroll {
 
 		virtual void LoadMore();
 		virtual String GetNoResultMessage() {
-			return String("No services found.\n"
-			"Please see github.com/EusthEnoptEron/Mangaroll for instructions.");
+			return AppState::Strings->NoServices;
 		}
 	private:
 		MangaServiceProvider(const MangaServiceProvider &);

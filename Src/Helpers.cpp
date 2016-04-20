@@ -31,6 +31,7 @@ namespace OvrMangaroll {
 	Config *AppState::Conf = NULL;
 	Mangaroll *AppState::Reader = NULL;
 	ThreadPool *AppState::Scheduler = NULL;
+	TranslationManager *AppState::Strings = NULL;
 
 	Assets *Assets::_Instance = NULL;
 

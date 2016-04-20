@@ -9,7 +9,7 @@
       name="action_settings"
       description="The name of the settings menu."
       >Settings</string>
-    <string name="no_local_files">No manga found on system.\nCreate a folder called "Manga" or "Comics" in the root folder of your SD card and place your files there.</string>
+    <string name="no_local_files">No manga found on system.\nCreate a folder called \"Manga\" or \"Comics\" in the root folder of your SD card and place your files there.</string>
     <string name="no_services">No services found.\nPlease see github.com/EusthEnoptEron/Mangaroll for instructions.</string>
     <string name="no_results">The search yielded no results.</string>
     <string name="label_local">Local</string>

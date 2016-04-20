@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">Mangaroll</string>
     <string name="action_settings">Einstellungen</string>
-    <string name="no_local_files">Es wurden keine Manga auf dem System gefunden.\nErstelle einen Ordner mit dem Namen "Manga" oder "Comics" im Hauptverzeichnis und platziere darin deine Dateien.</string>
+    <string name="no_local_files">Es wurden keine Manga auf dem System gefunden.\nErstelle einen Ordner mit dem Namen \"Manga\" oder \"Comics\" im Hauptverzeichnis und platziere darin deine Dateien.</string>
     <string name="no_services">Keine Services gefunden.\nSiehe github.com/EusthEnoptEron/Mangaroll für eine Anleitung.</string>
     <string name="no_results">Die Suche hat nichts gefunden.</string>
     <string name="label_local">Lokal</string>

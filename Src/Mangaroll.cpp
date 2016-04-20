@@ -127,6 +127,8 @@ void Mangaroll::OneTimeInit( const char * fromPackage, const char * launchIntent
 
 	Locale = ovrLocale::Create( *app, "default" );
 	AppState::Scheduler = new ThreadPool(5);
+	
+	AppState::Strings = new TranslationManager(this);
 
 	// Build paths
 	FillStorageLocations();

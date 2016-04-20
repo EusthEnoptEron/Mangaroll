@@ -15,6 +15,7 @@
 #include "UI\UITexture.h"
 #include "UI\UIObject.h"
 #include "ThreadPool.h"
+#include "TranslationManager.h"
 
 using namespace OVR;
 namespace OvrMangaroll {
@@ -56,6 +57,7 @@ namespace OvrMangaroll {
 	public:
 		static ThreadPool *Scheduler;
 		static Config *Conf;
+		static TranslationManager *Strings;
 		static App *Instance;
 		static Mangaroll *Reader;
 		static jclass FetcherClass;
