@@ -9,14 +9,17 @@
       name="action_settings"
       description="The name of the settings menu."
       >Settings</string>
-  <string
-      name="media_not_found"
-      description="The message displayed when no media found on the phone."
-      >There are no videos on your phone. Please insert the SD card included with your Gear VR.</string>
-  <string
-      name="playback_failed"
-      description="The message displayed when an existing media file fails to play."
-      >
-    Failed to load media for playback.
-  </string>
+    <string name="no_local_files">No manga found on system.\nCreate a folder called "Manga" or "Comics" in the root folder of your SD card and place your files there.</string>
+    <string name="no_services">No services found.\nPlease see github.com/EusthEnoptEron/Mangaroll for instructions.</string>
+    <string name="no_results">The search yielded no results.</string>
+    <string name="label_local">Local</string>
+    <string name="label_online">Online</string>
+    <string name="page_no">Page %d</string>
+    <string name="pref_contrast">Contrast</string>
+    <string name="pref_brightness">Brightness</string>
+    <string name="pref_sharpen">Adaptive Sharpening</string>
+    <string name="pref_transparent">Transparency</string>
+    <string name="pref_read_dir">Left -> Right</string>
+    <string name="pref_auto_progress">Auto-Rotate</string>
+    <string name="pref_head_motions">Follow Gaze</string>
 </resources>

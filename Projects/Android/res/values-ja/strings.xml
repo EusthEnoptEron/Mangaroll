@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Mangaroll</string>
+    <string name="action_settings">設定</string>
+    <string name="no_local_files">画像ファイルが見つかりませんでした。\nメインフォルダーに「Manga」または「Comics」フォルダーを作成して、中に画像ファイルをコピーしてください。</string>
+    <string name="no_services">サービス設定が見つかりませんでした。\ngithub.com/EusthEnoptEron/Mangarollを参考にservices.jsonを作成してください。</string>
+    <string name="no_results">なにも見つかりませんでした。</string>
+    <string name="label_local">オフライン</string>
+    <string name="label_online">オンライン</string>
+    <string name="page_no">%dページ</string>
+    <string name="pref_contrast">コントラスト</string>
+    <string name="pref_brightness">明るさ</string>
+    <string name="pref_sharpen">シャープ化</string>
+    <string name="pref_transparent">透明</string>
+    <string name="pref_read_dir">左->右</string>
+    <string name="pref_auto_progress">自動回転</string>
+    <string name="pref_head_motions">視線をフォロー</string>
+</resources>

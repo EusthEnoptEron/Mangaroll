@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Mangaroll</string>
+    <string name="action_settings">Einstellungen</string>
+    <string name="no_local_files">Es wurden keine Manga auf dem System gefunden.\nErstelle einen Ordner mit dem Namen "Manga" oder "Comics" im Hauptverzeichnis und platziere darin deine Dateien.</string>
+    <string name="no_services">Keine Services gefunden.\nSiehe github.com/EusthEnoptEron/Mangaroll für eine Anleitung.</string>
+    <string name="no_results">Die Suche hat nichts gefunden.</string>
+    <string name="label_local">Lokal</string>
+    <string name="label_online">Online</string>
+    <string name="page_no">Seite %d</string>
+    <string name="pref_contrast">Kontrast</string>
+    <string name="pref_brightness">Helligkeit</string>
+    <string name="pref_sharpen">Adaptives Schärfen</string>
+    <string name="pref_transparent">Transparenz</string>
+    <string name="pref_read_dir">Links -> Rechts</string>
+    <string name="pref_auto_progress">Blick folgen (Horizontal)</string>
+    <string name="pref_head_motions">Blick folgen (Vertikal)</string>
+</resources>
